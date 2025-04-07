@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:validators/validators.dart';
-import '../login_viewmodel/login_viewmodel.dart';
 
+import '../login_viewmodel/login_viewmodel.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -13,9 +13,8 @@ class LoginScreen extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-
           Image.asset(
-            'assets/images/login_bg.jpg',
+            'assets/images/ChatGPT Image 7 abr 2025, 22_25_44.png',
             fit: BoxFit.cover,
           ),
 
@@ -64,7 +63,6 @@ class LoginCard extends StatelessWidget {
   }
 }
 
-
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
@@ -106,16 +104,18 @@ class _LoginFormState extends State<LoginForm> {
 
   void _validatePassword() {
     final password = _passwordController.text;
-    final regex = RegExp(r"""^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])(?!.*['";])(?!.*--).{8,}$""");
+    final regex = RegExp(
+      r"""^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])(?!.*['";])(?!.*--).{8,}$""",
+    );
 
     setState(() {
       if (password.isEmpty) {
         _passwordError = 'La contraseña no puede estar vacía';
         _isPasswordValid = false;
-      // } else if (!regex.hasMatch(password)) {
-      //   _passwordError =
-      //   'Debe tener al menos 8 caracteres,\nuna mayúscula, una minúscula,\nun número y un símbolo especial seguro.';
-      //   _isPasswordValid = false;
+        // } else if (!regex.hasMatch(password)) {
+        //   _passwordError =
+        //   'Debe tener al menos 8 caracteres,\nuna mayúscula, una minúscula,\nun número y un símbolo especial seguro.';
+        //   _isPasswordValid = false;
       } else {
         _passwordError = null;
         _isPasswordValid = true;
@@ -152,29 +152,28 @@ class _LoginFormState extends State<LoginForm> {
         viewModel.isLoading
             ? const CircularProgressIndicator()
             : ElevatedButton(
-          onPressed: (_isEmailValid && _isPasswordValid)
-              ? () async {
-            final success = await viewModel.login(
-              _emailController.text.trim(),
-              _passwordController.text,
-            );
+              onPressed:
+                  (_isEmailValid && _isPasswordValid)
+                      ? () async {
+                        final success = await viewModel.login(
+                          _emailController.text.trim(),
+                          _passwordController.text,
+                        );
 
-            if (success) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Login exitoso')),
-              );
-            } else if (viewModel.errorMessage != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(viewModel.errorMessage!)),
-              );
-            }
-          }
-              : null,
-          child: const Text('Iniciar sesión'),
-        ),
+                        if (success) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Login exitoso')),
+                          );
+                        } else if (viewModel.errorMessage != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(viewModel.errorMessage!)),
+                          );
+                        }
+                      }
+                      : null,
+              child: const Text('Iniciar sesión'),
+            ),
       ],
     );
   }
 }
-
-
