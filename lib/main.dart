@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:foodflow_app/features/auth/login/login_view/login_screen.dart';
+import 'package:provider/provider.dart';
+
+import 'features/auth/login/login_viewmodel/login_viewmodel.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(create: (_) =>
+      LoginViewModel(),
+      child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -24,7 +30,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      home: Placeholder(),
+      home: LoginScreen(),
     );
   }
 }

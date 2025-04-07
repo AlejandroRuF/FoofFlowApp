@@ -3,5 +3,5 @@ class ApiConfig {
 }
 
 class ApiEndpoints {
-  static const String login = '${ApiConfig.baseUrl}auth/login/';
+  static const String login = '${ApiConfig.baseUrl}auth/token/';
 }
