@@ -9,17 +9,22 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final imageFit = screenWidth >700 ? BoxFit.fitWidth : BoxFit.cover;
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
           Image.asset(
-            'assets/images/ChatGPT Image 7 abr 2025, 22_25_44.png',
-            fit: BoxFit.cover,
+            'assets/images/login_bg.png',
+              fit: screenWidth >700 ? screenWidth >900 ? BoxFit.fill : BoxFit.fitWidth : BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              alignment: screenWidth > 700 ? Alignment.center : Alignment.topCenter,
           ),
 
           // Capa semitransparente
-          Container(color: Colors.black.withOpacity(0.4)),
+          Container(color: Colors.black.withAlpha((0.4 * 255).round())),
 
           // Card con el contenido
           const Center(child: LoginCard()),

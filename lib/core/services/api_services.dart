@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/core/constants/api_endpoints.dart';
 import 'package:foodflow_app/core/services/user_sesion_service.dart';
 
@@ -21,7 +22,9 @@ class ApiServices {
         },
 
         onError: (e, handler) {
-          print('Error global: ${e.message}');
+          if (kDebugMode) {
+            print('Error global: ${e.message}');
+          }
           return handler.next(e);
         },
       ),
