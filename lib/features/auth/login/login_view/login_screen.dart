@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:validators/validators.dart';
-
+import '../../../../core/services/user_services.dart';
+import '../../../../core/services/user_sesion_service.dart';
 import '../login_viewmodel/login_viewmodel.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -10,17 +12,20 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final imageFit = screenWidth >700 ? BoxFit.fitWidth : BoxFit.cover;
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
           Image.asset(
             'assets/images/login_bg.png',
-              fit: screenWidth >700 ? screenWidth >900 ? BoxFit.fill : BoxFit.fitWidth : BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-              alignment: screenWidth > 700 ? Alignment.center : Alignment.topCenter,
+            fit: screenWidth > 700
+                ? screenWidth > 900
+                    ? BoxFit.fill
+                    : BoxFit.fitWidth
+                : BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            alignment: screenWidth > 700 ? Alignment.center : Alignment.topCenter,
           ),
 
           // Capa semitransparente
@@ -59,7 +64,7 @@ class LoginCard extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 24),
-              LoginForm(), // 👇 Formulario separado
+              LoginForm(),
             ],
           ),
         ),
@@ -78,54 +83,136 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _rememberCredentials = false;
+  bool _isAutoLoggingIn = false;
 
   String? _emailError;
   String? _passwordError;
-  bool _isEmailValid = false;
-  bool _isPasswordValid = false;
 
   @override
   void initState() {
     super.initState();
-    _emailController.addListener(_validateEmail);
-    _passwordController.addListener(_validatePassword);
+    // Cargar credenciales guardadas si existen
+    _loadSavedCredentials();
+    // Intentar auto-login si hay datos guardados
+    _checkForStoredDataAndAutoLogin();
   }
 
-  void _validateEmail() {
+  Future<void> _checkForStoredDataAndAutoLogin() async {
+    final viewModel = Provider.of<LoginViewModel>(context, listen: false);
+    final userSession = UserSessionService();
+    
+    if (userSession.token != null && userSession.refreshToken != null && userSession.user != null) {
+      // Si hay datos guardados, intentar auto-login
+      setState(() {
+        _isAutoLoggingIn = true;
+      });
+      
+      if (kDebugMode) {
+        print('Se encontraron datos de sesión en LoginScreen, intentando auto-login...');
+      }
+      
+      try {
+        final userId = userSession.user!.id;
+        final user = await UserService().obtenerDatosCompletos(userId);
+        
+        if (user != null) {
+          if (kDebugMode) {
+            print('Auto-login exitoso desde LoginScreen');
+          }
+          
+          // También actualizamos la configuración de recordar
+          await userSession.setRememberCredentials(true);
+          
+          // Simular un login exitoso
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Scaffold(
+              appBar: AppBar(title: const Text('FoodFlow')),
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Sesión iniciada correctamente', style: TextStyle(fontSize: 20)),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await viewModel.logout();
+                        // No es necesario hacer nada aquí, ya estamos en la pantalla de login
+                      },
+                      child: const Text('Cerrar sesión'),
+                    ),
+                  ],
+                ),
+              ),
+            )),
+          );
+        } else {
+          setState(() {
+            _isAutoLoggingIn = false;
+          });
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error durante auto-login desde LoginScreen: $e');
+        }
+        setState(() {
+          _isAutoLoggingIn = false;
+        });
+      }
+    }
+  }
+  
+  // Resto del código...
+
+  Future<void> _loadSavedCredentials() async {
+    final viewModel = Provider.of<LoginViewModel>(context, listen: false);
+    final savedEmail = await viewModel.getSavedEmail();
+    
+    if (savedEmail != null && savedEmail.isNotEmpty) {
+      setState(() {
+        _emailController.text = savedEmail;
+        _rememberCredentials = true;
+      });
+    }
+  }
+
+  // Método para validar ambos campos cuando se presiona el botón
+  bool _validateFields() {
     final email = _emailController.text.trim();
-    setState(() {
-      if (email.isEmpty) {
-        _emailError = 'El email no puede estar vacío';
-        _isEmailValid = false;
-      } else if (!isEmail(email)) {
-        _emailError = 'Formato de email inválido';
-        _isEmailValid = false;
-      } else {
-        _emailError = null;
-        _isEmailValid = true;
-      }
-    });
-  }
-
-  void _validatePassword() {
     final password = _passwordController.text;
-    final regex = RegExp(
-      r"""^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])(?!.*['";])(?!.*--).{8,}$""",
-    );
+    bool isValid = true;
 
-    setState(() {
-      if (password.isEmpty) {
+    // Validar email
+    if (email.isEmpty) {
+      setState(() {
+        _emailError = 'El email no puede estar vacío';
+      });
+      isValid = false;
+    } else if (!isEmail(email)) {
+      setState(() {
+        _emailError = 'Formato de email inválido';
+      });
+      isValid = false;
+    } else {
+      setState(() {
+        _emailError = null;
+      });
+    }
+
+    // Validar contraseña
+    if (password.isEmpty) {
+      setState(() {
         _passwordError = 'La contraseña no puede estar vacía';
-        _isPasswordValid = false;
-        // } else if (!regex.hasMatch(password)) {
-        //   _passwordError =
-        //   'Debe tener al menos 8 caracteres,\nuna mayúscula, una minúscula,\nun número y un símbolo especial seguro.';
-        //   _isPasswordValid = false;
-      } else {
+      });
+      isValid = false;
+    } else {
+      setState(() {
         _passwordError = null;
-        _isPasswordValid = true;
-      }
-    });
+      });
+    }
+
+    return isValid;
   }
 
   @override
@@ -153,31 +240,50 @@ class _LoginFormState extends State<LoginForm> {
             errorText: _passwordError,
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 8),
+        // Añadimos el checkbox para recordar credenciales
+        Row(
+          children: [
+            Checkbox(
+              value: _rememberCredentials,
+              onChanged: (value) {
+                setState(() {
+                  _rememberCredentials = value ?? false;
+                });
+              },
+            ),
+            const Text('Recordar usuario'),
+          ],
+        ),
+        const SizedBox(height: 16),
         viewModel.isLoading
             ? const CircularProgressIndicator()
             : ElevatedButton(
-              onPressed:
-                  (_isEmailValid && _isPasswordValid)
-                      ? () async {
-                        final success = await viewModel.login(
-                          _emailController.text.trim(),
-                          _passwordController.text,
-                        );
+                onPressed: () async {
+                  // Validar campos cuando se presiona el botón
+                  if (_validateFields()) {
+                    final email = _emailController.text.trim();
+                    final password = _passwordController.text;
+                    
+                    final success = await viewModel.login(
+                      email,
+                      password,
+                      rememberMe: _rememberCredentials,
+                    );
 
-                        if (success) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Login exitoso')),
-                          );
-                        } else if (viewModel.errorMessage != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(viewModel.errorMessage!)),
-                          );
-                        }
-                      }
-                      : null,
-              child: const Text('Iniciar sesión'),
-            ),
+                    if (success) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Login exitoso')),
+                      );
+                    } else if (viewModel.errorMessage != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(viewModel.errorMessage!)),
+                      );
+                    }
+                  }
+                },
+                child: const Text('Iniciar sesión'),
+              ),
       ],
     );
   }

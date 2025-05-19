@@ -1,6 +1,6 @@
 class UserProfile{
 
-  final int id;
-  final String
+  final int id = 0;
+  final String = '';
 
 }

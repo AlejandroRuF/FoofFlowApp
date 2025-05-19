@@ -1,0 +1,98 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:foodflow_app/core/constants/api_endpoints.dart';
+import 'package:foodflow_app/core/services/api_services.dart';
+import 'package:foodflow_app/core/services/user_sesion_service.dart';
+import 'package:foodflow_app/models/permisos_empleado_model.dart';
+import 'package:foodflow_app/models/user_model.dart';
+
+class UserService {
+  static final UserService _instance = UserService._internal();
+  factory UserService() => _instance;
+  UserService._internal();
+  
+  Future<User?> obtenerDatosCompletos(int userId) async {
+    try {
+      if (kDebugMode) {
+        print('Obteniendo datos completos del usuario ID: $userId');
+        print('URL completa: ${ApiEndpoints.getFullUrl("${ApiEndpoints.usuario}$userId/")}');
+      }
+      
+      final response = await ApiServices.dio.get(
+        "${ApiEndpoints.usuario}$userId/",
+      );
+      
+      if (response.statusCode == 200) {
+        final userData = response.data;
+        final user = User.fromJson(userData);
+        
+        if (kDebugMode) {
+          print('Datos del usuario obtenidos: ${user.toJson()}');
+        }
+        
+        // Actualizar datos en sesión
+        await UserSessionService().actualizarDatosUsuario(user);
+        
+        // Obtener permisos del usuario si es empleado
+        if (user.tipoUsuario == 'empleado') {
+          await obtenerPermisosUsuario(userId);
+        }
+        
+        return user;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al obtener datos del usuario: $e');
+        if (e is DioException) {
+          print('DioError tipo: ${e.type}');
+          print('DioError mensaje: ${e.message}');
+          print('DioError respuesta: ${e.response}');
+          print('URL de la solicitud: ${e.requestOptions.uri}');
+        }
+      }
+    }
+    return null;
+  }
+  
+  // Añade este método para obtener los permisos del usuario
+  Future<PermisosEmpleado?> obtenerPermisosUsuario(int userId) async {
+    try {
+      if (kDebugMode) {
+        print('Obteniendo permisos para el usuario ID: $userId');
+        print('URL: ${ApiEndpoints.getFullUrl(ApiEndpoints.permisosEmpleado(userId))}');
+      }
+      
+      final response = await ApiServices.dio.get(
+        ApiEndpoints.permisosEmpleado(userId),
+      );
+      
+      if (response.statusCode == 200) {
+        final permisosData = response.data;
+        
+        if (kDebugMode) {
+          print('Permisos obtenidos: $permisosData');
+        }
+        
+        // Si hay datos de permisos, crear objeto y guardar
+        if (permisosData != null && permisosData.isNotEmpty) {
+          final permisos = PermisosEmpleado.fromJson(permisosData);
+          
+          // Guardar permisos en la sesión
+          await UserSessionService().guardarPermisos(permisos);
+          
+          return permisos;
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al obtener permisos: $e');
+        if (e is DioException) {
+          print('DioError tipo: ${e.type}');
+          print('DioError mensaje: ${e.message}');
+          print('DioError respuesta: ${e.response}');
+        }
+      }
+    }
+    return null;
+  }
+}
