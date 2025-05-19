@@ -15,8 +15,23 @@ class UserSessionService {
 
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
-    
-    // Recuperar tokens
+
+    final rememberMe = prefs.getBool(_rememberCredentialsKey) ?? false;
+
+
+    if (rememberMe) {
+      final accessToken = prefs.getString('access_token');
+      final refreshToken = prefs.getString('refresh_token');
+
+      if (accessToken != null && refreshToken != null) {
+        _auth = Auth(accessToken: accessToken, refreshToken: refreshToken);
+      }
+
+    } else {
+      await prefs.clear();
+    }
+
+
     final accessToken = prefs.getString('access_token');
     final refreshToken = prefs.getString('refresh_token');
     
@@ -30,7 +45,6 @@ class UserSessionService {
       _auth = Auth(accessToken: accessToken, refreshToken: refreshToken);
     }
 
-    // Recuperar datos de usuario
     final userId = prefs.getInt('user_id');
     final email = prefs.getString('email');
     final nombre = prefs.getString('nombre');
@@ -48,9 +62,7 @@ class UserSessionService {
         print('Usuario recuperado del almacenamiento: ${_user?.toJson()}');
       }
     }
-    
-    // Verificar si se debe recordar usuario
-    final rememberMe = prefs.getBool(_rememberCredentialsKey);
+
     if (kDebugMode) {
       print('¿Recordar usuario? $rememberMe');
     }
@@ -64,38 +76,30 @@ class UserSessionService {
     _user = null;
   }
 
-// Añadir estos métodos a UserSessionService
 
-// Clave para SharedPreferences
 static const String _rememberCredentialsKey = 'remember_credentials';
 
-// Verificar si se deben recordar las credenciales
 Future<bool> getRememberCredentials() async {
   final prefs = await SharedPreferences.getInstance();
   return prefs.getBool(_rememberCredentialsKey) ?? false;
 }
 
-// Establecer si se deben recordar las credenciales
 Future<void> setRememberCredentials(bool remember) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool(_rememberCredentialsKey, remember);
 }
 
-// Modificar el método saveSession para que también guarde el estado de recordar
 Future<void> saveSession(Auth auth, User user, {bool rememberMe = false}) async {
   final prefs = await SharedPreferences.getInstance();
 
-  // Guardar tokens
   await prefs.setString("access_token", auth.accessToken);
   await prefs.setString("refresh_token", auth.refreshToken);
   
-  // Guardar datos básicos del usuario
   await prefs.setInt("user_id", user.id);
   await prefs.setString("email", user.email);
   await prefs.setString("nombre", user.nombre);
   await prefs.setString("tipo_usuario", user.tipoUsuario);
   
-  // Guardar preferencia de recordar (usar la clave correcta)
   await prefs.setBool(_rememberCredentialsKey, rememberMe);
   
   if (kDebugMode) {
@@ -114,13 +118,10 @@ Future<void> saveSession(Auth auth, User user, {bool rememberMe = false}) async 
   
   bool get isLoggedIn => _auth != null && _user != null;
 
-// Añadir estos métodos a la clase UserSessionService
 
-// Método para actualizar datos del usuario
   Future<void> actualizarDatosUsuario(User user) async {
     final prefs = await SharedPreferences.getInstance();
     
-    // Guardamos todos los datos del usuario
     await prefs.setInt("user_id", user.id);
     await prefs.setString("email", user.email);
     await prefs.setString("nombre", user.nombre);
@@ -139,14 +140,11 @@ Future<void> saveSession(Auth auth, User user, {bool rememberMe = false}) async 
     _user = user;
   }
 
-// Método para guardar permisos
   Future<void> guardarPermisos(PermisosEmpleado permisos) async {
     final prefs = await SharedPreferences.getInstance();
     
-    // Guardamos el ID de los permisos
     await prefs.setInt("permisos_id", permisos.id);
     
-    // Guardamos todos los permisos individuales
     await prefs.setBool("puede_ver_productos", permisos.puedeVerProductos);
     await prefs.setBool("puede_crear_productos", permisos.puedeCrearProductos);
     await prefs.setBool("puede_editar_productos", permisos.puedeEditarProductos);
@@ -174,7 +172,6 @@ Future<void> saveSession(Auth auth, User user, {bool rememberMe = false}) async 
     _permisos = permisos;
   }
 
-  /// Actualiza solo los tokens sin cambiar el usuario
   Future<void> updateTokens(Auth auth) async {
     final prefs = await SharedPreferences.getInstance();
     
@@ -182,7 +179,6 @@ Future<void> saveSession(Auth auth, User user, {bool rememberMe = false}) async 
       print('Actualizando tokens: ${auth.toJson()}');
     }
     
-    // Actualizar tokens
     await prefs.setString("access_token", auth.accessToken);
     await prefs.setString("refresh_token", auth.refreshToken);
     
