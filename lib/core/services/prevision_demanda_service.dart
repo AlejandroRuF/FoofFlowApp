@@ -97,12 +97,10 @@ class PrevisionDemandaService {
   
   Future<Map<String, dynamic>> obtenerResumenPrevisiones(int restauranteId) async {
     try {
-      // Obtenemos el año y mes actual
       final now = DateTime.now();
       final int anyoActual = now.year;
       final int mesActual = now.month;
       
-      // Obtener previsiones de demanda del mes actual
       final List<PrevisionDemanda> previsionesActuales = await obtenerPrevisionesFiltradas(
         restauranteId: restauranteId,
         mes: mesActual,
@@ -122,7 +120,6 @@ class PrevisionDemandaService {
       
       final previsionesTramoActual = previsionesActuales.where((p) => p.tramoMes == tramoActual).toList();
       
-      // Calcular totales
       int totalDemandaPrevista = 0;
       double promedioVariacion = 0.0;
       int contadorEstimadas = 0;
@@ -133,17 +130,14 @@ class PrevisionDemandaService {
         if (prevision.esEstimada) contadorEstimadas++;
       }
       
-      // Calcular promedio de variación
       if (previsionesActuales.isNotEmpty) {
         promedioVariacion /= previsionesActuales.length;
       }
       
-      // Porcentaje de previsiones estimadas vs reales
       double porcentajeEstimadas = previsionesActuales.isNotEmpty
           ? (contadorEstimadas / previsionesActuales.length) * 100
           : 0;
       
-      // Retornar el resumen
       return {
         'total_demanda_prevista': totalDemandaPrevista,
         'promedio_variacion': promedioVariacion,

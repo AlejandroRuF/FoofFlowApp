@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/services/user_services.dart';
 import '../../../../core/services/user_sesion_service.dart';
 import '../../../../core/constants/api_endpoints.dart';
+import '../../../dashboard/dashboard_view/dashboard_screen.dart';
 import '../login_viewmodel/login_viewmodel.dart';
 import '../../../../core/services/api_services.dart';
 
@@ -21,20 +22,20 @@ class LoginScreen extends StatelessWidget {
         children: [
           Image.asset(
             'assets/images/login_bg.png',
-            fit: screenWidth > 700
-                ? screenWidth > 900
-                    ? BoxFit.fill
-                    : BoxFit.fitWidth
-                : BoxFit.cover,
+            fit:
+                screenWidth > 700
+                    ? screenWidth > 900
+                        ? BoxFit.fill
+                        : BoxFit.fitWidth
+                    : BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
-            alignment: screenWidth > 700 ? Alignment.center : Alignment.topCenter,
+            alignment:
+                screenWidth > 700 ? Alignment.center : Alignment.topCenter,
           ),
 
-          // Capa semitransparente
           Container(color: Colors.black.withAlpha((0.4 * 255).round())),
 
-          // Card con el contenido
           const Center(child: LoginCard()),
         ],
       ),
@@ -88,7 +89,7 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   bool _rememberCredentials = false;
   bool _isAutoLoggingIn = false;
-  bool _isLoading = false; // Variable para controlar el estado de carga
+  bool _isLoading = false;
 
   String? _emailError;
   String? _passwordError;
@@ -96,9 +97,7 @@ class _LoginFormState extends State<LoginForm> {
   @override
   void initState() {
     super.initState();
-    // Cargar credenciales guardadas si existen
     _loadSavedCredentials();
-    // Intentar auto-login si hay datos guardados
     _checkForStoredDataAndAutoLogin();
   }
 
@@ -106,16 +105,17 @@ class _LoginFormState extends State<LoginForm> {
     final viewModel = Provider.of<LoginViewModel>(context, listen: false);
     final userSession = UserSessionService();
 
-    if (userSession.token != null && userSession.refreshToken != null &&
+    if (userSession.token != null &&
+        userSession.refreshToken != null &&
         userSession.user != null) {
-      // Si hay datos guardados, intentar auto-login
       setState(() {
         _isAutoLoggingIn = true;
       });
 
       if (kDebugMode) {
         print(
-            'Se encontraron datos de sesión en LoginScreen, intentando auto-login...');
+          'Se encontraron datos de sesión en LoginScreen, intentando auto-login...',
+        );
       }
 
       try {
@@ -127,33 +127,34 @@ class _LoginFormState extends State<LoginForm> {
             print('Auto-login exitoso desde LoginScreen');
           }
 
-          // También actualizamos la configuración de recordar
           await userSession.setRememberCredentials(true);
 
-          // Simular un login exitoso
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) =>
-                Scaffold(
-                  appBar: AppBar(title: const Text('FoodFlow')),
-                  body: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Sesión iniciada correctamente',
-                            style: TextStyle(fontSize: 20)),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () async {
-                            await viewModel.logout();
-                            // No es necesario hacer nada aquí, ya estamos en la pantalla de login
-                          },
-                          child: const Text('Cerrar sesión'),
-                        ),
-                      ],
+            MaterialPageRoute(
+              builder:
+                  (context) => Scaffold(
+                    appBar: AppBar(title: const Text('FoodFlow')),
+                    body: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Sesión iniciada correctamente',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () async {
+                              await viewModel.logout();
+                            },
+                            child: const Text('Cerrar sesión'),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                )),
+            ),
           );
         } else {
           setState(() {
@@ -172,13 +173,13 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   Future<void> _abrirResetPasswordURL() async {
-    // Primero validamos que el email sea válido
     final email = _emailController.text.trim();
 
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Por favor, introduce tu correo electrónico')),
+          content: Text('Por favor, introduce tu correo electrónico'),
+        ),
       );
       return;
     }
@@ -186,32 +187,31 @@ class _LoginFormState extends State<LoginForm> {
     if (!isEmail(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Por favor, introduce un correo electrónico válido')),
+          content: Text('Por favor, introduce un correo electrónico válido'),
+        ),
       );
       return;
     }
 
-    // Mostrar indicador de carga
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Usar ApiServices.dio para hacer la petición POST
       final resetPasswordUrl = ApiEndpoints.getFullUrl(
-          ApiEndpoints.resetPassword);
+        ApiEndpoints.resetPassword,
+      );
 
       if (kDebugMode) {
         print(
-            'Enviando solicitud de reseteo de contraseña a: $resetPasswordUrl');
+          'Enviando solicitud de reseteo de contraseña a: $resetPasswordUrl',
+        );
         print('Email: $email');
       }
 
       final response = await ApiServices.dio.post(
         ApiEndpoints.resetPassword,
-        data: {
-          'email': email
-        },
+        data: {'email': email},
       );
 
       setState(() {
@@ -223,7 +223,8 @@ class _LoginFormState extends State<LoginForm> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
-                  'Se ha enviado un correo con las instrucciones para restablecer tu contraseña'),
+                'Se ha enviado un correo con las instrucciones para restablecer tu contraseña',
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -233,7 +234,8 @@ class _LoginFormState extends State<LoginForm> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
-                  'El correo electrónico no está registrado en el sistema'),
+                'El correo electrónico no está registrado en el sistema',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -242,8 +244,9 @@ class _LoginFormState extends State<LoginForm> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: ${response.data['error'] ??
-                  "Ocurrió un error al procesar tu solicitud"}'),
+              content: Text(
+                'Error: ${response.data['error'] ?? "Ocurrió un error al procesar tu solicitud"}',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -262,7 +265,8 @@ class _LoginFormState extends State<LoginForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-                'Error de conexión. Verifica tu conexión a internet e intenta nuevamente.'),
+              'Error de conexión. Verifica tu conexión a internet e intenta nuevamente.',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -273,7 +277,7 @@ class _LoginFormState extends State<LoginForm> {
   Future<void> _loadSavedCredentials() async {
     final viewModel = Provider.of<LoginViewModel>(context, listen: false);
     final savedEmail = await viewModel.getSavedEmail();
-    
+
     if (savedEmail != null && savedEmail.isNotEmpty) {
       setState(() {
         _emailController.text = savedEmail;
@@ -282,13 +286,11 @@ class _LoginFormState extends State<LoginForm> {
     }
   }
 
-  // Método para validar ambos campos cuando se presiona el botón
   bool _validateFields() {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     bool isValid = true;
 
-    // Validar email
     if (email.isEmpty) {
       setState(() {
         _emailError = 'El email no puede estar vacío';
@@ -305,7 +307,6 @@ class _LoginFormState extends State<LoginForm> {
       });
     }
 
-    // Validar contraseña
     if (password.isEmpty) {
       setState(() {
         _passwordError = 'La contraseña no puede estar vacía';
@@ -361,48 +362,53 @@ class _LoginFormState extends State<LoginForm> {
           ],
         ),
         const SizedBox(height: 16),
-        // Botón de inicio de sesión
         viewModel.isLoading
             ? const CircularProgressIndicator()
             : ElevatedButton(
-                onPressed: () async {
-                  // Validar campos cuando se presiona el botón
-                  if (_validateFields()) {
-                    final email = _emailController.text.trim();
-                    final password = _passwordController.text;
-                    
-                    final success = await viewModel.login(
-                      email,
-                      password,
-                      rememberMe: _rememberCredentials,
-                    );
+              onPressed: () async {
+                if (_validateFields()) {
+                  final email = _emailController.text.trim();
+                  final password = _passwordController.text;
 
-                    if (success) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Login exitoso')),
-                      );
-                    } else if (viewModel.errorMessage != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(viewModel.errorMessage!)),
-                      );
-                    }
+                  final success = await viewModel.login(
+                    email,
+                    password,
+                    rememberMe: _rememberCredentials,
+                  );
+
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Login exitoso')),
+                    );
+                    _handleLoginSuccess(context);
+                  } else if (viewModel.errorMessage != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(viewModel.errorMessage!)),
+                    );
                   }
-                },
-                child: const Text('Iniciar sesión'),
-              ),
-        // Botón para restablecer contraseña
+                }
+              },
+              child: const Text('Iniciar sesión'),
+            ),
         const SizedBox(height: 16),
-        _isLoading 
+        _isLoading
             ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
             : TextButton(
-                onPressed: _abrirResetPasswordURL,
-                child: const Text('¿Olvidaste tu contraseña?'),
-              ),
+              onPressed: _abrirResetPasswordURL,
+              child: const Text('¿Olvidaste tu contraseña?'),
+            ),
       ],
+    );
+  }
+
+  void _handleLoginSuccess(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const DashboardScreen()),
     );
   }
 }

@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:foodflow_app/core/constants/api_endpoints.dart';
 import 'package:foodflow_app/core/services/user_sesion_service.dart';
 import 'package:foodflow_app/core/services/user_services.dart';
+import 'package:foodflow_app/features/dashboard/dashboard_view/dashboard_screen.dart';
 import 'package:foodflow_app/models/auth_model.dart';
 import '../../models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,28 +22,65 @@ class AuthService {
     ),
   );
 
+  Future<bool> login(
+    String email,
+    String password,
+    bool rememberMe,
+    BuildContext context,
+  ) async {
+    try {
+      final response = await _dio.post(
+        ApiEndpoints.getFullUrl(ApiEndpoints.login),
+        data: {'email': email, 'password': password},
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
 
-  /// Intenta refrescar el token de acceso utilizando el token de refresco
+      if (response.statusCode == 200) {
+        final data = response.data;
+
+        final auth = Auth(
+          accessToken: data['access'],
+          refreshToken: data['refresh'],
+        );
+
+        final user = User.fromJson(data);
+
+        await UserSessionService().saveSession(
+          auth,
+          user,
+          rememberMe: rememberMe,
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+        );
+
+        return true;
+      }
+      return false;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error en login: $e');
+      }
+      return false;
+    }
+  }
+
   Future<Auth?> refreshToken(String refreshToken) async {
     try {
-
       if (kDebugMode) {
         print('Intentando refrescar token...');
         print('Token de refresco: $refreshToken');
-
-        print('URL completa: ${ApiEndpoints.getFullUrl(ApiEndpoints.refreshToken)}');
+        print(
+          'URL completa: ${ApiEndpoints.getFullUrl(ApiEndpoints.refreshToken)}',
+        );
       }
 
       final response = await _dio.post(
         ApiEndpoints.getFullUrl(ApiEndpoints.refreshToken),
-        data: {
-          'refresh': refreshToken,
-        },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
+        data: {'refresh': refreshToken},
+        options: Options(headers: {'Content-Type': 'application/json'}),
       );
 
       if (kDebugMode) {
@@ -51,16 +90,16 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        
+
         final newAuth = Auth(
           accessToken: data['access'],
-          refreshToken: data['refresh']
+          refreshToken: data['refresh'],
         );
-        
+
         final user = User.fromJson(data);
-        
+
         await UserSessionService().saveSession(newAuth, user, rememberMe: true);
-        
+
         return newAuth;
       }
     } catch (e) {
@@ -81,14 +120,13 @@ class AuthService {
   }
 
   Future<bool> attemptAutoLogin() async {
-
     await UserSessionService().init();
-    
+
     final userSession = UserSessionService();
 
     final prefs = await SharedPreferences.getInstance();
     final rememberMe = prefs.getBool('remember_credentials') ?? false;
-    
+
     if (kDebugMode) {
       print('Intentando auto-login...');
       print('¿Recordar credenciales? (leído directamente) $rememberMe');
@@ -97,11 +135,15 @@ class AuthService {
       print('Usuario guardado: ${userSession.user?.toJson()}');
     }
 
-    if (userSession.token != null && userSession.refreshToken != null && userSession.user != null) {
+    if (userSession.token != null &&
+        userSession.refreshToken != null &&
+        userSession.user != null) {
       if (kDebugMode) {
-        print('Hay datos de sesión guardados, intentando auto-login independientemente de remember_credentials');
+        print(
+          'Hay datos de sesión guardados, intentando auto-login independientemente de remember_credentials',
+        );
       }
-      
+
       try {
         final userId = userSession.user?.id;
         if (userId == null) {
@@ -110,48 +152,54 @@ class AuthService {
           }
           return false;
         }
-        
+
         if (kDebugMode) {
           print('Intentando obtener datos del usuario con token existente...');
-          print('URL completa: ${ApiEndpoints.getFullUrl("${ApiEndpoints.usuario}$userId/")}');
+          print(
+            'URL completa: ${ApiEndpoints.getFullUrl("${ApiEndpoints.usuario}$userId/")}',
+          );
         }
-        
+
         final user = await UserService().obtenerDatosCompletos(userId);
-        
+
         if (user != null) {
           if (kDebugMode) {
             print('Auto-login exitoso con token existente');
           }
-          
+
           if (!rememberMe) {
             await userSession.setRememberCredentials(true);
             if (kDebugMode) {
-              print('Actualizando remember_credentials a true después de auto-login exitoso');
+              print(
+                'Actualizando remember_credentials a true después de auto-login exitoso',
+              );
             }
           }
-          
+
           return true;
         }
-        
+
         if (kDebugMode) {
           print('Token de acceso no válido, intentando refrescar...');
         }
-        
+
         final refreshTokenStr = userSession.refreshToken;
         if (refreshTokenStr == null) {
           return false;
         }
-        
+
         final newAuth = await refreshToken(refreshTokenStr);
-        
+
         if (newAuth != null) {
           if (!rememberMe) {
             await userSession.setRememberCredentials(true);
             if (kDebugMode) {
-              print('Actualizando remember_credentials a true después de refresco exitoso');
+              print(
+                'Actualizando remember_credentials a true después de refresco exitoso',
+              );
             }
           }
-          
+
           return true;
         }
       } catch (e) {
@@ -164,7 +212,7 @@ class AuthService {
         print('No hay suficientes datos para intentar auto-login');
       }
     }
-    
+
     if (kDebugMode) {
       print('No se pudo completar el auto-login, limpiando sesión');
     }

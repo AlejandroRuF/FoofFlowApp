@@ -10,32 +10,34 @@ class UserService {
   static final UserService _instance = UserService._internal();
   factory UserService() => _instance;
   UserService._internal();
-  
+
   Future<User?> obtenerDatosCompletos(int userId) async {
     try {
       if (kDebugMode) {
         print('Obteniendo datos completos del usuario ID: $userId');
-        print('URL completa: ${ApiEndpoints.getFullUrl("${ApiEndpoints.usuario}$userId/")}');
+        print(
+          'URL completa: ${ApiEndpoints.getFullUrl("${ApiEndpoints.usuario}$userId/")}',
+        );
       }
-      
+
       final response = await ApiServices.dio.get(
         "${ApiEndpoints.usuario}$userId/",
       );
-      
+
       if (response.statusCode == 200) {
         final userData = response.data;
         final user = User.fromJson(userData);
-        
+
         if (kDebugMode) {
           print('Datos del usuario obtenidos: ${user.toJson()}');
         }
 
         await UserSessionService().actualizarDatosUsuario(user);
-        
+
         if (user.tipoUsuario == 'empleado') {
           await obtenerPermisosUsuario(userId);
         }
-        
+
         return user;
       }
     } catch (e) {
@@ -51,30 +53,32 @@ class UserService {
     }
     return null;
   }
-  
+
   Future<PermisosEmpleado?> obtenerPermisosUsuario(int userId) async {
     try {
       if (kDebugMode) {
         print('Obteniendo permisos para el usuario ID: $userId');
-        print('URL: ${ApiEndpoints.getFullUrl(ApiEndpoints.permisosEmpleado(userId))}');
+        print(
+          'URL: ${ApiEndpoints.getFullUrl(ApiEndpoints.permisosEmpleado(userId))}',
+        );
       }
-      
+
       final response = await ApiServices.dio.get(
         ApiEndpoints.permisosEmpleado(userId),
       );
-      
+
       if (response.statusCode == 200) {
         final permisosData = response.data;
-        
+
         if (kDebugMode) {
           print('Permisos obtenidos: $permisosData');
         }
-        
+
         if (permisosData != null && permisosData.isNotEmpty) {
           final permisos = PermisosEmpleado.fromJson(permisosData);
-          
+
           await UserSessionService().guardarPermisos(permisos);
-          
+
           return permisos;
         }
       }
