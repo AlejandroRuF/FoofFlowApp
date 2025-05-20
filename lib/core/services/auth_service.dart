@@ -109,7 +109,6 @@ class AuthService {
           print('DioError tipo: ${e.type}');
           print('DioError mensaje: ${e.message}');
           print('DioError respuesta: ${e.response}');
-          // Imprimir información de la solicitud
           print('URL de la solicitud: ${e.requestOptions.uri}');
           print('Método de la solicitud: ${e.requestOptions.method}');
           print('Datos de la solicitud: ${e.requestOptions.data}');

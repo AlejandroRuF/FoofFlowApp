@@ -48,8 +48,7 @@ class PrevisionDemanda {
       'es_estimada': esEstimada,
     };
   }
-  
-  // Método helper para obtener el nombre del tramo del mes
+
   String obtenerNombreTramo() {
     switch (tramoMes) {
       case 1:

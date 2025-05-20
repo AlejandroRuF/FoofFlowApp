@@ -5,6 +5,9 @@ import '../../shared/widgets/responsive_scaffold_widget.dart';
 import '../dashboard_viewmodel/dashboard_viewmodel.dart';
 import 'widgets/ventas_chart_widget.dart';
 import 'widgets/prevision_demanda_chart_widget.dart';
+import 'widgets/pedidos_activos_widget.dart';
+import 'widgets/inventario_widget.dart';
+import 'widgets/incidencias_widget.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -128,17 +131,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 24),
                 _buildTarjetasResumen(viewModel),
                 const SizedBox(height: 24),
-                VentasChartWidget(
-                  metricas: viewModel.metricasVentas ?? {},
-                  titulo: 'Métricas de Ventas',
-                ),
+
+                if (viewModel.metricasVentas != null)
+                  VentasChartWidget(
+                    metricas: viewModel.metricasVentas ?? {},
+                    titulo: 'Métricas de Ventas',
+                  ),
                 const SizedBox(height: 24),
+
+                if (viewModel.dashboardData?['pedidos_activos'] != null)
+                  PedidosActivosWidget(
+                    pedidos: viewModel.pedidosActivos!,
+                    tipoUsuario: viewModel.tipoUsuario,
+                    usuarioId: viewModel.usuario?.id,
+                    isDarkMode: Theme.of(context).brightness == Brightness.dark,
+                  ),
+                if (viewModel.dashboardData?['pedidos_activos'] != null)
+                  const SizedBox(height: 24),
+
+                if (viewModel.dashboardData?['inventario'] != null)
+                  InventarioWidget(
+                    inventario: viewModel.inventario!,
+                    tipoUsuario: viewModel.tipoUsuario,
+                  ),
+                if (viewModel.dashboardData?['inventario'] != null)
+                  const SizedBox(height: 24),
+
+                if (viewModel.dashboardData?['incidencias'] != null)
+                  IncidenciasWidget(
+                    incidencias: viewModel.incidencias!,
+                    tipoUsuario: viewModel.tipoUsuario,
+                    usuarioId: viewModel.usuario?.id,
+                    isDarkMode: Theme.of(context).brightness == Brightness.dark,
+                  ),
+                if (viewModel.dashboardData?['incidencias'] != null)
+                  const SizedBox(height: 24),
+
                 if (viewModel.debeMostrarPrevisiones() &&
                     viewModel.previsionDemanda != null)
                   PrevisionDemandaChartWidget(
                     previsiones: viewModel.previsionDemanda ?? {},
                     titulo: 'Previsión de Demanda',
                   ),
+
                 SizedBox(
                   height: MediaQuery.of(context).size.width < 600 ? 60 : 0,
                 ),
@@ -241,6 +276,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     IconData icono,
     Color color,
   ) {
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -248,6 +285,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: isWideScreen ? MainAxisSize.min : MainAxisSize.max,
           children: [
             Icon(icono, size: 28, color: color),
             const SizedBox(height: 4),

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:foodflow_app/core/services/user_sesion_service.dart';
 import 'package:foodflow_app/features/dashboard/dashboard_interactor/dashboard_interactor.dart';
 import 'package:foodflow_app/models/user_model.dart';
 
@@ -7,6 +8,7 @@ import '../dashboard_model/dashboard_model.dart';
 
 class DashboardViewModel extends ChangeNotifier {
   final _interactor = DashboardInteractor();
+  final _sessionService = UserSessionService();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -22,6 +24,11 @@ class DashboardViewModel extends ChangeNotifier {
       _dashboardData?['metricas_ventas'];
   Map<String, dynamic>? get previsionDemanda =>
       _dashboardData?['previsiones_demanda'];
+  Map<String, dynamic>? get pedidosActivos =>
+      _dashboardData?['pedidos_activos'];
+  Map<String, dynamic>? get inventario => _dashboardData?['inventario'];
+  Map<String, dynamic>? get incidencias => _dashboardData?['incidencias'];
+
   String get tipoUsuario => _dashboardData?['tipo_usuario'] ?? 'desconocido';
   User? get usuario => _dashboardData?['usuario'];
 
@@ -72,8 +79,39 @@ class DashboardViewModel extends ChangeNotifier {
   }
 
   bool debeMostrarPrevisiones() {
+    if (tipoUsuario == 'empleado') {
+      return _sessionService.permisos?.puedeVerPrevisionDemanda ?? false;
+    }
+
     final tipo = tipoUsuario.toLowerCase();
     return tipo == 'administrador' || tipo == 'restaurante';
+  }
+
+  bool debeMostrarPedidos() {
+    if (tipoUsuario == 'empleado') {
+      return _sessionService.permisos?.puedeVerPedidos ?? false;
+    }
+
+    return pedidosActivos != null && pedidosActivos!.isNotEmpty;
+  }
+
+  bool debeMostrarInventario() {
+    if (tipoUsuario == 'empleado') {
+      final permisos = _sessionService.permisos;
+      final puedeVerProductos = permisos?.puedeVerProductos ?? false;
+      final puedeVerAlmacenes = permisos?.puedeVerAlmacenes ?? false;
+      return puedeVerProductos || puedeVerAlmacenes;
+    }
+
+    return inventario != null && inventario!.isNotEmpty;
+  }
+
+  bool debeMostrarIncidencias() {
+    if (tipoUsuario == 'empleado') {
+      return _sessionService.permisos?.puedeVerIncidencias ?? false;
+    }
+
+    return incidencias != null && incidencias!.isNotEmpty;
   }
 
   String obtenerFechaActualizacionTexto() {

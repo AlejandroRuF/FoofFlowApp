@@ -31,6 +31,11 @@ class ApiEndpoints {
   static const String incidencias = 'incidencias/';
   static const String productos = 'productos/';
 
+  // Endpoints para productos relacionados
+  static const String categorias = 'categorias/';
+  static const String almacenes = 'almacenes/';
+  static const String pedidoProductos = 'pedido-productos/';
+
   // Endpoints para historial
   static const String historialPedidos = 'historial-pedidos/';
   static const String historialProductos = 'historial-productos/';

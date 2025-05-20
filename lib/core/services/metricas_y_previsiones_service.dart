@@ -123,7 +123,6 @@ class MetricasMockService {
         tramoActual = 3;
       }
 
-      // Lista de productos de ejemplo
       final productosNombres = [
         'Hamburguesa',
         'Pizza',
@@ -146,8 +145,7 @@ class MetricasMockService {
 
       for (int i = 0; i < 5; i++) {
         final int demandaPrevista = 30 + random.nextInt(100);
-        final double variacion =
-            (random.nextDouble() * 30) - 15; // Entre -15% y +15%
+        final double variacion = (random.nextDouble() * 30) - 15;
         final bool esEstimada = random.nextBool();
 
         totalDemandaPrevista += demandaPrevista;

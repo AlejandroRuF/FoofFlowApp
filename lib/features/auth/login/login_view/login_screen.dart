@@ -347,7 +347,6 @@ class _LoginFormState extends State<LoginForm> {
           ),
         ),
         const SizedBox(height: 8),
-        // Checkbox para recordar credenciales
         Row(
           children: [
             Checkbox(

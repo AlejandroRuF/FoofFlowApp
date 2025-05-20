@@ -33,7 +33,7 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
     });
 
     switch (index) {
-      case 0: // Dashboard
+      case 0:
         if (ModalRoute.of(context)?.settings.name != '/dashboard') {
           Navigator.of(context).pushReplacementNamed('/dashboard');
         }

@@ -76,12 +76,27 @@ class PermisosEmpleado {
       puedeVerPedidoProducto: json['puede_ver_pedidoProducto'] ?? false,
       puedeCrearPedidoProducto: json['puede_crear_pedidoProducto'] ?? false,
       puedeEditarPedidoProducto: json['puede_editar_pedidoProducto'] ?? false,
-      puedeEliminarPedidoProducto: json['puede_eliminar_pedidoProducto'] ?? false,
+      puedeEliminarPedidoProducto:
+          json['puede_eliminar_pedidoProducto'] ?? false,
       puedeVerMetricas: json['puede_ver_metricas'] ?? false,
       puedeVerPrevisionDemanda: json['puede_ver_prevision_demanda'] ?? false,
       empleadoId: json['empleado'],
     );
   }
+
+  bool get puedeVerInventario => puedeVerProductos || puedeVerAlmacenes;
+
+  bool get tieneAccesoAlDashboard =>
+      puedeVerMetricas ||
+      puedeVerPrevisionDemanda ||
+      puedeVerPedidos ||
+      puedeVerInventario ||
+      puedeVerIncidencias;
+
+  bool get puedeGestionarProductos =>
+      puedeCrearProductos || puedeEditarProductos || puedeDesactivarProductos;
+
+  bool get puedeGestionarPedidos => puedeCrearPedidos || puedeEditarPedidos;
 
   Map<String, dynamic> toJson() {
     return {

@@ -50,7 +50,6 @@ class VentasChartWidget extends StatelessWidget {
     final actual = metricas['actual'];
     final anterior = metricas['anterior'];
 
-    // Valores para el gráfico
     final actuales = [
       actual['ingresos'] ?? 0.0,
       actual['gastos'] ?? 0.0,
