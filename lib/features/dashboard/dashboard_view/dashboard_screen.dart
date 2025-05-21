@@ -231,12 +231,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final actual = metricas['actual'];
     final variacion = metricas['variacion'];
 
-    // Ajustamos el número de columnas según el ancho de la pantalla
     int crossAxisCount = 2;
     if (screenWidth > 900) {
-      crossAxisCount = 4; // 4 tarjetas en una fila para pantallas muy anchas
+      crossAxisCount = 4;
     } else if (screenWidth > 600) {
-      crossAxisCount = 3; // 3 tarjetas en una fila para pantallas medianas
+      crossAxisCount = 3;
     }
 
     return GridView.count(
@@ -245,7 +244,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       mainAxisSpacing: 16,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      // Para pantallas anchas, usa un GridView con altura fija
       childAspectRatio:
           screenWidth > 600 ? (screenWidth / (150 * crossAxisCount)) : 1.0,
       children: [
