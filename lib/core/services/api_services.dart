@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/core/constants/api_endpoints.dart';
 import 'package:foodflow_app/core/services/auth_service.dart';
-import 'package:foodflow_app/core/services/user_sesion_service.dart';
+import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 
 class ApiServices {
   static final Dio dio =

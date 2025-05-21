@@ -25,11 +25,11 @@ class AppBottomNavBar extends StatelessWidget {
           icon: Icon(Icons.outbox_rounded),
           label: 'Pedidos',
         ),
-        NavigationDestination(icon: Icon(Icons.receipt_long), label: 'Pedidos'),
         NavigationDestination(
-          icon: Icon(Icons.inventory_2),
-          label: 'Inventario',
+          icon: Icon(Icons.receipt_long),
+          label: 'Productos',
         ),
+        NavigationDestination(icon: Icon(Icons.inventory_2), label: 'Almacén'),
         NavigationDestination(icon: Icon(Icons.person), label: 'Perfil'),
       ],
     );

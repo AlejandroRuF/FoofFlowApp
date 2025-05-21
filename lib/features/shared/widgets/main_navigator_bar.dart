@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../features/auth/login/login_viewmodel/login_viewmodel.dart';
 
 class MainNavigatorBar extends StatelessWidget {
-  const MainNavigatorBar({Key? key}) : super(key: key);
+  final int currentIndex;
+  final Function(int) onItemSelected;
+
+  const MainNavigatorBar({
+    Key? key,
+    required this.currentIndex,
+    required this.onItemSelected,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,49 +27,36 @@ class MainNavigatorBar extends StatelessWidget {
                   context,
                   title: 'Dashboard',
                   icon: Icons.dashboard,
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
+                  index: 0,
+                  isSelected: currentIndex == 0,
                 ),
                 _buildMenuItem(
                   context,
                   title: 'Pedidos',
                   icon: Icons.outbox_rounded,
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
+                  index: 1,
+                  isSelected: currentIndex == 1,
                 ),
                 _buildMenuItem(
                   context,
                   title: 'Productos',
                   icon: Icons.receipt_long,
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
+                  index: 2,
+                  isSelected: currentIndex == 2,
                 ),
                 _buildMenuItem(
                   context,
-                  title: 'Almacen',
+                  title: 'Almacén',
                   icon: Icons.inventory_2,
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                _buildMenuItem(
-                  context,
-                  title: 'Dashboard',
-                  icon: Icons.dashboard,
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
+                  index: 3,
+                  isSelected: currentIndex == 3,
                 ),
                 _buildMenuItem(
                   context,
                   title: 'Perfil',
                   icon: Icons.person,
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
+                  index: 4,
+                  isSelected: currentIndex == 4,
                 ),
               ],
             ),
@@ -128,9 +123,24 @@ class MainNavigatorBar extends StatelessWidget {
     BuildContext context, {
     required String title,
     required IconData icon,
-    required VoidCallback onTap,
+    required int index,
+    required bool isSelected,
   }) {
-    return ListTile(leading: Icon(icon), title: Text(title), onTap: onTap);
+    return ListTile(
+      leading: Icon(icon, color: isSelected ? Colors.amber : null),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected ? Colors.amber : null,
+        ),
+      ),
+      selected: isSelected,
+      onTap: () {
+        Navigator.of(context).pop();
+        onItemSelected(index);
+      },
+    );
   }
 
   Widget _buildFooter(BuildContext context) {
@@ -174,7 +184,7 @@ class MainNavigatorBar extends StatelessWidget {
                 final success = await loginViewModel.logout();
 
                 if (success) {
-                  Navigator.of(context).pushReplacementNamed('/login');
+                  context.go('/login');
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

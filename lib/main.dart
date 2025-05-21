@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:foodflow_app/core/services/auth_service.dart';
-import 'package:foodflow_app/features/auth/login/login_view/login_screen.dart';
-import 'package:foodflow_app/features/dashboard/dashboard_view/dashboard_screen.dart';
+import 'package:foodflow_app/core/router/app_router.dart';
 import 'package:foodflow_app/features/dashboard/dashboard_viewmodel/dashboard_viewmodel.dart';
 import 'package:foodflow_app/features/auth/login/login_viewmodel/login_viewmodel.dart';
+import 'package:foodflow_app/features/orders/orders_viewmodel/order_list_viewmodel.dart';
 import 'package:foodflow_app/core/theme/theme.dart';
 
 void main() {
@@ -28,6 +29,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => DashboardViewModel()),
+        ChangeNotifierProvider(create: (_) => OrderListViewModel()),
       ],
       child: const MyApp(),
     ),
@@ -39,7 +41,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'FoodFlow App',
       theme: FoodFlowTheme.lightTheme,
       darkTheme: FoodFlowTheme.darkTheme,
@@ -47,12 +49,8 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return MediaQuery(data: MediaQuery.of(context), child: child!);
       },
-      routes: {
-        '/': (context) => const SplashScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/dashboard': (context) => const DashboardScreen(),
-      },
-      initialRoute: '/',
+      routerConfig: appRouter,
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -76,9 +74,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (mounted) {
       if (isLoggedIn) {
-        Navigator.of(context).pushReplacementNamed('/dashboard');
+        context.go('/dashboard');
       } else {
-        Navigator.of(context).pushReplacementNamed('/login');
+        context.go('/login');
       }
     }
   }

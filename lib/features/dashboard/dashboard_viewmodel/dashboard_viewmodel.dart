@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:foodflow_app/core/services/user_sesion_service.dart';
+import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/features/dashboard/dashboard_interactor/dashboard_interactor.dart';
 import 'package:foodflow_app/models/user_model.dart';
 
@@ -94,7 +94,6 @@ class DashboardViewModel extends ChangeNotifier {
     }
   }
 
-  // Verificadores de permisos
   bool get tienePermisoVerPrevisionDemanda {
     if (tipoUsuario == 'empleado') {
       return _sessionService.permisos?.puedeVerPrevisionDemanda ?? false;
@@ -134,7 +133,6 @@ class DashboardViewModel extends ChangeNotifier {
     return true;
   }
 
-  // Estos métodos ahora siempre devuelven true para mostrar los widgets
   bool debeMostrarPrevisiones() => true;
   bool debeMostrarPedidos() => true;
   bool debeMostrarInventario() => true;

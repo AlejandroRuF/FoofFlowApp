@@ -3,10 +3,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/core/constants/api_endpoints.dart';
-import 'package:foodflow_app/core/services/user_sesion_service.dart';
-import 'package:foodflow_app/core/services/user_services.dart';
+import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
+import 'package:foodflow_app/core/services/usuario_services.dart';
 import 'package:foodflow_app/features/dashboard/dashboard_view/dashboard_screen.dart';
 import 'package:foodflow_app/models/auth_model.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -51,10 +52,7 @@ class AuthService {
           rememberMe: rememberMe,
         );
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardScreen()),
-        );
+        context.go('/dashboard');
 
         return true;
       }

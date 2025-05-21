@@ -3,7 +3,7 @@ import 'package:foodflow_app/core/services/incidencias_service.dart';
 import 'package:foodflow_app/core/services/inventario_service.dart';
 import 'package:foodflow_app/core/services/metricas_y_previsiones_service.dart';
 import 'package:foodflow_app/core/services/pedidos_service.dart';
-import 'package:foodflow_app/core/services/user_sesion_service.dart';
+import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/models/user_model.dart';
 
 class DashboardInteractor {

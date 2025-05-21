@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:foodflow_app/features/shared/widgets/app_bottom_navigation_bar.dart';
 import 'package:foodflow_app/features/shared/widgets/main_navigator_bar.dart';
 
@@ -9,6 +10,8 @@ class ResponsiveScaffold extends StatefulWidget {
   final Widget? floatingActionButton;
   final FloatingActionButtonLocation? floatingActionButtonLocation;
   final Widget? bottomSheet;
+  final int initialIndex;
+  final bool showBackButton;
 
   const ResponsiveScaffold({
     Key? key,
@@ -18,6 +21,8 @@ class ResponsiveScaffold extends StatefulWidget {
     this.floatingActionButton,
     this.floatingActionButtonLocation,
     this.bottomSheet,
+    this.initialIndex = 0,
+    this.showBackButton = false,
   }) : super(key: key);
 
   @override
@@ -25,7 +30,14 @@ class ResponsiveScaffold extends StatefulWidget {
 }
 
 class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
-  int _currentIndex = 0;
+  late int _currentIndex;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
 
   void _onItemSelected(int index) {
     setState(() {
@@ -34,17 +46,19 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
 
     switch (index) {
       case 0:
-        if (ModalRoute.of(context)?.settings.name != '/dashboard') {
-          Navigator.of(context).pushReplacementNamed('/dashboard');
-        }
+        context.go('/dashboard');
         break;
       case 1:
+        context.go('/orders');
         break;
       case 2:
+        context.go('/products');
         break;
       case 3:
+        context.go('/inventory');
         break;
       case 4:
+        context.go('/profile');
         break;
     }
   }
@@ -52,10 +66,48 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
+    final currentLocation = GoRouterState.of(context).matchedLocation;
+
+    final isMainRoute = [
+      '/dashboard',
+      '/orders',
+      '/products',
+      '/inventory',
+      '/profile',
+    ].contains(currentLocation);
+    final shouldShowBackButton = (!isMainRoute || widget.showBackButton);
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title), actions: widget.actions),
-      drawer: isSmallScreen ? null : const MainNavigatorBar(),
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: widget.actions,
+        leading:
+            isSmallScreen
+                ? shouldShowBackButton
+                    ? IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => context.pop(),
+                    )
+                    : null
+                : shouldShowBackButton
+                ? IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => context.pop(),
+                )
+                : IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                ),
+        automaticallyImplyLeading: isSmallScreen && !shouldShowBackButton,
+      ),
+      drawer:
+          !isSmallScreen
+              ? MainNavigatorBar(
+                currentIndex: _currentIndex,
+                onItemSelected: _onItemSelected,
+              )
+              : null,
       body: widget.body,
       bottomNavigationBar:
           isSmallScreen

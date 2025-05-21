@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/core/services/api_services.dart';
-import 'package:foodflow_app/core/services/user_sesion_service.dart';
+import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/features/auth/login/login_model/login_request.dart';
 import 'package:foodflow_app/models/auth_model.dart';
 
 import '../../../../core/constants/api_endpoints.dart';
-import '../../../../core/services/user_services.dart';
+import '../../../../core/services/usuario_services.dart';
 import '../../../../models/user_model.dart';
 
 class LoginInteractor {

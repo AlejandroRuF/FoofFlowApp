@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../auth/login/login_viewmodel/login_viewmodel.dart';
 import '../../shared/widgets/responsive_scaffold_widget.dart';
@@ -65,7 +66,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               final success = await loginViewModel.logout();
 
               if (success) {
-                Navigator.of(context).pushReplacementNamed('/login');
+                context.go('/login');
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -130,20 +131,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _buildEncabezado(viewModel),
                 const SizedBox(height: 24),
 
-                // Aquí implementamos la lógica para mostrar las tarjetas de resumen con o sin datos
                 viewModel.tienePermisoVerMetricas
                     ? _buildTarjetasResumen(viewModel)
                     : _buildTarjetasResumenSinPermisos(),
                 const SizedBox(height: 24),
 
-                // Métricas de ventas
                 VentasChartWidget(
                   metricas: viewModel.metricasVentas ?? {},
                   titulo: 'Métricas de Ventas',
                 ),
                 const SizedBox(height: 24),
 
-                // Pedidos activos
                 PedidosActivosWidget(
                   pedidos: viewModel.pedidosActivos ?? {},
                   tipoUsuario: viewModel.tipoUsuario,
@@ -152,14 +150,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Inventario
                 InventarioWidget(
                   inventario: viewModel.inventario ?? {},
                   tipoUsuario: viewModel.tipoUsuario,
                 ),
                 const SizedBox(height: 24),
 
-                // Incidencias
                 IncidenciasWidget(
                   incidencias: viewModel.incidencias ?? {},
                   tipoUsuario: viewModel.tipoUsuario,
@@ -354,7 +350,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // Método para mostrar tarjetas de resumen sin datos
   Widget _buildTarjetasResumenSinPermisos() {
     final screenWidth = MediaQuery.of(context).size.width;
 

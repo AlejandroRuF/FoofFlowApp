@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/core/constants/api_endpoints.dart';
 import 'package:foodflow_app/core/services/api_services.dart';
-import 'package:foodflow_app/core/services/user_sesion_service.dart';
+import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/models/permisos_empleado_model.dart';
 import 'package:foodflow_app/models/user_model.dart';
 

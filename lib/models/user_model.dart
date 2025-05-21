@@ -12,6 +12,7 @@ class User {
   final String? empresaAsociada;
   final String? imagen;
   final int? propietarioId;
+  final int? empleadorId;
 
   User({
     required this.id,
@@ -27,6 +28,7 @@ class User {
     this.empresaAsociada,
     this.imagen,
     this.propietarioId,
+    this.empleadorId,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -44,6 +46,7 @@ class User {
       empresaAsociada: json['empresa_asociada'],
       imagen: json['imagen'],
       propietarioId: json['propietario'],
+      empleadorId: json['empleador_id'],
     );
   }
 
@@ -62,8 +65,9 @@ class User {
       'empresa_asociada': empresaAsociada,
       'imagen': imagen,
       'propietario': propietarioId,
+      'empleador_id': empleadorId,
     };
   }
-  
+
   bool get esEmpleado => tipoUsuario == 'empleado';
 }
