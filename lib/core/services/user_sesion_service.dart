@@ -116,7 +116,13 @@ class UserSessionService {
 
   Future<void> clearSession() async {
     final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('email');
+
     await prefs.clear();
+
+    if (email != null) {
+      await prefs.setString('email', email);
+    }
 
     _auth = null;
     _user = null;

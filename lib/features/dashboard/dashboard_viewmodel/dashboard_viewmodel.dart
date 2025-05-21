@@ -20,14 +20,30 @@ class DashboardViewModel extends ChangeNotifier {
   Map<String, dynamic>? get dashboardData => _dashboardData;
   DashboardModel? get dashboardModel => _dashboardModel;
 
-  Map<String, dynamic>? get metricasVentas =>
-      _dashboardData?['metricas_ventas'];
-  Map<String, dynamic>? get previsionDemanda =>
-      _dashboardData?['previsiones_demanda'];
-  Map<String, dynamic>? get pedidosActivos =>
-      _dashboardData?['pedidos_activos'];
-  Map<String, dynamic>? get inventario => _dashboardData?['inventario'];
-  Map<String, dynamic>? get incidencias => _dashboardData?['incidencias'];
+  Map<String, dynamic>? get metricasVentas {
+    if (!tienePermisoVerMetricas) return <String, dynamic>{};
+    return _dashboardData?['metricas_ventas'];
+  }
+
+  Map<String, dynamic>? get previsionDemanda {
+    if (!tienePermisoVerPrevisionDemanda) return <String, dynamic>{};
+    return _dashboardData?['previsiones_demanda'];
+  }
+
+  Map<String, dynamic>? get pedidosActivos {
+    if (!tienePermisoVerPedidos) return <String, dynamic>{};
+    return _dashboardData?['pedidos_activos'];
+  }
+
+  Map<String, dynamic>? get inventario {
+    if (!tienePermisoVerInventario) return <String, dynamic>{};
+    return _dashboardData?['inventario'];
+  }
+
+  Map<String, dynamic>? get incidencias {
+    if (!tienePermisoVerIncidencias) return <String, dynamic>{};
+    return _dashboardData?['incidencias'];
+  }
 
   String get tipoUsuario => _dashboardData?['tipo_usuario'] ?? 'desconocido';
   User? get usuario => _dashboardData?['usuario'];
@@ -78,41 +94,51 @@ class DashboardViewModel extends ChangeNotifier {
     }
   }
 
-  bool debeMostrarPrevisiones() {
+  // Verificadores de permisos
+  bool get tienePermisoVerPrevisionDemanda {
     if (tipoUsuario == 'empleado') {
       return _sessionService.permisos?.puedeVerPrevisionDemanda ?? false;
     }
-
     final tipo = tipoUsuario.toLowerCase();
     return tipo == 'administrador' || tipo == 'restaurante';
   }
 
-  bool debeMostrarPedidos() {
+  bool get tienePermisoVerPedidos {
     if (tipoUsuario == 'empleado') {
       return _sessionService.permisos?.puedeVerPedidos ?? false;
     }
-
-    return pedidosActivos != null && pedidosActivos!.isNotEmpty;
+    return true;
   }
 
-  bool debeMostrarInventario() {
+  bool get tienePermisoVerInventario {
     if (tipoUsuario == 'empleado') {
       final permisos = _sessionService.permisos;
       final puedeVerProductos = permisos?.puedeVerProductos ?? false;
       final puedeVerAlmacenes = permisos?.puedeVerAlmacenes ?? false;
       return puedeVerProductos || puedeVerAlmacenes;
     }
-
-    return inventario != null && inventario!.isNotEmpty;
+    return true;
   }
 
-  bool debeMostrarIncidencias() {
+  bool get tienePermisoVerIncidencias {
     if (tipoUsuario == 'empleado') {
       return _sessionService.permisos?.puedeVerIncidencias ?? false;
     }
-
-    return incidencias != null && incidencias!.isNotEmpty;
+    return true;
   }
+
+  bool get tienePermisoVerMetricas {
+    if (tipoUsuario == 'empleado') {
+      return _sessionService.permisos?.puedeVerMetricas ?? false;
+    }
+    return true;
+  }
+
+  // Estos métodos ahora siempre devuelven true para mostrar los widgets
+  bool debeMostrarPrevisiones() => true;
+  bool debeMostrarPedidos() => true;
+  bool debeMostrarInventario() => true;
+  bool debeMostrarIncidencias() => true;
 
   String obtenerFechaActualizacionTexto() {
     if (_dashboardModel == null) {

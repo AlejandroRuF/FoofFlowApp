@@ -25,24 +25,8 @@ class MainNavigatorBar extends StatelessWidget {
                 ),
                 _buildMenuItem(
                   context,
-                  title: 'Métricas',
-                  icon: Icons.bar_chart,
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                _buildMenuItem(
-                  context,
-                  title: 'Previsiones',
-                  icon: Icons.timeline,
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                _buildMenuItem(
-                  context,
                   title: 'Pedidos',
-                  icon: Icons.shopping_cart,
+                  icon: Icons.outbox_rounded,
                   onTap: () {
                     Navigator.of(context).pop();
                   },
@@ -50,24 +34,31 @@ class MainNavigatorBar extends StatelessWidget {
                 _buildMenuItem(
                   context,
                   title: 'Productos',
-                  icon: Icons.fastfood,
+                  icon: Icons.receipt_long,
                   onTap: () {
                     Navigator.of(context).pop();
                   },
                 ),
                 _buildMenuItem(
                   context,
-                  title: 'Incidencias',
-                  icon: Icons.warning,
+                  title: 'Almacen',
+                  icon: Icons.inventory_2,
                   onTap: () {
                     Navigator.of(context).pop();
                   },
                 ),
-                const Divider(),
                 _buildMenuItem(
                   context,
-                  title: 'Configuración',
-                  icon: Icons.settings,
+                  title: 'Dashboard',
+                  icon: Icons.dashboard,
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                _buildMenuItem(
+                  context,
+                  title: 'Perfil',
+                  icon: Icons.person,
                   onTap: () {
                     Navigator.of(context).pop();
                   },

@@ -129,45 +129,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 _buildEncabezado(viewModel),
                 const SizedBox(height: 24),
-                _buildTarjetasResumen(viewModel),
+
+                // Aquí implementamos la lógica para mostrar las tarjetas de resumen con o sin datos
+                viewModel.tienePermisoVerMetricas
+                    ? _buildTarjetasResumen(viewModel)
+                    : _buildTarjetasResumenSinPermisos(),
                 const SizedBox(height: 24),
 
-                if (viewModel.metricasVentas != null)
-                  VentasChartWidget(
-                    metricas: viewModel.metricasVentas ?? {},
-                    titulo: 'Métricas de Ventas',
-                  ),
+                // Métricas de ventas
+                VentasChartWidget(
+                  metricas: viewModel.metricasVentas ?? {},
+                  titulo: 'Métricas de Ventas',
+                ),
                 const SizedBox(height: 24),
 
-                if (viewModel.dashboardData?['pedidos_activos'] != null)
-                  PedidosActivosWidget(
-                    pedidos: viewModel.pedidosActivos!,
-                    tipoUsuario: viewModel.tipoUsuario,
-                    usuarioId: viewModel.usuario?.id,
-                    isDarkMode: Theme.of(context).brightness == Brightness.dark,
-                  ),
-                if (viewModel.dashboardData?['pedidos_activos'] != null)
-                  const SizedBox(height: 24),
+                // Pedidos activos
+                PedidosActivosWidget(
+                  pedidos: viewModel.pedidosActivos ?? {},
+                  tipoUsuario: viewModel.tipoUsuario,
+                  usuarioId: viewModel.usuario?.id,
+                  isDarkMode: Theme.of(context).brightness == Brightness.dark,
+                ),
+                const SizedBox(height: 24),
 
-                if (viewModel.dashboardData?['inventario'] != null)
-                  InventarioWidget(
-                    inventario: viewModel.inventario!,
-                    tipoUsuario: viewModel.tipoUsuario,
-                  ),
-                if (viewModel.dashboardData?['inventario'] != null)
-                  const SizedBox(height: 24),
+                // Inventario
+                InventarioWidget(
+                  inventario: viewModel.inventario ?? {},
+                  tipoUsuario: viewModel.tipoUsuario,
+                ),
+                const SizedBox(height: 24),
 
-                if (viewModel.dashboardData?['incidencias'] != null)
-                  IncidenciasWidget(
-                    incidencias: viewModel.incidencias!,
-                    tipoUsuario: viewModel.tipoUsuario,
-                    usuarioId: viewModel.usuario?.id,
-                    isDarkMode: Theme.of(context).brightness == Brightness.dark,
-                  ),
-                if (viewModel.dashboardData?['incidencias'] != null)
-                  const SizedBox(height: 24),
+                // Incidencias
+                IncidenciasWidget(
+                  incidencias: viewModel.incidencias ?? {},
+                  tipoUsuario: viewModel.tipoUsuario,
+                  usuarioId: viewModel.usuario?.id,
+                  isDarkMode: Theme.of(context).brightness == Brightness.dark,
+                ),
+                const SizedBox(height: 24),
 
-                if (viewModel.debeMostrarPrevisiones() &&
+                if (viewModel.tienePermisoVerPrevisionDemanda &&
                     viewModel.previsionDemanda != null)
                   PrevisionDemandaChartWidget(
                     previsiones: viewModel.previsionDemanda ?? {},
@@ -345,6 +346,97 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                 ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Método para mostrar tarjetas de resumen sin datos
+  Widget _buildTarjetasResumenSinPermisos() {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    int crossAxisCount = 2;
+    if (screenWidth > 900) {
+      crossAxisCount = 4;
+    } else if (screenWidth > 600) {
+      crossAxisCount = 3;
+    }
+
+    return GridView.count(
+      crossAxisCount: crossAxisCount,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      childAspectRatio:
+          screenWidth > 600 ? (screenWidth / (150 * crossAxisCount)) : 1.0,
+      children: [
+        _buildTarjetaResumenSinPermisos(
+          'Ingresos',
+          Icons.trending_up,
+          Colors.blue,
+        ),
+        _buildTarjetaResumenSinPermisos(
+          'Gastos',
+          Icons.trending_down,
+          Colors.red,
+        ),
+        _buildTarjetaResumenSinPermisos(
+          'Beneficio',
+          Icons.account_balance,
+          Colors.green,
+        ),
+        _buildTarjetaResumenSinPermisos(
+          'Productos Vendidos',
+          Icons.shopping_cart,
+          Colors.amber,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTarjetaResumenSinPermisos(
+    String titulo,
+    IconData icono,
+    Color color,
+  ) {
+    final isWideScreen = MediaQuery.of(context).size.width > 600;
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Container(
+        constraints:
+            isWideScreen
+                ? const BoxConstraints(maxHeight: 150)
+                : const BoxConstraints(),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: isWideScreen ? MainAxisSize.min : MainAxisSize.max,
+            children: [
+              Icon(icono, size: 36, color: color),
+              const SizedBox(height: 8),
+              Text(
+                titulo,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Sin acceso',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),

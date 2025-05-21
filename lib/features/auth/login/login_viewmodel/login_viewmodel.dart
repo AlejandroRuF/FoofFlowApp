@@ -13,17 +13,13 @@ class LoginViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  static const String _savedEmailKey = 'saved_email';
+  static const String _savedEmailKey = 'email';
   static const String _rememberMeKey = 'remember_me';
 
   Future<String?> getSavedEmail() async {
     final prefs = await SharedPreferences.getInstance();
-    final rememberMe = prefs.getBool(_rememberMeKey) ?? false;
 
-    if (rememberMe) {
-      return prefs.getString(_savedEmailKey);
-    }
-    return null;
+    return prefs.getString(_savedEmailKey);
   }
 
   Future<void> _saveOrClearCredentials(String email, bool rememberMe) async {
