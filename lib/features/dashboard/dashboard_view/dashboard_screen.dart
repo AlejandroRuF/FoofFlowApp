@@ -222,6 +222,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildTarjetasResumen(DashboardViewModel viewModel) {
     final metricas = viewModel.metricasVentas;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     if (metricas == null || metricas['actual'] == null) {
       return const SizedBox.shrink();
@@ -230,12 +231,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final actual = metricas['actual'];
     final variacion = metricas['variacion'];
 
+    // Ajustamos el número de columnas según el ancho de la pantalla
+    int crossAxisCount = 2;
+    if (screenWidth > 900) {
+      crossAxisCount = 4; // 4 tarjetas en una fila para pantallas muy anchas
+    } else if (screenWidth > 600) {
+      crossAxisCount = 3; // 3 tarjetas en una fila para pantallas medianas
+    }
+
     return GridView.count(
-      crossAxisCount: 2,
+      crossAxisCount: crossAxisCount,
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      // Para pantallas anchas, usa un GridView con altura fija
+      childAspectRatio:
+          screenWidth > 600 ? (screenWidth / (150 * crossAxisCount)) : 1.0,
       children: [
         _buildTarjetaResumen(
           'Ingresos',
@@ -281,51 +293,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: isWideScreen ? MainAxisSize.min : MainAxisSize.max,
-          children: [
-            Icon(icono, size: 28, color: color),
-            const SizedBox(height: 4),
-            Text(
-              titulo,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              valor,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  variacion >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
-                  size: 14,
-                  color: variacion >= 0 ? Colors.green : Colors.red,
+      child: Container(
+        constraints:
+            isWideScreen
+                ? const BoxConstraints(maxHeight: 150)
+                : const BoxConstraints(),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: isWideScreen ? MainAxisSize.min : MainAxisSize.max,
+            children: [
+              Icon(icono, size: 28, color: color),
+              const SizedBox(height: 4),
+              Text(
+                titulo,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(width: 2),
-                Flexible(
-                  child: Text(
-                    '${variacion.abs().toStringAsFixed(1)}%',
-                    style: TextStyle(
-                      color: variacion >= 0 ? Colors.green : Colors.red,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                valor,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    variacion >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                    size: 14,
+                    color: variacion >= 0 ? Colors.green : Colors.red,
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(width: 2),
+                  Flexible(
+                    child: Text(
+                      '${variacion.abs().toStringAsFixed(1)}%',
+                      style: TextStyle(
+                        color: variacion >= 0 ? Colors.green : Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
