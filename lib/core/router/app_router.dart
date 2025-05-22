@@ -9,6 +9,9 @@ import '../../features/products/products_view/kitchen_list_screen.dart';
 import '../../features/products/products_view/product_list_screen.dart';
 import '../../features/products/products_view/product_form_screen.dart';
 import '../../features/products/products_view/product_detail_screen.dart';
+import '../../features/warehouse/warehouse_view/warehouse_management_screen.dart';
+import '../../features/warehouse/warehouse_view/inventory_screen_widget.dart';
+import '../../features/warehouse/warehouse_view/modify_by_q_r_screen.dart';
 import '../../main.dart';
 
 class ProductsScreen extends StatelessWidget {
@@ -19,18 +22,6 @@ class ProductsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Productos')),
       body: const Center(child: Text('Pantalla de Productos en desarrollo')),
-    );
-  }
-}
-
-class InventoryScreen extends StatelessWidget {
-  const InventoryScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Almacén')),
-      body: const Center(child: Text('Pantalla de Almacén en desarrollo')),
     );
   }
 }
@@ -170,7 +161,19 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/inventory',
       name: 'inventory',
-      builder: (context, state) => const InventoryScreen(),
+      builder: (context, state) => const WarehouseScreen(),
+      routes: [
+        GoRoute(
+          path: 'list',
+          name: 'inventoryList',
+          builder: (context, state) => const InventoryScreen(),
+        ),
+        GoRoute(
+          path: 'qr',
+          name: 'modifyByQR',
+          builder: (context, state) => const ModifyByQRScreen(),
+        ),
+      ],
     ),
 
     GoRoute(

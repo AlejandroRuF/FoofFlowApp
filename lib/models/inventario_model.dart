@@ -1,4 +1,4 @@
-class Almacen {
+class Inventario {
   final int id;
   final int usuarioId;
   final String usuarioNombre;
@@ -6,7 +6,7 @@ class Almacen {
   final String productoNombre;
   final int stockActual;
 
-  Almacen({
+  Inventario({
     required this.id,
     required this.usuarioId,
     required this.usuarioNombre,
@@ -15,8 +15,8 @@ class Almacen {
     required this.stockActual,
   });
 
-  factory Almacen.fromJson(Map<String, dynamic> json) {
-    return Almacen(
+  factory Inventario.fromJson(Map<String, dynamic> json) {
+    return Inventario(
       id: json['id'],
       usuarioId: json['usuario_id'],
       usuarioNombre: json['usuario_nombre'] ?? '',
