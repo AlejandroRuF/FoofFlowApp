@@ -12,6 +12,7 @@ class Producto {
   final int cocinaCentralId;
   final bool isActive;
   final double precioFinal;
+  final String? imagen;
 
   Producto({
     required this.id,
@@ -27,6 +28,7 @@ class Producto {
     required this.cocinaCentralId,
     required this.isActive,
     required this.precioFinal,
+    this.imagen,
   });
 
   factory Producto.fromJson(Map<String, dynamic> json) {
@@ -44,7 +46,28 @@ class Producto {
       cocinaCentralId: json['cocina_central'],
       isActive: json['is_active'] ?? true,
       precioFinal: double.parse(json['precio_final']?.toString() ?? '0.0'),
+      imagen: json['imagen'],
     );
+  }
+
+  String? getImagenUrlCompleta() {
+    if (imagen != null && imagen!.isNotEmpty) {
+      return imagen;
+    } else if (imagenUrl != null && imagenUrl!.isNotEmpty) {
+      return 'http://192.168.1.130:8000${imagenUrl!}';
+    }
+    return null;
+  }
+
+  String? getImagenQrUrlCompleta() {
+    if (imagenQrUrl != null && imagenQrUrl!.isNotEmpty) {
+      if (imagenQrUrl!.startsWith('http')) {
+        return imagenQrUrl;
+      } else {
+        return 'http://192.168.1.130:8000${imagenQrUrl!}';
+      }
+    }
+    return null;
   }
 
   Map<String, dynamic> toJson() {
@@ -62,6 +85,7 @@ class Producto {
       'cocina_central': cocinaCentralId,
       'is_active': isActive,
       'precio_final': precioFinal,
+      'imagen': imagen,
     };
   }
 }

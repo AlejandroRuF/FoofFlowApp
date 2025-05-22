@@ -281,4 +281,40 @@ class UserSessionService {
       print('Tokens actualizados correctamente');
     }
   }
+
+  Future<User?> obtenerPropietario() async {
+    try {
+      if (_user == null || _user!.propietarioId == null) {
+        return null;
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      final propietarioId = _user!.propietarioId;
+
+      final nombre = prefs.getString('propietario_nombre');
+      final email = prefs.getString('propietario_email');
+      final tipoUsuario = prefs.getString('propietario_tipo_usuario');
+
+      if (nombre != null && email != null && tipoUsuario != null) {
+        return User(
+          id: propietarioId!,
+          nombre: nombre,
+          email: email,
+          tipoUsuario: tipoUsuario,
+        );
+      }
+
+      return User(
+        id: propietarioId!,
+        nombre: 'Propietario',
+        email: 'propietario@example.com',
+        tipoUsuario: 'cocina_central',
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al obtener datos del propietario: $e');
+      }
+      return null;
+    }
+  }
 }

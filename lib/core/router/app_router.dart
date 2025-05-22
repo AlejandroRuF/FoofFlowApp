@@ -5,6 +5,10 @@ import '../../features/dashboard/dashboard_view/dashboard_screen.dart';
 import '../../features/orders/orders_view/order_list_screen.dart';
 import '../../features/orders/orders_view/order_detail_screen.dart';
 import '../../features/orders/orders_view/order_form_screen.dart';
+import '../../features/products/products_view/kitchen_list_screen.dart';
+import '../../features/products/products_view/product_list_screen.dart';
+import '../../features/products/products_view/product_form_screen.dart';
+import '../../features/products/products_view/product_detail_screen.dart';
 import '../../main.dart';
 
 class ProductsScreen extends StatelessWidget {
@@ -120,7 +124,47 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/products',
       name: 'products',
-      builder: (context, state) => const ProductsScreen(),
+      builder: (context, state) => const KitchenListScreen(),
+      routes: [
+        GoRoute(
+          path: 'kitchen/:kitchenId',
+          name: 'productsByKitchen',
+          builder: (context, state) {
+            final kitchenId = state.pathParameters['kitchenId']!;
+            return ProductListScreen(cocinaCentralId: int.parse(kitchenId));
+          },
+        ),
+
+        GoRoute(
+          path: 'all',
+          name: 'allProducts',
+          builder: (context, state) => const ProductListScreen(),
+        ),
+
+        GoRoute(
+          path: 'new',
+          name: 'newProduct',
+          builder: (context, state) => const ProductFormScreen(),
+        ),
+
+        GoRoute(
+          path: 'detail/:productId',
+          name: 'productDetail',
+          builder: (context, state) {
+            final productId = state.pathParameters['productId']!;
+            return ProductDetailScreen(productoId: int.parse(productId));
+          },
+        ),
+
+        GoRoute(
+          path: 'edit/:productId',
+          name: 'editProduct',
+          builder: (context, state) {
+            final productId = state.pathParameters['productId']!;
+            return ProductFormScreen(productoId: int.parse(productId));
+          },
+        ),
+      ],
     ),
 
     GoRoute(
