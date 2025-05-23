@@ -12,26 +12,77 @@ class AppBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    int displayIndex = currentIndex;
+    if (displayIndex > 4) {
+      displayIndex = -1;
+    }
+
     return NavigationBar(
-      selectedIndex: currentIndex,
+      selectedIndex: displayIndex < 0 ? 0 : displayIndex,
+      indicatorColor:
+          displayIndex < 0 ? Colors.transparent : primaryColor.withOpacity(0.2),
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       onDestinationSelected: (index) {
         if (index != currentIndex) {
           onItemSelected(index);
         }
       },
-      destinations: const [
-        NavigationDestination(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-        NavigationDestination(
-          icon: Icon(Icons.outbox_rounded),
-          label: 'Pedidos',
+      destinations: [
+        _buildDestination(
+          context,
+          Icons.dashboard,
+          'Dashboard',
+          0,
+          displayIndex,
         ),
-        NavigationDestination(
-          icon: Icon(Icons.receipt_long),
-          label: 'Productos',
+        _buildDestination(
+          context,
+          Icons.outbox_rounded,
+          'Pedidos',
+          1,
+          displayIndex,
         ),
-        NavigationDestination(icon: Icon(Icons.inventory_2), label: 'Almacén'),
-        NavigationDestination(icon: Icon(Icons.person), label: 'Perfil'),
+        _buildDestination(
+          context,
+          Icons.receipt_long,
+          'Productos',
+          2,
+          displayIndex,
+        ),
+        _buildDestination(
+          context,
+          Icons.inventory_2,
+          'Almacén',
+          3,
+          displayIndex,
+        ),
+        _buildDestination(
+          context,
+          Icons.report_problem,
+          'Incidencias',
+          4,
+          displayIndex,
+        ),
       ],
+    );
+  }
+
+  NavigationDestination _buildDestination(
+    BuildContext context,
+    IconData icon,
+    String label,
+    int index,
+    int currentIndex,
+  ) {
+    final isSelected = index == currentIndex;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
+    return NavigationDestination(
+      icon: Icon(icon, color: isSelected ? primaryColor : null),
+      selectedIcon: Icon(icon, color: primaryColor),
+      label: label,
     );
   }
 }

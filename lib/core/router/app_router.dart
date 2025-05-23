@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/auth/login/login_view/login_screen.dart';
 import '../../features/dashboard/dashboard_view/dashboard_screen.dart';
+import '../../features/incidents/incidents_view/IncidentFormScreen.dart';
+import '../../features/incidents/incidents_view/Incidents_screen.dart';
+import '../../features/incidents/incidents_view/widgets/incident_detail_view.dart';
 import '../../features/orders/orders_view/order_list_screen.dart';
 import '../../features/orders/orders_view/order_detail_screen.dart';
 import '../../features/orders/orders_view/order_form_screen.dart';
@@ -178,6 +181,27 @@ final GoRouter appRouter = GoRouter(
             final usuario = state.extra as dynamic;
             return EditProfileScreen(usuario: usuario);
           },
+        ),
+      ],
+    ),
+
+    GoRoute(
+      path: '/incidents',
+      name: 'incidents',
+      builder: (context, state) => const IncidentsScreen(),
+      routes: [
+        GoRoute(
+          path: 'detail/:id',
+          name: 'incidentDetail',
+          builder: (context, state) {
+            final incidenciaId = state.pathParameters['id']!;
+            return IncidentDetailScreen(incidenciaId: int.parse(incidenciaId));
+          },
+        ),
+        GoRoute(
+          path: 'new',
+          name: 'newIncident',
+          builder: (context, state) => const IncidentFormScreen(),
         ),
       ],
     ),

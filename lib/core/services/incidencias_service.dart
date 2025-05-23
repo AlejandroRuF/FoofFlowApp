@@ -199,4 +199,34 @@ class IncidenciasService {
       };
     }
   }
+
+  Future<bool> marcarComoResuelta(int incidenciaId) async {
+    try {
+      final response = await ApiServices.dio.patch(
+        '${ApiEndpoints.incidencias}$incidenciaId/',
+        data: {'estado': 'resuelta'},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al marcar incidencia como resuelta: $e');
+      }
+      return false;
+    }
+  }
+
+  Future<bool> cancelarIncidencia(int incidenciaId) async {
+    try {
+      final response = await ApiServices.dio.patch(
+        '${ApiEndpoints.incidencias}$incidenciaId/',
+        data: {'estado': 'cancelada'},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al cancelar incidencia: $e');
+      }
+      return false;
+    }
+  }
 }

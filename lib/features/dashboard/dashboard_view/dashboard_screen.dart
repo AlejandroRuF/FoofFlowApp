@@ -33,54 +33,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return ResponsiveScaffold(
       title: 'FoodFlow - Dashboard',
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.logout),
-          onPressed: () async {
-            final confirm = await showDialog<bool>(
-              context: context,
-              builder:
-                  (context) => AlertDialog(
-                    title: const Text('Cerrar sesión'),
-                    content: const Text(
-                      '¿Estás seguro de que quieres cerrar sesión?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('Cancelar'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        child: const Text('Cerrar sesión'),
-                      ),
-                    ],
-                  ),
-            );
-
-            if (confirm == true) {
-              final loginViewModel = Provider.of<LoginViewModel>(
-                context,
-                listen: false,
-              );
-              final success = await loginViewModel.logout();
-
-              if (success) {
-                context.go('/login');
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      loginViewModel.errorMessage ?? 'Error al cerrar sesión',
-                    ),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            }
-          },
-        ),
-      ],
       body: _buildBody(),
     );
   }

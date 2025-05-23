@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:foodflow_app/features/auth/login/login_viewmodel/login_viewmodel.dart';
 import 'package:foodflow_app/features/shared/widgets/app_bottom_navigation_bar.dart';
 import 'package:foodflow_app/features/shared/widgets/main_navigator_bar.dart';
 
@@ -39,6 +41,30 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
     _currentIndex = widget.initialIndex;
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateCurrentIndex();
+  }
+
+  void _updateCurrentIndex() {
+    final currentLocation = GoRouterState.of(context).matchedLocation;
+
+    if (currentLocation.startsWith('/dashboard')) {
+      _currentIndex = 0;
+    } else if (currentLocation.startsWith('/orders')) {
+      _currentIndex = 1;
+    } else if (currentLocation.startsWith('/products')) {
+      _currentIndex = 2;
+    } else if (currentLocation.startsWith('/inventory')) {
+      _currentIndex = 3;
+    } else if (currentLocation.startsWith('/incidents')) {
+      _currentIndex = 4;
+    } else if (currentLocation.startsWith('/profile')) {
+      _currentIndex = 5;
+    } else {}
+  }
+
   void _onItemSelected(int index) {
     setState(() {
       _currentIndex = index;
@@ -58,8 +84,57 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
         context.go('/inventory');
         break;
       case 4:
+        context.go('/incidents');
+        break;
+      case 5:
         context.go('/profile');
         break;
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Cerrar sesión'),
+            content: const Text('¿Estás seguro de que quieres cerrar sesión?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Cerrar sesión'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirm == true) {
+      final loginViewModel = Provider.of<LoginViewModel>(
+        context,
+        listen: false,
+      );
+      final success = await loginViewModel.logout();
+
+      if (success) {
+        if (mounted) {
+          context.go('/login');
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                loginViewModel.errorMessage ?? 'Error al cerrar sesión',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -73,15 +148,39 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
       '/orders',
       '/products',
       '/inventory',
+      '/incidents',
       '/profile',
     ].contains(currentLocation);
     final shouldShowBackButton = (!isMainRoute || widget.showBackButton);
+    final List<Widget> appBarActions = [];
+
+    if (isSmallScreen) {
+      appBarActions.add(
+        IconButton(
+          icon: const Icon(Icons.person),
+          tooltip: 'Perfil',
+          onPressed: () => context.go('/profile'),
+        ),
+      );
+    }
+
+    appBarActions.add(
+      IconButton(
+        icon: const Icon(Icons.logout),
+        tooltip: 'Cerrar sesión',
+        onPressed: _handleLogout,
+      ),
+    );
+
+    if (widget.actions != null) {
+      appBarActions.addAll(widget.actions!);
+    }
 
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text(widget.title),
-        actions: widget.actions,
+        actions: appBarActions,
         leading:
             isSmallScreen
                 ? shouldShowBackButton

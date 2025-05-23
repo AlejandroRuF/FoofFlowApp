@@ -15,6 +15,9 @@ class MainNavigatorBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final int safeIndex =
+        currentIndex >= 0 && currentIndex <= 5 ? currentIndex : 0;
+
     return Drawer(
       child: Column(
         children: [
@@ -28,35 +31,42 @@ class MainNavigatorBar extends StatelessWidget {
                   title: 'Dashboard',
                   icon: Icons.dashboard,
                   index: 0,
-                  isSelected: currentIndex == 0,
+                  isSelected: safeIndex == 0,
                 ),
                 _buildMenuItem(
                   context,
                   title: 'Pedidos',
                   icon: Icons.outbox_rounded,
                   index: 1,
-                  isSelected: currentIndex == 1,
+                  isSelected: safeIndex == 1,
                 ),
                 _buildMenuItem(
                   context,
                   title: 'Productos',
                   icon: Icons.receipt_long,
                   index: 2,
-                  isSelected: currentIndex == 2,
+                  isSelected: safeIndex == 2,
                 ),
                 _buildMenuItem(
                   context,
                   title: 'Almacén',
                   icon: Icons.inventory_2,
                   index: 3,
-                  isSelected: currentIndex == 3,
+                  isSelected: safeIndex == 3,
+                ),
+                _buildMenuItem(
+                  context,
+                  title: 'Incidencias',
+                  icon: Icons.report_problem,
+                  index: 4,
+                  isSelected: safeIndex == 4,
                 ),
                 _buildMenuItem(
                   context,
                   title: 'Perfil',
                   icon: Icons.person,
-                  index: 4,
-                  isSelected: currentIndex == 4,
+                  index: 5,
+                  isSelected: safeIndex == 5,
                 ),
               ],
             ),

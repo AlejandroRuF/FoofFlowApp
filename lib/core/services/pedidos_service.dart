@@ -134,4 +134,26 @@ class PedidosService {
       };
     }
   }
+
+  Future<List<PedidoProducto>> obtenerProductosPedido(int pedidoId) async {
+    try {
+      final response = await ApiServices.dio.get(
+        '${ApiEndpoints.pedidoProductos}?pedido_id=$pedidoId',
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> productosData = response.data;
+        return productosData
+            .map((producto) => PedidoProducto.fromJson(producto))
+            .toList();
+      }
+
+      return [];
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al obtener productos del pedido: $e');
+      }
+      return [];
+    }
+  }
 }
