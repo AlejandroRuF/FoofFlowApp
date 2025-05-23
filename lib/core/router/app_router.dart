@@ -12,6 +12,8 @@ import '../../features/products/products_view/product_detail_screen.dart';
 import '../../features/warehouse/warehouse_view/warehouse_management_screen.dart';
 import '../../features/warehouse/warehouse_view/inventory_screen_widget.dart';
 import '../../features/warehouse/warehouse_view/modify_by_q_r_screen.dart';
+import '../../features/profile/profile_view/profile_screen.dart';
+import '../../features/profile/profile_view/edit_profile_screen.dart';
 import '../../main.dart';
 
 class ProductsScreen extends StatelessWidget {
@@ -22,18 +24,6 @@ class ProductsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Productos')),
       body: const Center(child: Text('Pantalla de Productos en desarrollo')),
-    );
-  }
-}
-
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Perfil')),
-      body: const Center(child: Text('Pantalla de Perfil en desarrollo')),
     );
   }
 }
@@ -180,6 +170,16 @@ final GoRouter appRouter = GoRouter(
       path: '/profile',
       name: 'profile',
       builder: (context, state) => const ProfileScreen(),
+      routes: [
+        GoRoute(
+          path: 'edit',
+          name: 'editProfile',
+          builder: (context, state) {
+            final usuario = state.extra as dynamic;
+            return EditProfileScreen(usuario: usuario);
+          },
+        ),
+      ],
     ),
   ],
 );
