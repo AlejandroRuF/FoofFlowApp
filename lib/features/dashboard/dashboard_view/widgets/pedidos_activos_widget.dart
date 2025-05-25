@@ -71,7 +71,9 @@ class PedidosActivosWidget extends StatelessWidget {
   }
 
   Widget _buildPedidosList(BuildContext context) {
-    final listaPedidos = pedidos['lista'] as List? ?? [];
+    final listaPedidosRaw = pedidos['lista'];
+    final List<dynamic> listaPedidos =
+        (listaPedidosRaw is List) ? listaPedidosRaw : [];
 
     if (listaPedidos.isEmpty) {
       return const Center(
@@ -88,14 +90,18 @@ class PedidosActivosWidget extends StatelessWidget {
         itemCount: listaPedidos.length,
         itemBuilder: (context, index) {
           final pedido = listaPedidos[index];
-          return _buildPedidoItem(pedido);
+          if (pedido is Map<String, dynamic>) {
+            return _buildPedidoItem(pedido);
+          } else {
+            return const SizedBox.shrink();
+          }
         },
       ),
     );
   }
 
   Widget _buildPedidoItem(Map<String, dynamic> pedido) {
-    final esAdmin = tipoUsuario == 'administrador';
+    final esAdmin = tipoUsuario.toLowerCase() == 'administrador';
 
     String clienteTexto = pedido['cliente'] ?? 'Cliente';
     String proveedorTexto = '';
@@ -104,8 +110,8 @@ class PedidosActivosWidget extends StatelessWidget {
       clienteTexto = 'Cliente: ${pedido['cliente'] ?? 'Cliente'}';
       proveedorTexto = 'Proveedor: ${pedido['proveedor'] ?? 'Proveedor'}';
     } else {
-      final int? pedidoClienteId = pedido['cliente_id'];
-      final int? pedidoProveedorId = pedido['proveedor_id'];
+      final int? pedidoClienteId = _parseIntSafe(pedido['cliente_id']);
+      final int? pedidoProveedorId = _parseIntSafe(pedido['proveedor_id']);
 
       if (usuarioId != null) {
         if (usuarioId == pedidoClienteId) {
@@ -115,6 +121,9 @@ class PedidosActivosWidget extends StatelessWidget {
         }
       }
     }
+
+    double totalDouble = _parseDoubleSafe(pedido['total']) ?? 0.0;
+    String totalTexto = totalDouble.toStringAsFixed(2);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -137,7 +146,7 @@ class PedidosActivosWidget extends StatelessWidget {
             if (esAdmin && proveedorTexto.isNotEmpty) Text(proveedorTexto),
             const SizedBox(height: 4),
             Text('Fecha: ${pedido['fecha'] ?? '--/--/----'}'),
-            Text('Total: ${pedido['total']?.toStringAsFixed(2) ?? '0.00'} €'),
+            Text('Total: $totalTexto €'),
           ],
         ),
         trailing: Chip(
@@ -156,7 +165,7 @@ class PedidosActivosWidget extends StatelessWidget {
   }
 
   Color _getColorEstado(String? estado) {
-    switch (estado?.toLowerCase()) {
+    switch (estado?.toLowerCase().trim()) {
       case 'pendiente':
         return Colors.orange;
       case 'en proceso':
@@ -212,5 +221,20 @@ class PedidosActivosWidget extends StatelessWidget {
         Text(titulo, style: const TextStyle(fontSize: 12)),
       ],
     );
+  }
+
+  int? _parseIntSafe(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  double? _parseDoubleSafe(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
   }
 }

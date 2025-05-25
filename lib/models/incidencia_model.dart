@@ -1,8 +1,11 @@
+import 'producto_model.dart';
+
 class Incidencia {
   final int id;
   final int pedidoId;
   final int productoId;
   final String productoNombre;
+  final Producto? producto; // Nuevo: objeto anidado producto (opcional)
   final int nuevaCantidad;
   final String descripcion;
   final String estado;
@@ -12,15 +15,21 @@ class Incidencia {
   final String? reportadoPorEmail;
   final String fechaReporte;
   final String? fechaResolucion;
-
   final String? clienteNombre;
   final String? proveedorNombre;
+
+  // Nuevos campos de la API
+  final int? restauranteId;
+  final String? restauranteNombre;
+  final int? cocinaCentralId;
+  final String? cocinaCentralNombre;
 
   Incidencia({
     required this.id,
     required this.pedidoId,
     required this.productoId,
     required this.productoNombre,
+    this.producto,
     required this.nuevaCantidad,
     required this.descripcion,
     required this.estado,
@@ -32,14 +41,33 @@ class Incidencia {
     this.fechaResolucion,
     this.clienteNombre,
     this.proveedorNombre,
+    this.restauranteId,
+    this.restauranteNombre,
+    this.cocinaCentralId,
+    this.cocinaCentralNombre,
   });
 
   factory Incidencia.fromJson(Map<String, dynamic> json) {
+    Producto? productoObj;
+    int? productoId;
+    String? productoNombre;
+
+    // Si producto es objeto (nuevo formato), sino es ID (viejo formato)
+    if (json['producto'] is Map) {
+      productoObj = Producto.fromJson(json['producto']);
+      productoId = json['producto']['id'] ?? 0;
+      productoNombre = json['producto']['nombre'] ?? '';
+    } else {
+      productoId = json['producto'];
+      productoNombre = json['producto_nombre'] ?? '';
+    }
+
     return Incidencia(
       id: json['id'],
       pedidoId: json['pedido_id'] ?? json['pedido'],
-      productoId: json['producto'],
-      productoNombre: json['producto_nombre'] ?? '',
+      productoId: productoId ?? 0,
+      productoNombre: productoNombre ?? '',
+      producto: productoObj,
       nuevaCantidad: json['nueva_cantidad'],
       descripcion: json['descripcion'],
       estado: json['estado'],
@@ -52,6 +80,10 @@ class Incidencia {
       fechaResolucion: json['fecha_resolucion'],
       clienteNombre: json['cliente_nombre'],
       proveedorNombre: json['proveedor_nombre'],
+      restauranteId: json['restaurante_id'],
+      restauranteNombre: json['restaurante_nombre'],
+      cocinaCentralId: json['cocina_central_id'],
+      cocinaCentralNombre: json['cocina_central_nombre'],
     );
   }
 
@@ -59,8 +91,8 @@ class Incidencia {
     return {
       'id': id,
       'pedido': pedidoId,
-      'producto': productoId,
-      'producto_nombre': productoNombre,
+      'producto': producto != null ? producto!.toJson() : productoId,
+      'producto_nombre': producto != null ? producto!.nombre : productoNombre,
       'nueva_cantidad': nuevaCantidad,
       'descripcion': descripcion,
       'estado': estado,
@@ -72,6 +104,10 @@ class Incidencia {
       'fecha_resolucion': fechaResolucion,
       'cliente_nombre': clienteNombre,
       'proveedor_nombre': proveedorNombre,
+      'restaurante_id': restauranteId,
+      'restaurante_nombre': restauranteNombre,
+      'cocina_central_id': cocinaCentralId,
+      'cocina_central_nombre': cocinaCentralNombre,
     };
   }
 
@@ -90,6 +126,8 @@ class Incidencia {
       'reportado_por_nombre': reportadoPorNombre,
       'cliente_nombre': clienteNombre,
       'proveedor_nombre': proveedorNombre,
+      'restaurante_nombre': restauranteNombre,
+      'cocina_central_nombre': cocinaCentralNombre,
       'prioridad': _determinarPrioridad(),
     };
   }

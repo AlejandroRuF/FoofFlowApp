@@ -2,16 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/core/constants/api_endpoints.dart';
 import 'package:foodflow_app/core/services/api_services.dart';
-import 'package:foodflow_app/core/services/pedidos_service.dart';
 import 'package:foodflow_app/models/incidencia_model.dart';
-import 'package:foodflow_app/models/pedido_model.dart';
 
 class IncidenciasService {
   static final IncidenciasService _instance = IncidenciasService._internal();
   factory IncidenciasService() => _instance;
   IncidenciasService._internal();
-
-  final _pedidosService = PedidosService();
 
   Future<List<Incidencia>> obtenerIncidencias({
     Map<String, dynamic>? filtros,
@@ -32,36 +28,13 @@ class IncidenciasService {
       if (response.statusCode == 200) {
         final List<dynamic> incidenciasData = response.data;
 
-        final List<Incidencia> incidencias = [];
+        // Ya no hace falta enriquecer, toda la info viene en la respuesta
+        final incidencias =
+            incidenciasData
+                .map((incidenciaData) => Incidencia.fromJson(incidenciaData))
+                .toList();
 
-        for (var incidenciaData in incidenciasData) {
-          final incidencia = Incidencia.fromJson(incidenciaData);
-
-          try {
-            final pedido = await _pedidosService.obtenerPedidoDetalle(
-              incidencia.pedidoId,
-            );
-            if (pedido != null) {
-              var incidenciaActualizada = Map<String, dynamic>.from(
-                incidenciaData,
-              );
-              incidenciaActualizada['cliente_nombre'] =
-                  pedido.restauranteNombre;
-              incidenciaActualizada['proveedor_nombre'] =
-                  pedido.cocinaCentralNombre;
-
-              incidencias.add(Incidencia.fromJson(incidenciaActualizada));
-            }
-          } catch (e) {
-            if (kDebugMode) {
-              print(
-                'Error al obtener detalles del pedido para la incidencia: $e',
-              );
-            }
-          }
-        }
-
-        return incidencias;
+        return List<Incidencia>.from(incidencias);
       }
 
       return [];
@@ -82,22 +55,7 @@ class IncidenciasService {
       if (response.statusCode == 200) {
         final incidenciaData = response.data;
 
-        try {
-          final pedidoId = incidenciaData['pedido'];
-          final pedido = await _pedidosService.obtenerPedidoDetalle(pedidoId);
-
-          if (pedido != null) {
-            incidenciaData['cliente_nombre'] = pedido.restauranteNombre;
-            incidenciaData['proveedor_nombre'] = pedido.cocinaCentralNombre;
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            print(
-              'Error al obtener detalles del pedido para la incidencia: $e',
-            );
-          }
-        }
-
+        // Toda la info viene ya en el detalle
         return Incidencia.fromJson(incidenciaData);
       }
 

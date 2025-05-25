@@ -13,6 +13,18 @@ class DashboardInteractor {
   final _inventarioService = InventarioService();
   final _incidenciasService = IncidenciasService();
 
+  Map<String, dynamic>? _cachePedidosActivos;
+  DateTime? _cacheTimestampPedidos;
+  final Duration _cacheDuration = Duration(minutes: 2);
+
+  bool _isCachePedidosValido() {
+    if (_cachePedidosActivos == null || _cacheTimestampPedidos == null) {
+      return false;
+    }
+    final diferencia = DateTime.now().difference(_cacheTimestampPedidos!);
+    return diferencia < _cacheDuration;
+  }
+
   Future<Map<String, dynamic>> obtenerDatosDashboard() async {
     try {
       final User? currentUser = _sessionService.user;
@@ -36,13 +48,31 @@ class DashboardInteractor {
       resultado['metricas_ventas'] = await _metricasMockService
           .obtenerResumenMetricasMock(usuarioId);
 
+      // Uso de cache para pedidos activos
+      if (_isCachePedidosValido()) {
+        if (kDebugMode) {
+          print('Usando cache de pedidos activos en DashboardInteractor');
+        }
+        resultado['pedidos_activos'] = _cachePedidosActivos;
+      } else {
+        if (tipoUsuario == 'administrador' ||
+            tipoUsuario == 'restaurante' ||
+            tipoUsuario == 'cocina_central' ||
+            (tipoUsuario == 'empleado' &&
+                (_sessionService.permisos?.puedeVerPedidos ?? false))) {
+          final pedidosActivos =
+              await _pedidosService.obtenerResumenPedidosDashboard();
+          _cachePedidosActivos = pedidosActivos;
+          _cacheTimestampPedidos = DateTime.now();
+          resultado['pedidos_activos'] = pedidosActivos;
+        }
+      }
+
       switch (tipoUsuario) {
         case 'administrador':
         case 'restaurante':
           resultado['previsiones_demanda'] = await _metricasMockService
               .obtenerResumenPrevisionesMock(usuarioId);
-          resultado['pedidos_activos'] =
-              await _pedidosService.obtenerResumenPedidosDashboard();
           resultado['inventario'] =
               await _inventarioService.obtenerResumenInventarioDashboard();
           resultado['incidencias'] =
@@ -50,8 +80,6 @@ class DashboardInteractor {
           break;
 
         case 'cocina_central':
-          resultado['pedidos_activos'] =
-              await _pedidosService.obtenerResumenPedidosDashboard();
           resultado['inventario'] =
               await _inventarioService.obtenerResumenInventarioDashboard();
           resultado['incidencias'] =
@@ -59,11 +87,6 @@ class DashboardInteractor {
           break;
 
         case 'empleado':
-          if (_sessionService.permisos?.puedeVerPedidos ?? false) {
-            resultado['pedidos_activos'] =
-                await _pedidosService.obtenerResumenPedidosDashboard();
-          }
-
           final permisos = _sessionService.permisos;
           final puedeVerProductos = permisos?.puedeVerProductos ?? false;
           final puedeVerAlmacenes = permisos?.puedeVerAlmacenes ?? false;
@@ -106,6 +129,9 @@ class DashboardInteractor {
   }
 
   Future<Map<String, dynamic>> recargarDatosDashboard() async {
+    // Limpiamos cache de pedidos para forzar recarga
+    _cachePedidosActivos = null;
+    _cacheTimestampPedidos = null;
     return await obtenerDatosDashboard();
   }
 }
