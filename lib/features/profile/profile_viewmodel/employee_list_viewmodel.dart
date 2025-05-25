@@ -1,24 +1,38 @@
 import 'package:flutter/material.dart';
 import '../profile_interactor/profile_interactor.dart';
 import '../profile_model/Profile_management_model.dart';
+import 'package:foodflow_app/models/user_model.dart';
 
 class EmployeeListViewModel extends ChangeNotifier {
   final ProfileInteractor _interactor = ProfileInteractor();
 
   bool _isLoading = false;
   String? _error;
-  List<EmployeeItem> _employees = [];
+  List<User> _employees = [];
   Map<int, Map<String, bool>> _employeePermissions = {};
   bool _permissionsChanged = false;
+  final Set<int> _empleadosModificados =
+      {}; // MODIFICADO: usar para filtrar PATCH
 
   bool get isLoading => _isLoading;
   String? get error => _error;
-  List<EmployeeItem> get employees => _employees;
+  List<User> get employees => _employees;
   Map<int, Map<String, bool>> get employeePermissions => _employeePermissions;
   bool get permissionsChanged => _permissionsChanged;
   List<PermissionCategory> get categoriasPermisos =>
       _interactor.obtenerCategoriasPermisos();
-  final Set<int> _empleadosModificados = {};
+
+  List<EmployeeItem> get employeesUI =>
+      _employees
+          .map(
+            (user) => EmployeeItem(
+              id: user.id,
+              nombre: user.nombre,
+              email: user.email,
+              imagen: user.imagen,
+            ),
+          )
+          .toList();
 
   EmployeeListViewModel() {
     cargarDatos();
@@ -30,19 +44,21 @@ class EmployeeListViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final empleados = await _interactor.obtenerEmpleados();
+      final empleados =
+          await _interactor.obtenerEmpleados(); // ahora List<User>
 
       final Map<int, Map<String, bool>> permisosMap = {};
       for (var empleado in empleados) {
-        final permisos = await _interactor.obtenerPermisosEmpleado(empleado.id);
+        final permisos = _interactor.obtenerPermisosEmpleado(empleado);
         if (permisos != null) {
           permisosMap[empleado.id] = permisos;
         }
       }
 
-      _employees = empleados;
+      _employees = empleados; // ahora es List<User>
       _employeePermissions = permisosMap;
       _permissionsChanged = false;
+      _empleadosModificados.clear(); // limpiar modificados al cargar de nuevo
     } catch (e) {
       _error = 'Error al cargar empleados: $e';
     } finally {
@@ -67,6 +83,7 @@ class EmployeeListViewModel extends ChangeNotifier {
 
     _employeePermissions = nuevosPermisos;
     _permissionsChanged = true;
+    _empleadosModificados.add(empleadoId); // MODIFICADO: marcar como cambiado
     notifyListeners();
   }
 
@@ -78,7 +95,8 @@ class EmployeeListViewModel extends ChangeNotifier {
     try {
       bool todoCorrecto = true;
 
-      for (final empleadoId in _employeePermissions.keys) {
+      // MODIFICADO: solo guarda empleados modificados
+      for (final empleadoId in _empleadosModificados) {
         final permisos = _employeePermissions[empleadoId]!;
         final exito = await _interactor.actualizarPermisosEmpleado(
           empleadoId,
@@ -91,6 +109,7 @@ class EmployeeListViewModel extends ChangeNotifier {
       }
 
       _permissionsChanged = false;
+      _empleadosModificados.clear(); // limpiar modificados tras guardar
 
       if (!todoCorrecto) {
         _error = 'Error al guardar algunos permisos';
@@ -104,5 +123,15 @@ class EmployeeListViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+}
+
+extension _IterableMap<K, V> on Iterable<MapEntry<K, V>?> {
+  Map<K, V> toMap() {
+    final map = <K, V>{};
+    for (final e in this) {
+      if (e != null) map[e.key] = e.value;
+    }
+    return map;
   }
 }

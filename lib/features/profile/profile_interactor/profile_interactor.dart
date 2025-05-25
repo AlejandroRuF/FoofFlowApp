@@ -52,31 +52,22 @@ class ProfileInteractor {
     }
   }
 
-  Future<List<EmployeeItem>> obtenerEmpleados() async {
+  Future<List<User>> obtenerEmpleados() async {
     try {
       final user = _userSessionService.user;
       if (user == null || !esResponsable()) return [];
 
       final empleados = await _userService.obtenerEmpleados(user.id);
-      return empleados
-          .where((user) => user.tipoUsuario == 'empleado')
-          .map(
-            (user) => EmployeeItem(
-              id: user.id,
-              nombre: user.nombre,
-              email: user.email,
-              imagen: user.imagen,
-            ),
-          )
-          .toList();
+      return empleados.where((user) => user.tipoUsuario == 'empleado').toList();
     } catch (e) {
       return [];
     }
   }
 
-  Future<Map<String, bool>?> obtenerPermisosEmpleado(int empleadoId) async {
+  // Cambiado: recibe el objeto User y NO hace llamada extra
+  Map<String, bool>? obtenerPermisosEmpleado(User empleado) {
     try {
-      final permisos = await _userService.obtenerPermisosUsuario(empleadoId);
+      final permisos = empleado.permisos;
       if (permisos == null) return null;
 
       return {

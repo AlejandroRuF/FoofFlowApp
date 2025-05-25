@@ -8,6 +8,7 @@ import '../profile_model/Profile_management_model.dart';
 class ProfileViewModel extends ChangeNotifier {
   final ProfileInteractor _interactor = ProfileInteractor();
   ProfileModel _state = ProfileModel();
+  final Set<int> _empleadosModificados = {}; // MODIFICADO
 
   ProfileViewModel() {
     _inicializar();
@@ -39,21 +40,35 @@ class ProfileViewModel extends ChangeNotifier {
 
   Future<void> _cargarEmpleados() async {
     try {
-      final empleados = await _interactor.obtenerEmpleados();
+      final empleados = await _interactor.obtenerEmpleados(); // List<User>
 
       final Map<int, Map<String, bool>> permisosMap = {};
       for (var empleado in empleados) {
-        final permisos = await _interactor.obtenerPermisosEmpleado(empleado.id);
+        final permisos = _interactor.obtenerPermisosEmpleado(empleado);
         if (permisos != null) {
           permisosMap[empleado.id] = permisos;
         }
       }
 
+      final empleadosUI =
+          empleados
+              .map(
+                (user) => EmployeeItem(
+                  id: user.id,
+                  nombre: user.nombre,
+                  email: user.email,
+                  imagen: user.imagen,
+                ),
+              )
+              .toList();
+
       _actualizarEstado(
-        employees: empleados,
+        employees: empleadosUI,
         employeePermissions: permisosMap,
         permissionsChanged: false,
       );
+      _empleadosModificados
+          .clear(); // MODIFICADO: limpiar modificados al cargar
     } catch (e) {
       _actualizarEstado(error: 'Error al cargar empleados: $e');
     }
@@ -210,6 +225,9 @@ class ProfileViewModel extends ChangeNotifier {
     nuevosPermisos[empleadoId] = Map<String, bool>.from(permisoActual);
     nuevosPermisos[empleadoId]![permissionKey] = value;
 
+    _empleadosModificados.add(
+      empleadoId,
+    ); // MODIFICADO: marcar empleado modificado
     _actualizarEstado(
       employeePermissions: nuevosPermisos,
       permissionsChanged: true,
@@ -222,7 +240,8 @@ class ProfileViewModel extends ChangeNotifier {
     try {
       bool todoCorrecto = true;
 
-      for (final empleadoId in state.employeePermissions.keys) {
+      // MODIFICADO: solo guarda empleados modificados
+      for (final empleadoId in _empleadosModificados) {
         final permisos = state.employeePermissions[empleadoId]!;
         final exito = await _interactor.actualizarPermisosEmpleado(
           empleadoId,
@@ -233,6 +252,8 @@ class ProfileViewModel extends ChangeNotifier {
           todoCorrecto = false;
         }
       }
+
+      _empleadosModificados.clear(); // limpiar modificados tras guardar
 
       _actualizarEstado(
         isSaving: false,

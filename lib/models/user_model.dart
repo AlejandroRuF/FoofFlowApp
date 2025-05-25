@@ -1,42 +1,59 @@
+import 'package:foodflow_app/models/permisos_empleado_model.dart';
+
 class User {
   final int id;
   final String email;
   final String nombre;
   final String tipoUsuario;
-  final String? imagenPerfil;
-  final String? telefono;
   final String? direccion;
-  final String? empresaAsociada;
+  final String? telefono;
   final String? fechaCreacion;
-  final Map<String, dynamic>? permisos;
+  final bool isActive;
+  final bool isStaff;
+  final bool isSuperuser;
+  final String? empresaAsociada;
+  final String? imagen;
+  final int? propietarioId;
+  final int? empleadorId;
+  final PermisosEmpleado? permisos;
 
   User({
     required this.id,
     required this.email,
     required this.nombre,
     required this.tipoUsuario,
-    this.imagenPerfil,
-    this.telefono,
     this.direccion,
-    this.empresaAsociada,
+    this.telefono,
     this.fechaCreacion,
+    this.isActive = true,
+    this.isStaff = false,
+    this.isSuperuser = false,
+    this.empresaAsociada,
+    this.imagen,
+    this.propietarioId,
+    this.empleadorId,
     this.permisos,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] ?? json['usuario_id'] ?? 0,
-      email: json['email'] ?? '',
-      nombre: json['nombre'] ?? '',
-      tipoUsuario: json['tipo_usuario'] ?? '',
-      imagenPerfil: json['imagen_perfil'],
-      telefono: json['telefono'],
+      id: json['usuario_id'] ?? json['id'],
+      email: json['email'],
+      nombre: json['nombre'],
+      tipoUsuario: json['tipo_usuario'],
       direccion: json['direccion'],
-      empresaAsociada: json['empresa_asociada'],
+      telefono: json['telefono'],
       fechaCreacion: json['fecha_creacion'],
+      isActive: json['is_active'] ?? true,
+      isStaff: json['is_staff'] ?? false,
+      isSuperuser: json['is_superuser'] ?? false,
+      empresaAsociada: json['empresa_asociada'],
+      imagen: json['imagen'],
+      propietarioId: json['propietario'],
+      empleadorId: json['empleador_id'],
       permisos:
           json['permisos'] != null
-              ? Map<String, dynamic>.from(json['permisos'])
+              ? PermisosEmpleado.fromJson(json['permisos'])
               : null,
     );
   }
@@ -47,23 +64,19 @@ class User {
       'email': email,
       'nombre': nombre,
       'tipo_usuario': tipoUsuario,
-      'imagen_perfil': imagenPerfil,
-      'telefono': telefono,
       'direccion': direccion,
-      'empresa_asociada': empresaAsociada,
+      'telefono': telefono,
       'fecha_creacion': fechaCreacion,
-      'permisos': permisos,
+      'is_active': isActive,
+      'is_staff': isStaff,
+      'is_superuser': isSuperuser,
+      'empresa_asociada': empresaAsociada,
+      'imagen': imagen,
+      'propietario': propietarioId,
+      'empleador_id': empleadorId,
+      'permisos': permisos?.toJson(),
     };
   }
 
-  bool esEmpleado() {
-    return tipoUsuario == 'empleado';
-  }
-
-  bool tienePermiso(String permiso) {
-    if (!esEmpleado() || permisos == null) {
-      return true; // Los no empleados tienen todos los permisos por defecto
-    }
-    return permisos![permiso] == true;
-  }
+  bool get esEmpleado => tipoUsuario == 'empleado';
 }
