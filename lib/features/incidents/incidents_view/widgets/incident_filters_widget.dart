@@ -18,10 +18,29 @@ class _IncidentFiltersWidgetState extends State<IncidentFiltersWidget> {
   bool _filtersExpanded = false;
   final TextEditingController _searchController = TextEditingController();
 
+  List<Producto> _productos = [];
+  bool _productosCargados = false;
+
   @override
   void initState() {
     super.initState();
     _searchController.text = '';
+    _cargarProductos();
+  }
+
+  Future<void> _cargarProductos() async {
+    // Si tu viewModel expone un método para obtener productos, úsalo aquí.
+    // Si no, deberías adaptar el viewModel para exponerlo.
+    if (mounted) {
+      // Puedes comentar esta sección si no tienes muchos productos
+      // y no quieres cargar la lista.
+      // final productos = await widget.viewModel.obtenerProductos();
+      // setState(() {
+      //   _productos = productos;
+      //   _productosCargados = true;
+      // });
+      _productosCargados = true;
+    }
   }
 
   @override
@@ -84,6 +103,8 @@ class _IncidentFiltersWidgetState extends State<IncidentFiltersWidget> {
         _buildEstadoFilter(),
         const SizedBox(height: 8),
         _buildPedidoFilter(),
+        const SizedBox(height: 8),
+        _buildProductoFilter(),
         const SizedBox(height: 8),
         _buildFechaFilters(),
         const SizedBox(height: 16),
@@ -162,6 +183,35 @@ class _IncidentFiltersWidgetState extends State<IncidentFiltersWidget> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildProductoFilter() {
+    // Este filtro sólo se muestra si tienes la lista de productos cargada;
+    // puedes adaptarlo a tu lógica real de negocio (o eliminarlo si no lo usas).
+    // Para una app grande, mejor paginar/autocompletar el selector.
+    return DropdownButtonFormField<int?>(
+      decoration: const InputDecoration(
+        labelText: 'Producto',
+        border: OutlineInputBorder(),
+      ),
+      value: widget.viewModel.filtrosActivos['producto_id'] as int?,
+      onChanged: (int? value) {
+        widget.viewModel.establecerProductoFiltro(value);
+      },
+      items: [
+        const DropdownMenuItem<int?>(
+          value: null,
+          child: Text('Todos los productos'),
+        ),
+        ..._productos.map((producto) {
+          final nombreProducto = producto.nombre;
+          return DropdownMenuItem<int>(
+            value: producto.id,
+            child: Text(nombreProducto),
+          );
+        }),
+      ],
     );
   }
 

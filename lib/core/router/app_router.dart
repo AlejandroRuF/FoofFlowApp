@@ -6,7 +6,7 @@ import '../../features/cart/cart_view/cart_list_screen.dart';
 import '../../features/dashboard/dashboard_view/dashboard_screen.dart';
 import '../../features/incidents/incidents_view/IncidentFormScreen.dart';
 import '../../features/incidents/incidents_view/Incidents_screen.dart';
-import '../../features/incidents/incidents_view/widgets/incident_detail_view.dart';
+import '../../features/incidents/incidents_view/incident_detail_screen.dart';
 import '../../features/orders/orders_view/order_list_screen.dart';
 import '../../features/orders/orders_view/order_detail_screen.dart';
 import '../../features/orders/orders_view/order_form_screen.dart';

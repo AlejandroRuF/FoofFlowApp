@@ -74,6 +74,10 @@ class IncidentDetailScreen extends StatelessWidget {
       fechaResolucionFormateada = dateFormatter.format(fechaResolucion);
     }
 
+    // Usar nombre de producto preferentemente del objeto anidado
+    final nombreProducto =
+        incidencia.producto?.nombre ?? incidencia.productoNombre;
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -85,11 +89,16 @@ class IncidentDetailScreen extends StatelessWidget {
             _buildInfoCard('Información de la Incidencia', [
               InfoItem('ID', '${incidencia.id}'),
               InfoItem('Pedido', '#${incidencia.pedidoId}'),
-              InfoItem('Producto', incidencia.productoNombre),
+              InfoItem('Producto', nombreProducto),
               InfoItem('Nueva cantidad', '${incidencia.nuevaCantidad}'),
               InfoItem('Reportado por', incidencia.reportadoPorNombre ?? 'N/A'),
               InfoItem('Cliente', incidencia.clienteNombre ?? 'N/A'),
               InfoItem('Proveedor', incidencia.proveedorNombre ?? 'N/A'),
+              // Mostrar los nuevos campos si están disponibles:
+              if (incidencia.restauranteNombre != null)
+                InfoItem('Restaurante', incidencia.restauranteNombre!),
+              if (incidencia.cocinaCentralNombre != null)
+                InfoItem('Cocina Central', incidencia.cocinaCentralNombre!),
               InfoItem('Fecha de reporte', fechaReporteFormateada),
               InfoItem('Fecha de resolución', fechaResolucionFormateada),
             ]),

@@ -15,6 +15,10 @@ class IncidentCardWidget extends StatelessWidget {
     final fechaReporte = DateTime.parse(incidencia.fechaReporte);
     final fechaFormateada = dateFormatter.format(fechaReporte);
 
+    // Usar el nombre del producto del objeto anidado, o el antiguo campo por compatibilidad
+    final nombreProducto =
+        incidencia.producto?.nombre ?? incidencia.productoNombre;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
@@ -31,7 +35,7 @@ class IncidentCardWidget extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Incidencia #${incidencia.id} - ${incidencia.productoNombre}',
+                      'Incidencia #${incidencia.id} - $nombreProducto',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,

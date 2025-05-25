@@ -50,9 +50,14 @@ class IncidentsModel {
           incidencia.descripcion.toLowerCase().contains(
             textoBusqueda.toLowerCase(),
           ) ||
-          incidencia.productoNombre.toLowerCase().contains(
+          (incidencia.productoNombre.toLowerCase().contains(
             textoBusqueda.toLowerCase(),
-          );
+          )) ||
+          // Nuevo: buscar también en el nombre del producto anidado
+          ((incidencia.producto != null &&
+              incidencia.producto!.nombre.toLowerCase().contains(
+                textoBusqueda.toLowerCase(),
+              )));
 
       bool coincideEstado =
           estado == null || estado.isEmpty || incidencia.estado == estado;
@@ -60,7 +65,10 @@ class IncidentsModel {
       bool coincidePedido = pedidoId == null || incidencia.pedidoId == pedidoId;
 
       bool coincideProducto =
-          productoId == null || incidencia.productoId == productoId;
+          productoId == null ||
+          incidencia.productoId == productoId ||
+          (incidencia.producto != null &&
+              incidencia.producto!.id == productoId);
 
       bool coincideUsuario =
           usuarioId == null || incidencia.reportadoPorId == usuarioId;
