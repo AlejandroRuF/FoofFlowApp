@@ -90,4 +90,29 @@ class Pedido {
       'urgente': urgente,
     };
   }
+
+  Map<String, dynamic> toJsonActualizar() {
+    final Map<String, dynamic> data = {};
+
+    if (notas != null) {
+      data['notas'] = notas;
+    }
+
+    data['urgente'] = urgente;
+
+    // El estado puede estar presente si cambió
+    if (estado.isNotEmpty) {
+      data['estado'] = estado;
+    }
+
+    if (fechaEntregaReal != null) {
+      data['fecha_entrega_real'] = fechaEntregaReal;
+    }
+
+    if (motivoCancelacion != null) {
+      data['motivo_cancelacion'] = motivoCancelacion;
+    }
+
+    return data;
+  }
 }

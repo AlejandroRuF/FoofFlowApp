@@ -79,10 +79,26 @@ class OrderListViewModel extends ChangeNotifier {
         }
       } else if (usuarioActual.tipoUsuario == 'empleado') {
         final permisos = _sessionService.permisos;
-        final empleador = usuarioActual.propietarioId;
+        final empleadorId = usuarioActual.empleadorId;
 
-        if (empleador != null) {
-          if (permisos?.puedeVerPedidos == true) {}
+        if (empleadorId != null && permisos?.puedeVerPedidos == true) {
+          // Busca el empleador en usuariosRelacionados (si ya lo tienes cargado)
+          final empleador = _model.usuariosRelacionados.firstWhere(
+            (u) => u.id == empleadorId,
+            orElse:
+                () => User(
+                  id: empleadorId,
+                  email: '',
+                  nombre: '',
+                  tipoUsuario: '',
+                ),
+          );
+
+          if (empleador.tipoUsuario == 'restaurante') {
+            filtros['restaurante'] = empleadorId;
+          } else if (empleador.tipoUsuario == 'cocina_central') {
+            filtros['cocina_central'] = empleadorId;
+          }
         }
       }
     }

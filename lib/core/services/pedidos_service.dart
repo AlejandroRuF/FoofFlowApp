@@ -26,7 +26,6 @@ class PedidosService {
 
       if (response.statusCode == 200) {
         final List<dynamic> pedidosData = response.data;
-
         return pedidosData.map((pedido) => Pedido.fromJson(pedido)).toList();
       }
 
@@ -47,27 +46,13 @@ class PedidosService {
 
       if (response.statusCode == 200) {
         final pedidoData = response.data;
-
-        final productosResponse = await ApiServices.dio.get(
-          '${ApiEndpoints.pedidoProductos}?pedido_id=$pedidoId',
-        );
-
-        if (productosResponse.statusCode == 200) {
-          final List<dynamic> productosData = productosResponse.data;
-          final productos =
-              productosData
-                  .map((producto) => PedidoProducto.fromJson(producto))
-                  .toList();
-
-          pedidoData['productos'] = productosData;
-
-          return Pedido.fromJson(pedidoData);
-        }
-
         return Pedido.fromJson(pedidoData);
+      } else {
+        if (kDebugMode) {
+          print('Error: Código de estado ${response.statusCode}');
+        }
+        return null;
       }
-
-      return null;
     } catch (e) {
       if (kDebugMode) {
         print('Error al obtener detalle del pedido: $e');
@@ -154,6 +139,53 @@ class PedidosService {
         print('Error al obtener productos del pedido: $e');
       }
       return [];
+    }
+  }
+
+  Future<bool> actualizarPedido(Pedido pedido) async {
+    try {
+      final int id = pedido.id;
+      final response = await ApiServices.dio.patch(
+        '${ApiEndpoints.pedidos}$id/',
+        data: pedido.toJsonActualizar(),
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        if (kDebugMode) {
+          print('Error al actualizar pedido: Código ${response.statusCode}');
+        }
+        return false;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error en actualizarPedido: $e');
+      }
+      return false;
+    }
+  }
+
+  Future<bool> cancelarPedido(int pedidoId, String motivo) async {
+    try {
+      final response = await ApiServices.dio.patch(
+        '${ApiEndpoints.pedidos}$pedidoId/',
+        data: {'estado': 'cancelado', 'motivo_cancelacion': motivo},
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        if (kDebugMode) {
+          print('Error al cancelar pedido: Código ${response.statusCode}');
+        }
+        return false;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error en cancelarPedido: $e');
+      }
+      return false;
     }
   }
 }
