@@ -35,7 +35,16 @@ class ProductFormScreen extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, ProductFormViewModel viewModel) {
     if (viewModel.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/icons/app_icon.png', width: 100, height: 100),
+            SizedBox(height: 24),
+            CircularProgressIndicator(),
+          ],
+        ),
+      );
     }
 
     if (viewModel.error != null &&
@@ -351,7 +360,20 @@ class ProductFormScreen extends StatelessWidget {
                   },
           child:
               viewModel.isSaving
-                  ? const CircularProgressIndicator()
+                  ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/icons/app_icon.png',
+                          width: 100,
+                          height: 100,
+                        ),
+                        SizedBox(height: 24),
+                        CircularProgressIndicator(),
+                      ],
+                    ),
+                  )
                   : Text(
                     productoId == null ? 'Crear Producto' : 'Guardar Cambios',
                   ),

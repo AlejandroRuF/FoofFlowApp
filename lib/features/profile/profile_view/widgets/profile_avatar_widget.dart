@@ -41,7 +41,20 @@ class ProfileAvatarWidget extends StatelessWidget {
           child: ClipOval(
             child:
                 isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/icons/app_icon.png',
+                            width: 100,
+                            height: 100,
+                          ),
+                          SizedBox(height: 24),
+                          CircularProgressIndicator(),
+                        ],
+                      ),
+                    )
                     : hasTempImage
                     ? Image.file(
                       File(imageTempPath!),

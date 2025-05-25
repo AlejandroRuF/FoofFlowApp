@@ -144,7 +144,16 @@ class _IncidentFormScreenState extends State<IncidentFormScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/icons/app_icon.png', width: 100, height: 100),
+            SizedBox(height: 24),
+            CircularProgressIndicator(),
+          ],
+        ),
+      );
     }
 
     if (_error != null) {
@@ -351,7 +360,20 @@ class _IncidentFormScreenState extends State<IncidentFormScreen> {
         ),
         child:
             _isLoading
-                ? const CircularProgressIndicator(color: Colors.white)
+                ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/icons/app_icon.png',
+                        width: 100,
+                        height: 100,
+                      ),
+                      SizedBox(height: 24),
+                      CircularProgressIndicator(),
+                    ],
+                  ),
+                )
                 : const Text(
                   'Crear Incidencia',
                   style: TextStyle(fontSize: 16),

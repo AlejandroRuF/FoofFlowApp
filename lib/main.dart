@@ -90,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.food_bank, size: 100, color: colors.primary),
+            Image.asset('assets/icons/app_icon.png', width: 100, height: 100),
             SizedBox(height: 24),
             Text(
               'FoodFlow',
@@ -101,7 +101,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             SizedBox(height: 32),
-            CircularProgressIndicator(color: colors.primary),
+            CircularProgressIndicator(),
           ],
         ),
       ),

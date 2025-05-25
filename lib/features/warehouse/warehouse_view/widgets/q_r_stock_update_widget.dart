@@ -51,12 +51,25 @@ class _QRStockUpdateWidgetState extends State<QRStockUpdateWidget> {
           child: Column(
             children: [
               if (_procesando) ...[
-                const Card(
+                Card(
                   child: Padding(
                     padding: EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        CircularProgressIndicator(),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/icons/app_icon.png',
+                                width: 100,
+                                height: 100,
+                              ),
+                              SizedBox(height: 24),
+                              CircularProgressIndicator(),
+                            ],
+                          ),
+                        ),
                         SizedBox(height: 16),
                         Text(
                           'Procesando código QR...',

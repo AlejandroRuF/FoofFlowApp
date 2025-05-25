@@ -35,7 +35,16 @@ class IncidentDetailScreen extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, IncidentDetailViewModel viewModel) {
     if (viewModel.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/icons/app_icon.png', width: 100, height: 100),
+            SizedBox(height: 24),
+            CircularProgressIndicator(),
+          ],
+        ),
+      );
     }
 
     if (viewModel.error != null) {

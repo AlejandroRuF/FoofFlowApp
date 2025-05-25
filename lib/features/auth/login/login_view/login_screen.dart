@@ -337,7 +337,20 @@ class _LoginFormState extends State<LoginForm> {
         ),
         const SizedBox(height: 16),
         viewModel.isLoading
-            ? const CircularProgressIndicator()
+            ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/icons/app_icon.png',
+                    width: 100,
+                    height: 100,
+                  ),
+                  SizedBox(height: 24),
+                  CircularProgressIndicator(),
+                ],
+              ),
+            )
             : ElevatedButton(
               onPressed: () async {
                 if (_validateFields()) {
@@ -366,10 +379,23 @@ class _LoginFormState extends State<LoginForm> {
             ),
         const SizedBox(height: 16),
         _isLoading
-            ? const SizedBox(
+            ? SizedBox(
               height: 20,
               width: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/icons/app_icon.png',
+                      width: 100,
+                      height: 100,
+                    ),
+                    SizedBox(height: 24),
+                    CircularProgressIndicator(strokeWidth: 2),
+                  ],
+                ),
+              ),
             )
             : TextButton(
               onPressed: _abrirResetPasswordURL,
