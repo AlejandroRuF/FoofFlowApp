@@ -29,16 +29,7 @@ class _IncidentFiltersWidgetState extends State<IncidentFiltersWidget> {
   }
 
   Future<void> _cargarProductos() async {
-    // Si tu viewModel expone un método para obtener productos, úsalo aquí.
-    // Si no, deberías adaptar el viewModel para exponerlo.
     if (mounted) {
-      // Puedes comentar esta sección si no tienes muchos productos
-      // y no quieres cargar la lista.
-      // final productos = await widget.viewModel.obtenerProductos();
-      // setState(() {
-      //   _productos = productos;
-      //   _productosCargados = true;
-      // });
       _productosCargados = true;
     }
   }
@@ -187,9 +178,6 @@ class _IncidentFiltersWidgetState extends State<IncidentFiltersWidget> {
   }
 
   Widget _buildProductoFilter() {
-    // Este filtro sólo se muestra si tienes la lista de productos cargada;
-    // puedes adaptarlo a tu lógica real de negocio (o eliminarlo si no lo usas).
-    // Para una app grande, mejor paginar/autocompletar el selector.
     return DropdownButtonFormField<int?>(
       decoration: const InputDecoration(
         labelText: 'Producto',

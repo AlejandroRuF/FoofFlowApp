@@ -82,7 +82,6 @@ class OrderListViewModel extends ChangeNotifier {
         final empleadorId = usuarioActual.empleadorId;
 
         if (empleadorId != null && permisos?.puedeVerPedidos == true) {
-          // Busca el empleador en usuariosRelacionados (si ya lo tienes cargado)
           final empleador = _model.usuariosRelacionados.firstWhere(
             (u) => u.id == empleadorId,
             orElse:

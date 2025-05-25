@@ -43,7 +43,7 @@ class MainNavigatorBar extends StatelessWidget {
                 _buildMenuItem(
                   context,
                   title: 'Productos',
-                  icon: Icons.receipt_long,
+                  icon: Icons.restaurant,
                   index: 2,
                   isSelected: safeIndex == 2,
                 ),

@@ -40,7 +40,6 @@ class Carrito extends Pedido {
     if (json['estado'] != "carrito") {
       throw ArgumentError('El estado del pedido no es "carrito".');
     }
-    // Acepta productos o pedido_productos
     final productosJson = json['productos'] ?? json['pedido_productos'];
     return Carrito(
       id: json['id'],

@@ -8,7 +8,7 @@ import '../profile_model/Profile_management_model.dart';
 class ProfileViewModel extends ChangeNotifier {
   final ProfileInteractor _interactor = ProfileInteractor();
   ProfileModel _state = ProfileModel();
-  final Set<int> _empleadosModificados = {}; // MODIFICADO
+  final Set<int> _empleadosModificados = {};
 
   ProfileViewModel() {
     _inicializar();
@@ -40,7 +40,7 @@ class ProfileViewModel extends ChangeNotifier {
 
   Future<void> _cargarEmpleados() async {
     try {
-      final empleados = await _interactor.obtenerEmpleados(); // List<User>
+      final empleados = await _interactor.obtenerEmpleados();
 
       final Map<int, Map<String, bool>> permisosMap = {};
       for (var empleado in empleados) {
@@ -67,8 +67,7 @@ class ProfileViewModel extends ChangeNotifier {
         employeePermissions: permisosMap,
         permissionsChanged: false,
       );
-      _empleadosModificados
-          .clear(); // MODIFICADO: limpiar modificados al cargar
+      _empleadosModificados.clear();
     } catch (e) {
       _actualizarEstado(error: 'Error al cargar empleados: $e');
     }
@@ -225,9 +224,7 @@ class ProfileViewModel extends ChangeNotifier {
     nuevosPermisos[empleadoId] = Map<String, bool>.from(permisoActual);
     nuevosPermisos[empleadoId]![permissionKey] = value;
 
-    _empleadosModificados.add(
-      empleadoId,
-    ); // MODIFICADO: marcar empleado modificado
+    _empleadosModificados.add(empleadoId);
     _actualizarEstado(
       employeePermissions: nuevosPermisos,
       permissionsChanged: true,
@@ -240,7 +237,6 @@ class ProfileViewModel extends ChangeNotifier {
     try {
       bool todoCorrecto = true;
 
-      // MODIFICADO: solo guarda empleados modificados
       for (final empleadoId in _empleadosModificados) {
         final permisos = state.employeePermissions[empleadoId]!;
         final exito = await _interactor.actualizarPermisosEmpleado(
@@ -253,7 +249,7 @@ class ProfileViewModel extends ChangeNotifier {
         }
       }
 
-      _empleadosModificados.clear(); // limpiar modificados tras guardar
+      _empleadosModificados.clear();
 
       _actualizarEstado(
         isSaving: false,

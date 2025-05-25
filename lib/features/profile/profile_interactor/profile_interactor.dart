@@ -64,7 +64,6 @@ class ProfileInteractor {
     }
   }
 
-  // Cambiado: recibe el objeto User y NO hace llamada extra
   Map<String, bool>? obtenerPermisosEmpleado(User empleado) {
     try {
       final permisos = empleado.permisos;

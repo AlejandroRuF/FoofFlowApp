@@ -46,7 +46,7 @@ class AppBottomNavBar extends StatelessWidget {
         ),
         _buildDestination(
           context,
-          Icons.receipt_long,
+          Icons.restaurant,
           'Productos',
           2,
           displayIndex,

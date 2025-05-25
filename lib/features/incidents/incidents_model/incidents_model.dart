@@ -53,7 +53,6 @@ class IncidentsModel {
           (incidencia.productoNombre.toLowerCase().contains(
             textoBusqueda.toLowerCase(),
           )) ||
-          // Nuevo: buscar también en el nombre del producto anidado
           ((incidencia.producto != null &&
               incidencia.producto!.nombre.toLowerCase().contains(
                 textoBusqueda.toLowerCase(),

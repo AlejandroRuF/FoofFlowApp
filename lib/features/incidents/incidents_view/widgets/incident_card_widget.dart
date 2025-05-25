@@ -15,7 +15,6 @@ class IncidentCardWidget extends StatelessWidget {
     final fechaReporte = DateTime.parse(incidencia.fechaReporte);
     final fechaFormateada = dateFormatter.format(fechaReporte);
 
-    // Usar el nombre del producto del objeto anidado, o el antiguo campo por compatibilidad
     final nombreProducto =
         incidencia.producto?.nombre ?? incidencia.productoNombre;
 

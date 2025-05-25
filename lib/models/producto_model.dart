@@ -1,3 +1,5 @@
+import 'package:foodflow_app/core/constants/api_endpoints.dart';
+
 class Producto {
   final int id;
   final String nombre;
@@ -54,7 +56,7 @@ class Producto {
     if (imagen != null && imagen!.isNotEmpty) {
       return imagen;
     } else if (imagenUrl != null && imagenUrl!.isNotEmpty) {
-      return 'http://192.168.1.130:8000${imagenUrl!}';
+      return ApiConfig.hostUrl + imagenUrl!;
     }
     return null;
   }
@@ -64,7 +66,7 @@ class Producto {
       if (imagenQrUrl!.startsWith('http')) {
         return imagenQrUrl;
       } else {
-        return 'http://192.168.1.130:8000${imagenQrUrl!}';
+        return ApiConfig.hostUrl + imagenQrUrl!;
       }
     }
     return null;

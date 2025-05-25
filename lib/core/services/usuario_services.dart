@@ -174,14 +174,14 @@ class UserService {
 
         final response = await ApiServices.dio.patch(
           ApiEndpoints.permisosEmpleado(empleadoId),
-          data: permisos, // CORRECCIÓN: envía los permisos en el PATCH
+          data: permisos,
         );
 
         return response.statusCode == 200;
       } else {
         final response = await ApiServices.dio.post(
           ApiEndpoints.permisosEmpleado(empleadoId),
-          data: permisos, // CORRECCIÓN: envía los permisos en el POST
+          data: permisos,
         );
 
         return response.statusCode == 201;

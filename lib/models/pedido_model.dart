@@ -100,7 +100,6 @@ class Pedido {
 
     data['urgente'] = urgente;
 
-    // El estado puede estar presente si cambió
     if (estado.isNotEmpty) {
       data['estado'] = estado;
     }

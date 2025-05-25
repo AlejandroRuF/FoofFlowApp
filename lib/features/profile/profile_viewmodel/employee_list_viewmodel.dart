@@ -11,8 +11,7 @@ class EmployeeListViewModel extends ChangeNotifier {
   List<User> _employees = [];
   Map<int, Map<String, bool>> _employeePermissions = {};
   bool _permissionsChanged = false;
-  final Set<int> _empleadosModificados =
-      {}; // MODIFICADO: usar para filtrar PATCH
+  final Set<int> _empleadosModificados = {};
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -44,8 +43,7 @@ class EmployeeListViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final empleados =
-          await _interactor.obtenerEmpleados(); // ahora List<User>
+      final empleados = await _interactor.obtenerEmpleados();
 
       final Map<int, Map<String, bool>> permisosMap = {};
       for (var empleado in empleados) {
@@ -55,10 +53,10 @@ class EmployeeListViewModel extends ChangeNotifier {
         }
       }
 
-      _employees = empleados; // ahora es List<User>
+      _employees = empleados;
       _employeePermissions = permisosMap;
       _permissionsChanged = false;
-      _empleadosModificados.clear(); // limpiar modificados al cargar de nuevo
+      _empleadosModificados.clear();
     } catch (e) {
       _error = 'Error al cargar empleados: $e';
     } finally {
@@ -83,7 +81,7 @@ class EmployeeListViewModel extends ChangeNotifier {
 
     _employeePermissions = nuevosPermisos;
     _permissionsChanged = true;
-    _empleadosModificados.add(empleadoId); // MODIFICADO: marcar como cambiado
+    _empleadosModificados.add(empleadoId);
     notifyListeners();
   }
 
@@ -95,7 +93,6 @@ class EmployeeListViewModel extends ChangeNotifier {
     try {
       bool todoCorrecto = true;
 
-      // MODIFICADO: solo guarda empleados modificados
       for (final empleadoId in _empleadosModificados) {
         final permisos = _employeePermissions[empleadoId]!;
         final exito = await _interactor.actualizarPermisosEmpleado(
@@ -109,7 +106,7 @@ class EmployeeListViewModel extends ChangeNotifier {
       }
 
       _permissionsChanged = false;
-      _empleadosModificados.clear(); // limpiar modificados tras guardar
+      _empleadosModificados.clear();
 
       if (!todoCorrecto) {
         _error = 'Error al guardar algunos permisos';

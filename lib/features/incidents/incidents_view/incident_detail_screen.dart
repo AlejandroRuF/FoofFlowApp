@@ -74,7 +74,6 @@ class IncidentDetailScreen extends StatelessWidget {
       fechaResolucionFormateada = dateFormatter.format(fechaResolucion);
     }
 
-    // Usar nombre de producto preferentemente del objeto anidado
     final nombreProducto =
         incidencia.producto?.nombre ?? incidencia.productoNombre;
 
@@ -94,7 +93,6 @@ class IncidentDetailScreen extends StatelessWidget {
               InfoItem('Reportado por', incidencia.reportadoPorNombre ?? 'N/A'),
               InfoItem('Cliente', incidencia.clienteNombre ?? 'N/A'),
               InfoItem('Proveedor', incidencia.proveedorNombre ?? 'N/A'),
-              // Mostrar los nuevos campos si están disponibles:
               if (incidencia.restauranteNombre != null)
                 InfoItem('Restaurante', incidencia.restauranteNombre!),
               if (incidencia.cocinaCentralNombre != null)

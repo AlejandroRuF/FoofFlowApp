@@ -28,7 +28,6 @@ class IncidenciasService {
       if (response.statusCode == 200) {
         final List<dynamic> incidenciasData = response.data;
 
-        // Ya no hace falta enriquecer, toda la info viene en la respuesta
         final incidencias =
             incidenciasData
                 .map((incidenciaData) => Incidencia.fromJson(incidenciaData))
@@ -55,7 +54,6 @@ class IncidenciasService {
       if (response.statusCode == 200) {
         final incidenciaData = response.data;
 
-        // Toda la info viene ya en el detalle
         return Incidencia.fromJson(incidenciaData);
       }
 

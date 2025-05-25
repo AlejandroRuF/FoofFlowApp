@@ -48,7 +48,6 @@ class DashboardInteractor {
       resultado['metricas_ventas'] = await _metricasMockService
           .obtenerResumenMetricasMock(usuarioId);
 
-      // Uso de cache para pedidos activos
       if (_isCachePedidosValido()) {
         if (kDebugMode) {
           print('Usando cache de pedidos activos en DashboardInteractor');
@@ -129,7 +128,6 @@ class DashboardInteractor {
   }
 
   Future<Map<String, dynamic>> recargarDatosDashboard() async {
-    // Limpiamos cache de pedidos para forzar recarga
     _cachePedidosActivos = null;
     _cacheTimestampPedidos = null;
     return await obtenerDatosDashboard();

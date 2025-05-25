@@ -5,7 +5,7 @@ class Incidencia {
   final int pedidoId;
   final int productoId;
   final String productoNombre;
-  final Producto? producto; // Nuevo: objeto anidado producto (opcional)
+  final Producto? producto;
   final int nuevaCantidad;
   final String descripcion;
   final String estado;
@@ -17,8 +17,6 @@ class Incidencia {
   final String? fechaResolucion;
   final String? clienteNombre;
   final String? proveedorNombre;
-
-  // Nuevos campos de la API
   final int? restauranteId;
   final String? restauranteNombre;
   final int? cocinaCentralId;
@@ -52,7 +50,6 @@ class Incidencia {
     int? productoId;
     String? productoNombre;
 
-    // Si producto es objeto (nuevo formato), sino es ID (viejo formato)
     if (json['producto'] is Map) {
       productoObj = Producto.fromJson(json['producto']);
       productoId = json['producto']['id'] ?? 0;

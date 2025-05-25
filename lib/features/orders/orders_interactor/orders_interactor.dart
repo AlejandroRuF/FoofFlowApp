@@ -12,7 +12,6 @@ class OrdersInteractor {
 
   Future<List<Pedido>> obtenerPedidos({Map<String, dynamic>? filtros}) async {
     try {
-      // Obtiene pedidos completos con productos embebidos
       return await _pedidosService.obtenerPedidos(filtros: filtros);
     } catch (e) {
       if (kDebugMode) {
@@ -24,7 +23,6 @@ class OrdersInteractor {
 
   Future<Pedido?> obtenerPedidoDetalle(int pedidoId) async {
     try {
-      // Obtiene pedido con lista productos ya dentro del objeto Pedido
       return await _pedidosService.obtenerPedidoDetalle(pedidoId);
     } catch (e) {
       if (kDebugMode) {
@@ -43,17 +41,13 @@ class OrdersInteractor {
 
       switch (usuario.tipoUsuario) {
         case 'restaurante':
-          // Implementar lógica específica si se requiere
           break;
         case 'cocina_central':
-          // Implementar lógica específica si se requiere
           break;
         case 'administrador':
         case 'superuser':
-          // Implementar lógica específica si se requiere
           break;
         case 'empleado':
-          // Implementar lógica específica si se requiere
           break;
       }
 
@@ -68,7 +62,6 @@ class OrdersInteractor {
 
   Future<bool> actualizarPedido(Pedido pedido) async {
     try {
-      // Asume que el servicio tiene método para actualizar pedido
       final resultado = await _pedidosService.actualizarPedido(pedido);
       return resultado;
     } catch (e) {
@@ -81,7 +74,6 @@ class OrdersInteractor {
 
   Future<bool> cancelarPedido(int pedidoId, String motivo) async {
     try {
-      // Asume que el servicio tiene método para cancelar pedido
       final resultado = await _pedidosService.cancelarPedido(pedidoId, motivo);
       return resultado;
     } catch (e) {

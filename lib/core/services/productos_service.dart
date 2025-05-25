@@ -158,7 +158,6 @@ class ProductosService {
         return false;
       }
 
-      // Buscar carrito de esa cocina central
       final response = await ApiServices.dio.get(
         '${ApiEndpoints.carritos}?cocina_central=$cocinaCentralId',
       );
@@ -171,7 +170,6 @@ class ProductosService {
         }
       }
 
-      // Si no hay carrito, lo creamos
       if (carritoId == null) {
         final nuevoCarritoResponse = await ApiServices.dio.post(
           ApiEndpoints.carritos,
@@ -183,20 +181,17 @@ class ProductosService {
         carritoId = nuevoCarritoResponse.data['id'];
       }
 
-      // Comprobar si ya existe el producto en ese carrito
       final productosCarritoResponse = await ApiServices.dio.get(
         '${ApiEndpoints.pedidoProductos}?pedido=$carritoId',
       );
       if (productosCarritoResponse.statusCode == 200) {
         final List<dynamic> productosCarrito = productosCarritoResponse.data;
-        // Solo buscamos producto que esté en ESTE carrito (por pedido y producto)
         final existente = productosCarrito.firstWhere(
           (item) =>
               item['producto'] == productoId && item['pedido'] == carritoId,
           orElse: () => null,
         );
         if (existente != null) {
-          // Si ya existe, actualizar la cantidad
           final nuevaCantidad = (existente['cantidad'] ?? 0) + cantidad;
           final patchResponse = await ApiServices.dio.patch(
             '${ApiEndpoints.pedidoProductos}${existente['id']}/',
@@ -206,7 +201,6 @@ class ProductosService {
         }
       }
 
-      // Si no existe, hacemos POST
       final productoResponse = await ApiServices.dio.post(
         ApiEndpoints.pedidoProductos,
         data: {
@@ -248,7 +242,6 @@ class ProductosService {
   Future<List<Producto>> obtenerProductosPorIds(List<int> ids) async {
     if (ids.isEmpty) return [];
     try {
-      // Puedes cambiar esto si tu API admite ?ids=1,2,3
       final response = await ApiServices.dio.get(
         '${ApiEndpoints.productos}?ids=${ids.join(',')}',
       );
