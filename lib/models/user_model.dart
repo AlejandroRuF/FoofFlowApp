@@ -3,50 +3,41 @@ class User {
   final String email;
   final String nombre;
   final String tipoUsuario;
-  final String? direccion;
+  final String? imagenPerfil;
   final String? telefono;
-  final String? fechaCreacion;
-  final bool isActive;
-  final bool isStaff;
-  final bool isSuperuser;
+  final String? direccion;
   final String? empresaAsociada;
-  final String? imagen;
-  final int? propietarioId;
-  final int? empleadorId;
+  final String? fechaCreacion;
+  final Map<String, dynamic>? permisos;
 
   User({
     required this.id,
     required this.email,
     required this.nombre,
     required this.tipoUsuario,
-    this.direccion,
+    this.imagenPerfil,
     this.telefono,
-    this.fechaCreacion,
-    this.isActive = true,
-    this.isStaff = false,
-    this.isSuperuser = false,
+    this.direccion,
     this.empresaAsociada,
-    this.imagen,
-    this.propietarioId,
-    this.empleadorId,
+    this.fechaCreacion,
+    this.permisos,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['usuario_id'] ?? json['id'],
-      email: json['email'],
-      nombre: json['nombre'],
-      tipoUsuario: json['tipo_usuario'],
-      direccion: json['direccion'],
+      id: json['id'] ?? json['usuario_id'] ?? 0,
+      email: json['email'] ?? '',
+      nombre: json['nombre'] ?? '',
+      tipoUsuario: json['tipo_usuario'] ?? '',
+      imagenPerfil: json['imagen_perfil'],
       telefono: json['telefono'],
-      fechaCreacion: json['fecha_creacion'],
-      isActive: json['is_active'] ?? true,
-      isStaff: json['is_staff'] ?? false,
-      isSuperuser: json['is_superuser'] ?? false,
+      direccion: json['direccion'],
       empresaAsociada: json['empresa_asociada'],
-      imagen: json['imagen'],
-      propietarioId: json['propietario'],
-      empleadorId: json['empleador_id'],
+      fechaCreacion: json['fecha_creacion'],
+      permisos:
+          json['permisos'] != null
+              ? Map<String, dynamic>.from(json['permisos'])
+              : null,
     );
   }
 
@@ -56,18 +47,23 @@ class User {
       'email': email,
       'nombre': nombre,
       'tipo_usuario': tipoUsuario,
-      'direccion': direccion,
+      'imagen_perfil': imagenPerfil,
       'telefono': telefono,
-      'fecha_creacion': fechaCreacion,
-      'is_active': isActive,
-      'is_staff': isStaff,
-      'is_superuser': isSuperuser,
+      'direccion': direccion,
       'empresa_asociada': empresaAsociada,
-      'imagen': imagen,
-      'propietario': propietarioId,
-      'empleador_id': empleadorId,
+      'fecha_creacion': fechaCreacion,
+      'permisos': permisos,
     };
   }
 
-  bool get esEmpleado => tipoUsuario == 'empleado';
+  bool esEmpleado() {
+    return tipoUsuario == 'empleado';
+  }
+
+  bool tienePermiso(String permiso) {
+    if (!esEmpleado() || permisos == null) {
+      return true; // Los no empleados tienen todos los permisos por defecto
+    }
+    return permisos![permiso] == true;
+  }
 }

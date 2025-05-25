@@ -1,97 +1,26 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/core/constants/api_endpoints.dart';
 import 'package:foodflow_app/core/services/api_services.dart';
-import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
-import 'package:foodflow_app/models/permisos_empleado_model.dart';
 import 'package:foodflow_app/models/user_model.dart';
 
 class UserService {
-  static final UserService _instance = UserService._internal();
-  factory UserService() => _instance;
-  UserService._internal();
-
   Future<User?> obtenerDatosCompletos(int userId) async {
     try {
-      if (kDebugMode) {
-        print('Obteniendo datos completos del usuario ID: $userId');
-        print(
-          'URL completa: ${ApiEndpoints.getFullUrl("${ApiEndpoints.usuario}$userId/")}',
-        );
-      }
-
       final response = await ApiServices.dio.get(
-        "${ApiEndpoints.usuario}$userId/",
+        '${ApiEndpoints.usuario}$userId/',
       );
 
       if (response.statusCode == 200) {
         final userData = response.data;
-        final user = User.fromJson(userData);
-
-        if (kDebugMode) {
-          print('Datos del usuario obtenidos: ${user.toJson()}');
-        }
-
-        await UserSessionService().actualizarDatosUsuario(user);
-
-        if (user.tipoUsuario == 'empleado') {
-          await obtenerPermisosUsuario(userId);
-        }
-
-        return user;
+        return User.fromJson(userData);
       }
     } catch (e) {
       if (kDebugMode) {
         print('Error al obtener datos del usuario: $e');
-        if (e is DioException) {
-          print('DioError tipo: ${e.type}');
-          print('DioError mensaje: ${e.message}');
-          print('DioError respuesta: ${e.response}');
-          print('URL de la solicitud: ${e.requestOptions.uri}');
-        }
-      }
-    }
-    return null;
-  }
-
-  Future<PermisosEmpleado?> obtenerPermisosUsuario(int userId) async {
-    try {
-      if (kDebugMode) {
-        print('Obteniendo permisos para el usuario ID: $userId');
-        print(
-          'URL: ${ApiEndpoints.getFullUrl(ApiEndpoints.permisosEmpleado(userId))}',
-        );
-      }
-
-      final response = await ApiServices.dio.get(
-        ApiEndpoints.permisosEmpleado(userId),
-      );
-
-      if (response.statusCode == 200) {
-        final permisosData = response.data;
-
-        if (kDebugMode) {
-          print('Permisos obtenidos: $permisosData');
-        }
-
-        if (permisosData != null && permisosData.isNotEmpty) {
-          final permisos = PermisosEmpleado.fromJson(permisosData);
-
-          await UserSessionService().guardarPermisos(permisos);
-
-          return permisos;
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error al obtener permisos: $e');
-        if (e is DioException) {
-          print('DioError tipo: ${e.type}');
-          print('DioError mensaje: ${e.message}');
-          print('DioError respuesta: ${e.response}');
-        }
       }
     }
     return null;
@@ -103,15 +32,13 @@ class UserService {
   ) async {
     try {
       final response = await ApiServices.dio.patch(
-        "${ApiEndpoints.usuario}$userId/",
+        '${ApiEndpoints.usuario}$userId/',
         data: datos,
       );
 
       if (response.statusCode == 200) {
         final userData = response.data;
-        final user = User.fromJson(userData);
-        await UserSessionService().actualizarDatosUsuario(user);
-        return user;
+        return User.fromJson(userData);
       }
     } catch (e) {
       if (kDebugMode) {
@@ -121,39 +48,42 @@ class UserService {
     return null;
   }
 
-  Future<bool> cambiarPassword(
-    int userId,
-    String currentPassword,
-    String newPassword,
-  ) async {
+  Future<String?> subirImagenPerfil(int userId, File imagen) async {
     try {
-      final response = await ApiServices.dio.post(
-        "${ApiEndpoints.usuario}$userId/change-password/",
-        data: {
-          'current_password': currentPassword,
-          'new_password': newPassword,
-        },
-      );
+      String fileName = imagen.path.split('/').last;
+      FormData formData = FormData.fromMap({
+        'imagen_perfil': await MultipartFile.fromFile(
+          imagen.path,
+          filename: fileName,
+        ),
+      });
 
-      return response.statusCode == 200;
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error al cambiar contraseña: $e');
-      }
-      return false;
-    }
-  }
-
-  Future<List<User>> obtenerEmpleados(int propietarioId) async {
-    try {
-      final response = await ApiServices.dio.get(
-        ApiEndpoints.usuario,
-        queryParameters: {'propietario': propietarioId},
+      final response = await ApiServices.dio.patch(
+        '${ApiEndpoints.usuario}$userId/',
+        data: formData,
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        return data.map((e) => User.fromJson(e)).toList();
+        final userData = response.data;
+        return userData['imagen_perfil'];
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al subir imagen de perfil: $e');
+      }
+    }
+    return null;
+  }
+
+  Future<List<User>> obtenerEmpleados() async {
+    try {
+      final response = await ApiServices.dio.get(
+        '${ApiEndpoints.usuario}?tipo_usuario=empleado',
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> userDataList = response.data;
+        return userDataList.map((userData) => User.fromJson(userData)).toList();
       }
     } catch (e) {
       if (kDebugMode) {
@@ -163,76 +93,64 @@ class UserService {
     return [];
   }
 
-  Future<bool> actualizarPermisosEmpleado(
-    int empleadoId,
-    Map<String, bool> permisos,
-  ) async {
+  Future<Map<String, bool>?> obtenerPermisosEmpleado(int userId) async {
     try {
-      final permisosResponse = await ApiServices.dio.get(
-        ApiEndpoints.permisosEmpleado(empleadoId),
-      );
-
-      if (permisosResponse.statusCode == 200 &&
-          permisosResponse.data.isNotEmpty) {
-        final permisosData = permisosResponse.data;
-        final permisosId = permisosData['id'];
-
-        final response = await ApiServices.dio.patch(
-          ApiEndpoints.permisosEmpleado(empleadoId),
-        );
-
-        return response.statusCode == 200;
-      } else {
-        final response = await ApiServices.dio.post(
-          ApiEndpoints.permisosEmpleado(empleadoId),
-        );
-
-        return response.statusCode == 201;
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error al actualizar permisos: $e');
-      }
-      return false;
-    }
-  }
-
-  Future<String?> subirImagenPerfil(int userId, File imagen) async {
-    try {
-      final formData = FormData.fromMap({
-        'imagen': await MultipartFile.fromFile(
-          imagen.path,
-          filename:
-              'profile_${userId}_${DateTime.now().millisecondsSinceEpoch}.jpg',
-        ),
-      });
-
-      final response = await ApiServices.dio.patch(
-        "${ApiEndpoints.usuario}$userId/",
-        data: formData,
+      final response = await ApiServices.dio.get(
+        ApiEndpoints.permisosEmpleado(userId),
       );
 
       if (response.statusCode == 200) {
-        final userData = response.data;
-        final user = User.fromJson(userData);
-        await UserSessionService().actualizarDatosUsuario(user);
-        return user.imagen;
+        final permisosData = response.data;
+
+        // Filtrar solo los campos booleanos, excluyendo 'id' y otros campos no booleanos
+        final Map<String, bool> permisos = {};
+        permisosData.forEach((key, value) {
+          if (value is bool) {
+            permisos[key] = value;
+          }
+        });
+
+        return permisos;
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error al subir imagen: $e');
+        print('Error al obtener permisos del empleado: $e');
       }
     }
     return null;
   }
 
-  Future<bool> solicitarRestablecerPassword(String email) async {
+  Future<bool> actualizarPermisosEmpleado(
+    int userId,
+    Map<String, bool> permisos,
+  ) async {
     try {
-      final url = ApiEndpoints.getFullUrl(ApiEndpoints.resetPassword);
-      final response = await ApiServices.dio.post(url, data: {'email': email});
+      final response = await ApiServices.dio.patch(
+        ApiEndpoints.permisosEmpleado(userId),
+        data: permisos,
+      );
+
       return response.statusCode == 200;
     } catch (e) {
-      print('Error al solicitar restablecer contraseña: $e');
+      if (kDebugMode) {
+        print('Error al actualizar permisos del empleado: $e');
+      }
+      return false;
+    }
+  }
+
+  Future<bool> restablecerPassword(String email) async {
+    try {
+      final response = await ApiServices.dio.post(
+        ApiEndpoints.resetPassword,
+        data: {'email': email},
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al restablecer contraseña: $e');
+      }
       return false;
     }
   }

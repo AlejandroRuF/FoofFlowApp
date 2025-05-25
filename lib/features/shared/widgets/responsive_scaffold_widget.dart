@@ -166,6 +166,14 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
 
     appBarActions.add(
       IconButton(
+        icon: const Icon(Icons.shopping_cart),
+        tooltip: 'Carrito',
+        onPressed: () => context.push('/cart'),
+      ),
+    );
+
+    appBarActions.add(
+      IconButton(
         icon: const Icon(Icons.logout),
         tooltip: 'Cerrar sesión',
         onPressed: _handleLogout,

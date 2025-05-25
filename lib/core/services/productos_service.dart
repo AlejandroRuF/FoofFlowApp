@@ -154,54 +154,67 @@ class ProductosService {
     try {
       final userSession = UserSessionService();
       final userId = userSession.user?.id;
-
       if (userId == null) {
         return false;
       }
 
+      // Buscar carrito de esa cocina central
       final response = await ApiServices.dio.get(
-        '${ApiEndpoints.pedidos}?estado=carrito',
+        '${ApiEndpoints.carritos}?cocina_central=$cocinaCentralId',
       );
 
-      int? pedidoId;
-
+      int? carritoId;
       if (response.statusCode == 200) {
         final List<dynamic> carritos = response.data;
-        for (var carrito in carritos) {
-          if (carrito['cocina_central'] == cocinaCentralId) {
-            pedidoId = carrito['id'];
-            break;
-          }
+        if (carritos.isNotEmpty) {
+          carritoId = carritos.first['id'];
         }
       }
 
-      if (pedidoId == null) {
-        final nuevoPedidoResponse = await ApiServices.dio.post(
-          ApiEndpoints.pedidos,
-          data: {
-            'cocina_central': cocinaCentralId,
-            'estado': 'carrito',
-            'tipo_pedido': 'normal',
-            'urgente': false,
-          },
+      // Si no hay carrito, lo creamos
+      if (carritoId == null) {
+        final nuevoCarritoResponse = await ApiServices.dio.post(
+          ApiEndpoints.carritos,
+          data: {'cocina_central': cocinaCentralId},
         );
-
-        if (nuevoPedidoResponse.statusCode != 201) {
+        if (nuevoCarritoResponse.statusCode != 201) {
           return false;
         }
-
-        pedidoId = nuevoPedidoResponse.data['id'];
+        carritoId = nuevoCarritoResponse.data['id'];
       }
 
+      // Comprobar si ya existe el producto en ese carrito
+      final productosCarritoResponse = await ApiServices.dio.get(
+        '${ApiEndpoints.pedidoProductos}?pedido=$carritoId',
+      );
+      if (productosCarritoResponse.statusCode == 200) {
+        final List<dynamic> productosCarrito = productosCarritoResponse.data;
+        // Solo buscamos producto que esté en ESTE carrito (por pedido y producto)
+        final existente = productosCarrito.firstWhere(
+          (item) =>
+              item['producto'] == productoId && item['pedido'] == carritoId,
+          orElse: () => null,
+        );
+        if (existente != null) {
+          // Si ya existe, actualizar la cantidad
+          final nuevaCantidad = (existente['cantidad'] ?? 0) + cantidad;
+          final patchResponse = await ApiServices.dio.patch(
+            '${ApiEndpoints.pedidoProductos}${existente['id']}/',
+            data: {'cantidad': nuevaCantidad},
+          );
+          return patchResponse.statusCode == 200;
+        }
+      }
+
+      // Si no existe, hacemos POST
       final productoResponse = await ApiServices.dio.post(
         ApiEndpoints.pedidoProductos,
         data: {
-          'pedido': pedidoId,
+          'pedido': carritoId,
           'producto': productoId,
           'cantidad': cantidad,
         },
       );
-
       return productoResponse.statusCode == 201;
     } catch (e) {
       if (kDebugMode) {
@@ -229,6 +242,26 @@ class ProductosService {
         print('Error al verificar carrito existente: $e');
       }
       return -1;
+    }
+  }
+
+  Future<List<Producto>> obtenerProductosPorIds(List<int> ids) async {
+    if (ids.isEmpty) return [];
+    try {
+      // Puedes cambiar esto si tu API admite ?ids=1,2,3
+      final response = await ApiServices.dio.get(
+        '${ApiEndpoints.productos}?ids=${ids.join(',')}',
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        return data.map((item) => Producto.fromJson(item)).toList();
+      }
+      return [];
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al obtener productos por ids: $e');
+      }
+      return [];
     }
   }
 }

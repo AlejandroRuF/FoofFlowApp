@@ -30,6 +30,8 @@ class ApiEndpoints {
   static const String pedidos = 'pedidos/';
   static const String incidencias = 'incidencias/';
   static const String productos = 'productos/';
+  static const String carritos = 'carritos/';
+  static String carritoPorId(int id) => 'carritos/$id/';
 
   // Endpoints para productos relacionados
   static const String categorias = 'categorias/';

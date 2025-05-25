@@ -39,4 +39,22 @@ class PedidoProducto {
       'precio_unitario': precioUnitario,
     };
   }
+
+  PedidoProducto copyWith({
+    int? id,
+    int? pedidoId,
+    int? productoId,
+    String? productoNombre,
+    int? cantidad,
+    double? precioUnitario,
+  }) {
+    return PedidoProducto(
+      id: id ?? this.id,
+      pedidoId: pedidoId ?? this.pedidoId,
+      productoId: productoId ?? this.productoId,
+      productoNombre: productoNombre ?? this.productoNombre,
+      cantidad: cantidad ?? this.cantidad,
+      precioUnitario: precioUnitario ?? this.precioUnitario,
+    );
+  }
 }

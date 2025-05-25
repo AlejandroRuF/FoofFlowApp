@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/auth/login/login_view/login_screen.dart';
+import '../../features/cart/cart_view/cart_detail_screen.dart';
+import '../../features/cart/cart_view/cart_list_screen.dart';
 import '../../features/dashboard/dashboard_view/dashboard_screen.dart';
 import '../../features/incidents/incidents_view/IncidentFormScreen.dart';
 import '../../features/incidents/incidents_view/Incidents_screen.dart';
@@ -202,6 +204,28 @@ final GoRouter appRouter = GoRouter(
           path: 'new',
           name: 'newIncident',
           builder: (context, state) => const IncidentFormScreen(),
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/cart',
+      name: 'cart-list',
+      builder: (context, state) => const CartListScreen(),
+      routes: [
+        GoRoute(
+          path: 'detail/:carritoId',
+          name: 'cart-detail',
+          builder: (context, state) {
+            final carritoId = int.tryParse(
+              state.pathParameters['carritoId'] ?? '',
+            );
+            if (carritoId == null) {
+              return const Scaffold(
+                body: Center(child: Text('ID de carrito inválido')),
+              );
+            }
+            return CartDetailScreen(carritoId: carritoId);
+          },
         ),
       ],
     ),
