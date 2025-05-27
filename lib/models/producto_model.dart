@@ -1,10 +1,11 @@
 import 'package:foodflow_app/core/constants/api_endpoints.dart';
+import 'package:foodflow_app/models/categoria_model.dart';
 
 class Producto {
   final int id;
   final String nombre;
   final String? descripcion;
-  final int? categoriaId;
+  final Categoria? categoria;
   final String? categoriaNombre;
   final double precio;
   final double impuestos;
@@ -20,7 +21,7 @@ class Producto {
     required this.id,
     required this.nombre,
     this.descripcion,
-    this.categoriaId,
+    required this.categoria,
     this.categoriaNombre,
     required this.precio,
     required this.impuestos,
@@ -38,7 +39,7 @@ class Producto {
       id: json['id'],
       nombre: json['nombre'],
       descripcion: json['descripcion'],
-      categoriaId: json['categoria'],
+      categoria: json['categoria'],
       categoriaNombre: json['categoria_nombre'],
       precio: double.parse(json['precio'].toString()),
       impuestos: double.parse(json['impuestos'].toString()),
@@ -77,7 +78,7 @@ class Producto {
       'id': id,
       'nombre': nombre,
       'descripcion': descripcion,
-      'categoria': categoriaId,
+      'categoria': categoria,
       'categoria_nombre': categoriaNombre,
       'precio': precio,
       'impuestos': impuestos,

@@ -296,7 +296,7 @@ class _IncidentFormScreenState extends State<IncidentFormScreen> {
               value: producto.productoId,
               child: Text(
                 (producto.productoNombre != null &&
-                        producto.productoNombre.isNotEmpty)
+                        producto.productoNombre!.isNotEmpty)
                     ? '${producto.productoNombre} (Cantidad actual: ${producto.cantidad})'
                     : 'Producto ID: ${producto.productoId} (Cantidad actual: ${producto.cantidad})',
               ),

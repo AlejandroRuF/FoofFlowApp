@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/core/services/productos_service.dart';
 import 'package:foodflow_app/features/products/products_model/products_model.dart';
+import 'package:foodflow_app/models/categoria_model.dart';
 import 'package:foodflow_app/models/producto_model.dart';
 import 'package:foodflow_app/models/user_model.dart';
 import 'package:image_picker/image_picker.dart';
@@ -25,7 +26,7 @@ class ProductFormViewModel extends ChangeNotifier {
   final impuestosController = TextEditingController();
   final unidadMedidaController = TextEditingController();
 
-  int? categoriaSeleccionada;
+  Categoria? categoriaSeleccionada;
   bool productoActivo = true;
 
   File? imagenSeleccionada;
@@ -58,7 +59,7 @@ class ProductFormViewModel extends ChangeNotifier {
         precioController.text = producto.precio.toString();
         impuestosController.text = producto.impuestos.toString();
         unidadMedidaController.text = producto.unidadMedida;
-        categoriaSeleccionada = producto.categoriaId;
+        categoriaSeleccionada = producto.categoria;
         productoActivo = producto.isActive;
         imagenUrl = producto.imagenUrl;
 

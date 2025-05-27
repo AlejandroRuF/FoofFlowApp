@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/models/pedido_model.dart';
 import 'package:foodflow_app/models/producto_model.dart';
+import 'package:intl/intl.dart';
 
 import '../../incidents_viewmodel/incidents_viewmodel.dart';
 
@@ -216,6 +217,7 @@ class _IncidentFiltersWidgetState extends State<IncidentFiltersWidget> {
               );
               if (fecha != null) {
                 widget.viewModel.establecerFechaDesde(fecha);
+                setState(() {});
               }
             },
             child: InputDecorator(
@@ -225,9 +227,9 @@ class _IncidentFiltersWidgetState extends State<IncidentFiltersWidget> {
               ),
               child: Text(
                 widget.viewModel.filtrosActivos['fecha_desde'] != null
-                    ? widget.viewModel.filtrosActivos['fecha_desde']
-                        .toString()
-                        .split(' ')[0]
+                    ? DateFormat(
+                      'dd/MM/yyyy',
+                    ).format(widget.viewModel.filtrosActivos['fecha_desde'])
                     : 'Seleccionar',
               ),
             ),
@@ -245,6 +247,7 @@ class _IncidentFiltersWidgetState extends State<IncidentFiltersWidget> {
               );
               if (fecha != null) {
                 widget.viewModel.establecerFechaHasta(fecha);
+                setState(() {});
               }
             },
             child: InputDecorator(
@@ -254,9 +257,9 @@ class _IncidentFiltersWidgetState extends State<IncidentFiltersWidget> {
               ),
               child: Text(
                 widget.viewModel.filtrosActivos['fecha_hasta'] != null
-                    ? widget.viewModel.filtrosActivos['fecha_hasta']
-                        .toString()
-                        .split(' ')[0]
+                    ? DateFormat(
+                      'dd/MM/yyyy',
+                    ).format(widget.viewModel.filtrosActivos['fecha_hasta'])
                     : 'Seleccionar',
               ),
             ),

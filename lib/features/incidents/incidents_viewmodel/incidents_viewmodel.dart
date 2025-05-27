@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/features/incidents/incidents_model/incidents_model.dart';
 import 'package:foodflow_app/models/incidencia_model.dart';
@@ -13,7 +14,8 @@ class IncidentsViewModel extends ChangeNotifier {
   List<Incidencia> get incidencias => _model.incidencias;
   bool get isLoading => _model.isLoading;
   String? get error => _model.error;
-  Map<String, dynamic> get filtrosActivos => _model.filtrosActivos;
+  final Map<String, dynamic> _filtrosActivos = {};
+  Map<String, dynamic> get filtrosActivos => _filtrosActivos;
   String _busquedaTexto = '';
   String _estadoSeleccionado = '';
   int? _pedidoSeleccionado;
@@ -62,13 +64,35 @@ class IncidentsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  DateTime? _normalizarFecha(DateTime? fecha, {required bool alFinalDelDia}) {
+    if (fecha == null) return null;
+    return DateTime(
+      fecha.year,
+      fecha.month,
+      fecha.day,
+      alFinalDelDia ? 23 : 0,
+      alFinalDelDia ? 59 : 0,
+      alFinalDelDia ? 59 : 0,
+    );
+  }
+
   void establecerFechaDesde(DateTime? fecha) {
+    fecha = _normalizarFecha(fecha, alFinalDelDia: false);
     _fechaDesde = fecha;
+    _filtrosActivos['fecha_desde'] = fecha;
+    if (kDebugMode) {
+      print("fecha desde $_fechaDesde");
+    }
     notifyListeners();
   }
 
   void establecerFechaHasta(DateTime? fecha) {
+    fecha = _normalizarFecha(fecha, alFinalDelDia: true);
     _fechaHasta = fecha;
+    _filtrosActivos['fecha_hasta'] = fecha;
+    if (kDebugMode) {
+      print("fecha hasta $_fechaHasta");
+    }
     notifyListeners();
   }
 

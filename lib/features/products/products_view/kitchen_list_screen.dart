@@ -62,7 +62,12 @@ class KitchenListScreen extends StatelessWidget {
     final cocinas = viewModel.cocinasFiltradas;
 
     if (cocinas.isEmpty) {
-      return const Center(child: Text('No se encontraron cocinas centrales'));
+      return Column(
+        children: [
+          _buildSearchBar(context, viewModel),
+          const Center(child: Text('No se encontraron cocinas centrales')),
+        ],
+      );
     }
 
     return Column(
