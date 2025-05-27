@@ -11,14 +11,14 @@ class CartProductWidget extends StatelessWidget {
   final VoidCallback? onDelete;
 
   const CartProductWidget({
-    Key? key,
+    super.key,
     required this.pedidoProducto,
     this.producto,
     this.editable = false,
     this.onAdd,
     this.onRemove,
     this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -7,11 +7,11 @@ class ProductCardWidget extends StatelessWidget {
   final String tipoUsuario;
 
   const ProductCardWidget({
-    Key? key,
+    super.key,
     required this.product,
     this.onTap,
     required this.tipoUsuario,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

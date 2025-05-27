@@ -7,11 +7,11 @@ class PermissionsGroupWidget extends StatelessWidget {
   final Function(String, bool) onPermissionChanged;
 
   const PermissionsGroupWidget({
-    Key? key,
+    super.key,
     required this.category,
     required this.permissions,
     required this.onPermissionChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +46,7 @@ class PermissionsGroupWidget extends StatelessWidget {
               }
             },
           );
-        }).toList(),
+        }),
         const Divider(height: 32),
       ],
     );

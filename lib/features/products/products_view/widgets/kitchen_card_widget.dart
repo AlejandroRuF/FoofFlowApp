@@ -5,8 +5,7 @@ class KitchenCardWidget extends StatelessWidget {
   final User kitchen;
   final VoidCallback? onTap;
 
-  const KitchenCardWidget({Key? key, required this.kitchen, this.onTap})
-    : super(key: key);
+  const KitchenCardWidget({super.key, required this.kitchen, this.onTap});
 
   @override
   Widget build(BuildContext context) {

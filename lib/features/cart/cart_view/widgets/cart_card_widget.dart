@@ -5,8 +5,7 @@ class CartCardWidget extends StatelessWidget {
   final Carrito carrito;
   final VoidCallback onTap;
 
-  const CartCardWidget({Key? key, required this.carrito, required this.onTap})
-    : super(key: key);
+  const CartCardWidget({super.key, required this.carrito, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

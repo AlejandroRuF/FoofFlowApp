@@ -6,7 +6,7 @@ import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.
 import '../warehouse_viewmodel/modify_by_qr_viewmodel.dart';
 
 class ModifyByQRScreen extends StatelessWidget {
-  const ModifyByQRScreen({Key? key}) : super(key: key);
+  const ModifyByQRScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

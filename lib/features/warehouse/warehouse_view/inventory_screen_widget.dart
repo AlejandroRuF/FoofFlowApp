@@ -6,7 +6,7 @@ import 'package:foodflow_app/features/warehouse/warehouse_view/widgets/inventory
 import '../warehouse_viewmodel/inventory_viewmodel.dart';
 
 class InventoryScreen extends StatelessWidget {
-  const InventoryScreen({Key? key}) : super(key: key);
+  const InventoryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

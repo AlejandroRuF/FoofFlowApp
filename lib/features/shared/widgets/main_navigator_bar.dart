@@ -8,10 +8,10 @@ class MainNavigatorBar extends StatelessWidget {
   final Function(int) onItemSelected;
 
   const MainNavigatorBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onItemSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

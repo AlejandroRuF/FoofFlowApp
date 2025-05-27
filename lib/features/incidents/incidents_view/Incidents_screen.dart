@@ -8,7 +8,7 @@ import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.
 import '../incidents_viewmodel/incidents_viewmodel.dart';
 
 class IncidentsScreen extends StatelessWidget {
-  const IncidentsScreen({Key? key}) : super(key: key);
+  const IncidentsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

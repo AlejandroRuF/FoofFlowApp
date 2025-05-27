@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 class ApiConfig {
   static const String hostUrl = 'http://192.168.1.130:8000/';

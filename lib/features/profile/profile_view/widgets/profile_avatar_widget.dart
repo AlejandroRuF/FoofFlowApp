@@ -10,13 +10,13 @@ class ProfileAvatarWidget extends StatelessWidget {
   final bool isLoading;
 
   const ProfileAvatarWidget({
-    Key? key,
+    super.key,
     required this.usuario,
     this.imageTempPath,
     required this.onTap,
     this.isEditable = true,
     this.isLoading = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +97,7 @@ class ProfileAvatarWidget extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.background,
+                    color: Theme.of(context).colorScheme.surface,
                     width: 2,
                   ),
                 ),

@@ -2,10 +2,7 @@ import 'package:foodflow_app/core/services/inventario_service.dart';
 import 'package:foodflow_app/core/services/productos_service.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/features/warehouse/warehouse_model/warehouse_model.dart';
-import 'package:foodflow_app/models/inventario_model.dart';
-import 'package:foodflow_app/models/producto_model.dart';
 
-import '../../../core/services/inventario_service.dart';
 
 class WarehouseInteractor {
   final InventarioService _inventarioService = InventarioService();

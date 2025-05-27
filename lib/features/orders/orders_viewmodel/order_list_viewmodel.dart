@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/features/orders/orders_interactor/orders_interactor.dart';
 import 'package:foodflow_app/features/orders/orders_model/orders_model.dart';
-import 'package:foodflow_app/models/pedido_model.dart';
 import 'package:foodflow_app/models/user_model.dart';
 
 class OrderListViewModel extends ChangeNotifier {

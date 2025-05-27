@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:foodflow_app/features/orders/orders_view/order_form_screen.dart';
 import 'package:foodflow_app/features/orders/orders_viewmodel/order_detail_viewmodel.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
 import 'package:foodflow_app/models/pedido_producto_model.dart';
@@ -9,7 +8,7 @@ import 'package:foodflow_app/models/pedido_producto_model.dart';
 class OrderDetailScreen extends StatelessWidget {
   final int pedidoId;
 
-  const OrderDetailScreen({Key? key, required this.pedidoId}) : super(key: key);
+  const OrderDetailScreen({super.key, required this.pedidoId});
 
   @override
   Widget build(BuildContext context) {
@@ -257,7 +256,7 @@ class OrderDetailScreen extends StatelessWidget {
             const Divider(),
             ...productos
                 .map((producto) => _buildProductoItem(context, producto))
-                .toList(),
+                ,
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,

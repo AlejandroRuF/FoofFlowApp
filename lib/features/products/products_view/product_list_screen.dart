@@ -10,7 +10,7 @@ import '../products_viewmodel/product_list_view_model.dart';
 class ProductListScreen extends StatelessWidget {
   final int? cocinaCentralId;
 
-  const ProductListScreen({Key? key, this.cocinaCentralId}) : super(key: key);
+  const ProductListScreen({super.key, this.cocinaCentralId});
 
   @override
   Widget build(BuildContext context) {

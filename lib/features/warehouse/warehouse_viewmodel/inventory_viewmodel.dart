@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:foodflow_app/features/warehouse/interactor/warehouse_interactor.dart';
 import 'package:foodflow_app/features/warehouse/warehouse_model/warehouse_model.dart';
 import 'package:foodflow_app/models/inventario_model.dart';
-import 'package:foodflow_app/models/producto_model.dart';
 
 class InventoryViewModel extends ChangeNotifier {
   final WarehouseInteractor _interactor = WarehouseInteractor();

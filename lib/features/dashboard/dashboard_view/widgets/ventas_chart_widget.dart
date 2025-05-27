@@ -6,10 +6,10 @@ class VentasChartWidget extends StatelessWidget {
   final String titulo;
 
   const VentasChartWidget({
-    Key? key,
+    super.key,
     required this.metricas,
     this.titulo = 'Métricas de Ventas',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

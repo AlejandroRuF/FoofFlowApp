@@ -3,10 +3,8 @@ import 'package:foodflow_app/core/services/pedidos_service.dart';
 import 'package:foodflow_app/core/services/productos_service.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/features/incidents/incidents_model/incidents_model.dart';
-import 'package:foodflow_app/models/incidencia_model.dart';
 import 'package:foodflow_app/models/pedido_model.dart';
 import 'package:foodflow_app/models/pedido_producto_model.dart';
-import 'package:foodflow_app/models/producto_model.dart';
 
 class IncidentsInteractor {
   final IncidenciasService _incidenciasService = IncidenciasService();

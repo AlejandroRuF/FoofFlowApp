@@ -10,7 +10,7 @@ class WarehouseCardWidget extends StatelessWidget {
   final bool isDarkMode;
 
   const WarehouseCardWidget({
-    Key? key,
+    super.key,
     required this.title,
     required this.description,
     required this.icon,
@@ -18,7 +18,7 @@ class WarehouseCardWidget extends StatelessWidget {
     required this.isEnabled,
     this.onTap,
     this.isDarkMode = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

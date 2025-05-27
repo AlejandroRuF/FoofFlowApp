@@ -9,13 +9,13 @@ class IncidenciasWidget extends StatelessWidget {
   final bool isDarkMode;
 
   const IncidenciasWidget({
-    Key? key,
+    super.key,
     required this.incidencias,
     this.titulo = 'Incidencias',
     required this.tipoUsuario,
     this.usuarioId,
     required this.isDarkMode,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

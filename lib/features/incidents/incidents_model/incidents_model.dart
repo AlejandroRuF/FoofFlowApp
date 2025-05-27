@@ -1,6 +1,4 @@
 import 'package:foodflow_app/models/incidencia_model.dart';
-import 'package:foodflow_app/models/pedido_model.dart';
-import 'package:foodflow_app/models/producto_model.dart';
 
 class IncidentsModel {
   final List<Incidencia> incidencias;

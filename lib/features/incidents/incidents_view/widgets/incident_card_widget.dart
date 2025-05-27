@@ -6,8 +6,7 @@ class IncidentCardWidget extends StatelessWidget {
   final Incidencia incidencia;
   final VoidCallback? onTap;
 
-  const IncidentCardWidget({Key? key, required this.incidencia, this.onTap})
-    : super(key: key);
+  const IncidentCardWidget({super.key, required this.incidencia, this.onTap});
 
   @override
   Widget build(BuildContext context) {

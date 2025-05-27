@@ -183,20 +183,25 @@ class UserSessionService {
     await prefs.setString("nombre", user.nombre);
     await prefs.setString("tipo_usuario", user.tipoUsuario);
 
-    if (user.direccion != null)
+    if (user.direccion != null) {
       await prefs.setString("direccion", user.direccion!);
-    if (user.telefono != null)
+    }
+    if (user.telefono != null) {
       await prefs.setString("telefono", user.telefono!);
-    if (user.fechaCreacion != null)
+    }
+    if (user.fechaCreacion != null) {
       await prefs.setString("fecha_creacion", user.fechaCreacion!);
+    }
     await prefs.setBool("is_active", user.isActive);
     await prefs.setBool("is_staff", user.isStaff);
     await prefs.setBool("is_superuser", user.isSuperuser);
-    if (user.empresaAsociada != null)
+    if (user.empresaAsociada != null) {
       await prefs.setString("empresa_asociada", user.empresaAsociada!);
+    }
     if (user.imagen != null) await prefs.setString("imagen", user.imagen!);
-    if (user.propietarioId != null)
+    if (user.propietarioId != null) {
       await prefs.setInt("propietario_id", user.propietarioId!);
+    }
 
     _user = user;
   }

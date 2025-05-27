@@ -8,13 +8,13 @@ class PedidosActivosWidget extends StatelessWidget {
   final bool isDarkMode;
 
   const PedidosActivosWidget({
-    Key? key,
+    super.key,
     required this.pedidos,
     this.titulo = 'Pedidos Activos',
     required this.tipoUsuario,
     this.usuarioId,
     required this.isDarkMode,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

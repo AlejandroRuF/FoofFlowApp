@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/models/carrito_model.dart';
-import 'package:foodflow_app/models/user_model.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/models/producto_model.dart';
 import 'package:foodflow_app/core/services/productos_service.dart';

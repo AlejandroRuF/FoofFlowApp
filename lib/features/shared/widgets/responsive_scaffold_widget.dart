@@ -16,7 +16,7 @@ class ResponsiveScaffold extends StatefulWidget {
   final bool showBackButton;
 
   const ResponsiveScaffold({
-    Key? key,
+    super.key,
     required this.title,
     required this.body,
     this.actions,
@@ -25,7 +25,7 @@ class ResponsiveScaffold extends StatefulWidget {
     this.bottomSheet,
     this.initialIndex = 0,
     this.showBackButton = false,
-  }) : super(key: key);
+  });
 
   @override
   State<ResponsiveScaffold> createState() => _ResponsiveScaffoldState();

@@ -6,7 +6,7 @@ import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.
 import 'package:go_router/go_router.dart';
 
 class CartListScreen extends StatelessWidget {
-  const CartListScreen({Key? key}) : super(key: key);
+  const CartListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class CartListScreen extends StatelessWidget {
 }
 
 class _CartListBody extends StatelessWidget {
-  const _CartListBody({Key? key}) : super(key: key);
+  const _CartListBody();
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,6 @@ class _CartListBody extends StatelessWidget {
           ],
         ),
       );
-      ;
     }
 
     if (model.error != null) {

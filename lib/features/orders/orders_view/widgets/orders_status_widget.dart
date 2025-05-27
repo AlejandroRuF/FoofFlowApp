@@ -8,13 +8,13 @@ class OrdersStatusWidget extends StatelessWidget {
   final int cancelados;
 
   const OrdersStatusWidget({
-    Key? key,
+    super.key,
     required this.totalPedidos,
     required this.pendientes,
     required this.enProceso,
     required this.completados,
     required this.cancelados,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

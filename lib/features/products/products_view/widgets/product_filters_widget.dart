@@ -7,12 +7,12 @@ class ProductFiltersWidget extends StatelessWidget {
   final VoidCallback? onMostrarInactivosChanged;
 
   const ProductFiltersWidget({
-    Key? key,
+    super.key,
     required this.busqueda,
     required this.mostrarInactivos,
     required this.onBusquedaChanged,
     this.onMostrarInactivosChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

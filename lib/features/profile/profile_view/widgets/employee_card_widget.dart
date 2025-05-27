@@ -10,14 +10,14 @@ class EmployeeCardWidget extends StatelessWidget {
   final List<PermissionCategory> permissionCategories;
 
   const EmployeeCardWidget({
-    Key? key,
+    super.key,
     required this.employee,
     required this.expanded,
     required this.onToggle,
     required this.permissions,
     required this.onPermissionChanged,
     required this.permissionCategories,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

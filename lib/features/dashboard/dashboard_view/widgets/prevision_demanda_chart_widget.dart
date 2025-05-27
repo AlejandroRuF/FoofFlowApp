@@ -6,10 +6,10 @@ class PrevisionDemandaChartWidget extends StatelessWidget {
   final String titulo;
 
   const PrevisionDemandaChartWidget({
-    Key? key,
+    super.key,
     required this.previsiones,
     this.titulo = 'Previsión de Demanda',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

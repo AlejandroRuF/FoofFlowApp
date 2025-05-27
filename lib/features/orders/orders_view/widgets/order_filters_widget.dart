@@ -12,7 +12,7 @@ class OrderFiltersWidget extends StatelessWidget {
   final VoidCallback onLimpiarFiltros;
 
   const OrderFiltersWidget({
-    Key? key,
+    super.key,
     this.fechaInicio,
     this.fechaFin,
     this.usuarioFiltro,
@@ -21,7 +21,7 @@ class OrderFiltersWidget extends StatelessWidget {
     required this.onFechaFinChanged,
     required this.onUsuarioChanged,
     required this.onLimpiarFiltros,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +145,7 @@ class OrderFiltersWidget extends StatelessWidget {
               '${user.nombre} (${_getTipoUsuario(user.tipoUsuario)})',
             ),
           );
-        }).toList(),
+        }),
       ],
       onChanged: (value) => onUsuarioChanged(value),
     );

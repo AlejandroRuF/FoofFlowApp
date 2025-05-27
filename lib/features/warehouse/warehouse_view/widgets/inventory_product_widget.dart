@@ -7,11 +7,11 @@ class InventoryProductWidget extends StatefulWidget {
   final Future<bool> Function(int)? onStockChanged;
 
   const InventoryProductWidget({
-    Key? key,
+    super.key,
     required this.inventarioItem,
     this.puedeModificar = false,
     this.onStockChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<InventoryProductWidget> createState() => _InventoryProductWidgetState();

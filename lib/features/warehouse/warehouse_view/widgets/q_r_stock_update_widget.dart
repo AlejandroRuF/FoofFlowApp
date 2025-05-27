@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class QRStockUpdateWidget extends StatefulWidget {
@@ -7,10 +6,10 @@ class QRStockUpdateWidget extends StatefulWidget {
   final VoidCallback onCancelPressed;
 
   const QRStockUpdateWidget({
-    Key? key,
+    super.key,
     required this.onQRDetected,
     required this.onCancelPressed,
-  }) : super(key: key);
+  });
 
   @override
   State<QRStockUpdateWidget> createState() => _QRStockUpdateWidgetState();

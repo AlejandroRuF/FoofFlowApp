@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:foodflow_app/features/orders/orders_view/order_detail_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:foodflow_app/features/orders/orders_view/widgets/order_card_widget.dart';
@@ -9,7 +8,7 @@ import 'package:foodflow_app/features/orders/orders_viewmodel/order_list_viewmod
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
 
 class OrderListScreen extends StatelessWidget {
-  const OrderListScreen({Key? key}) : super(key: key);
+  const OrderListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +28,7 @@ class OrderListScreen extends StatelessWidget {
 }
 
 class _OrderListBody extends StatelessWidget {
-  const _OrderListBody({Key? key}) : super(key: key);
+  const _OrderListBody();
 
   @override
   Widget build(BuildContext context) {

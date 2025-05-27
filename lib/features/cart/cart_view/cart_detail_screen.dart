@@ -8,7 +8,7 @@ import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.
 class CartDetailScreen extends StatelessWidget {
   final int carritoId;
 
-  const CartDetailScreen({Key? key, required this.carritoId}) : super(key: key);
+  const CartDetailScreen({super.key, required this.carritoId});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class CartDetailScreen extends StatelessWidget {
 }
 
 class _CartDetailBody extends StatelessWidget {
-  const _CartDetailBody({Key? key}) : super(key: key);
+  const _CartDetailBody();
 
   @override
   Widget build(BuildContext context) {

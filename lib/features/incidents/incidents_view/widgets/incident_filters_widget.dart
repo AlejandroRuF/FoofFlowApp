@@ -7,8 +7,7 @@ import '../../incidents_viewmodel/incidents_viewmodel.dart';
 class IncidentFiltersWidget extends StatefulWidget {
   final IncidentsViewModel viewModel;
 
-  const IncidentFiltersWidget({Key? key, required this.viewModel})
-    : super(key: key);
+  const IncidentFiltersWidget({super.key, required this.viewModel});
 
   @override
   State<IncidentFiltersWidget> createState() => _IncidentFiltersWidgetState();
@@ -18,7 +17,7 @@ class _IncidentFiltersWidgetState extends State<IncidentFiltersWidget> {
   bool _filtersExpanded = false;
   final TextEditingController _searchController = TextEditingController();
 
-  List<Producto> _productos = [];
+  final List<Producto> _productos = [];
   bool _productosCargados = false;
 
   @override

@@ -9,7 +9,7 @@ import '../products_viewmodel/product_form_view_model.dart';
 class ProductFormScreen extends StatelessWidget {
   final int? productoId;
 
-  const ProductFormScreen({Key? key, this.productoId}) : super(key: key);
+  const ProductFormScreen({super.key, this.productoId});
 
   @override
   Widget build(BuildContext context) {

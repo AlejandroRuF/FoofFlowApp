@@ -22,7 +22,7 @@ import '../../features/profile/profile_view/edit_profile_screen.dart';
 import '../../main.dart';
 
 class NotFoundScreen extends StatelessWidget {
-  const NotFoundScreen({Key? key}) : super(key: key);
+  const NotFoundScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

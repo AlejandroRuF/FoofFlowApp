@@ -13,7 +13,7 @@ class ProfileFieldWidget extends StatelessWidget {
   final IconData? icon;
 
   const ProfileFieldWidget({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     this.hintText,
@@ -24,7 +24,7 @@ class ProfileFieldWidget extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.maxLines = 1,
     this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

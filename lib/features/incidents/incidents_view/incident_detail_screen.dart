@@ -9,8 +9,7 @@ import '../../../../models/incidencia_model.dart';
 class IncidentDetailScreen extends StatelessWidget {
   final int incidenciaId;
 
-  const IncidentDetailScreen({Key? key, required this.incidenciaId})
-    : super(key: key);
+  const IncidentDetailScreen({super.key, required this.incidenciaId});
 
   @override
   Widget build(BuildContext context) {

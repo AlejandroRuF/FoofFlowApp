@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../auth/login/login_viewmodel/login_viewmodel.dart';
 import '../../shared/widgets/responsive_scaffold_widget.dart';
 import '../dashboard_viewmodel/dashboard_viewmodel.dart';
 import 'widgets/ventas_chart_widget.dart';
@@ -11,7 +9,7 @@ import 'widgets/inventario_widget.dart';
 import 'widgets/incidencias_widget.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+  const DashboardScreen({super.key});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();

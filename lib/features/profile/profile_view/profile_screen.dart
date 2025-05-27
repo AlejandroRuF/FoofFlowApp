@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
-import 'package:foodflow_app/features/profile/profile_view/edit_profile_screen.dart';
 import 'package:foodflow_app/features/profile/profile_view/widgets/profile_avatar_widget.dart';
 import 'package:foodflow_app/features/profile/profile_view/widgets/profile_field_widget.dart';
 import 'package:foodflow_app/features/profile/profile_view/widgets/employee_card_widget.dart';
@@ -12,7 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import '../profile_viewmodel/profile_viewmodel.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();

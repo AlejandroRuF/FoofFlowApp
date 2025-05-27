@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/core/constants/api_endpoints.dart';
 import 'package:foodflow_app/core/services/api_services.dart';

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/core/services/productos_service.dart';
-import 'package:foodflow_app/features/products/products_interactor/products_interactor.dart';
 import 'package:foodflow_app/features/products/products_model/products_model.dart';
 import 'package:foodflow_app/models/producto_model.dart';
 import 'package:foodflow_app/models/user_model.dart';

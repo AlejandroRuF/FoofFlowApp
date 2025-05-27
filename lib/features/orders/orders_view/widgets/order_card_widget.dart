@@ -5,8 +5,7 @@ class OrderCardWidget extends StatelessWidget {
   final Pedido pedido;
   final VoidCallback onTap;
 
-  const OrderCardWidget({Key? key, required this.pedido, required this.onTap})
-    : super(key: key);
+  const OrderCardWidget({super.key, required this.pedido, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

@@ -7,7 +7,7 @@ import 'package:foodflow_app/models/pedido_producto_model.dart';
 import '../incidents_interactor/incidents_interactor.dart';
 
 class IncidentFormScreen extends StatefulWidget {
-  const IncidentFormScreen({Key? key}) : super(key: key);
+  const IncidentFormScreen({super.key});
 
   @override
   State<IncidentFormScreen> createState() => _IncidentFormScreenState();

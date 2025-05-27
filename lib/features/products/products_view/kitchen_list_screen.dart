@@ -7,7 +7,7 @@ import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.
 import '../products_viewmodel/kitchen_list_view_model.dart';
 
 class KitchenListScreen extends StatelessWidget {
-  const KitchenListScreen({Key? key}) : super(key: key);
+  const KitchenListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

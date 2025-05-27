@@ -6,11 +6,11 @@ class InventarioWidget extends StatelessWidget {
   final String tipoUsuario;
 
   const InventarioWidget({
-    Key? key,
+    super.key,
     required this.inventario,
     this.titulo = 'Inventario',
     required this.tipoUsuario,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

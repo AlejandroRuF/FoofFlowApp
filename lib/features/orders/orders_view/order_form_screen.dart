@@ -6,7 +6,7 @@ import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.
 class OrderFormScreen extends StatefulWidget {
   final int pedidoId;
 
-  const OrderFormScreen({Key? key, required this.pedidoId}) : super(key: key);
+  const OrderFormScreen({super.key, required this.pedidoId});
 
   @override
   State<OrderFormScreen> createState() => _OrderFormScreenState();

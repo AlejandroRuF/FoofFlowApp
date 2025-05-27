@@ -6,7 +6,7 @@ import 'package:foodflow_app/core/services/usuario_services.dart';
 class EditProfileScreen extends StatefulWidget {
   final User usuario;
 
-  const EditProfileScreen({Key? key, required this.usuario}) : super(key: key);
+  const EditProfileScreen({super.key, required this.usuario});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
