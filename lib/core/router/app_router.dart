@@ -21,18 +21,6 @@ import '../../features/profile/profile_view/profile_screen.dart';
 import '../../features/profile/profile_view/edit_profile_screen.dart';
 import '../../main.dart';
 
-class ProductsScreen extends StatelessWidget {
-  const ProductsScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Productos')),
-      body: const Center(child: Text('Pantalla de Productos en desarrollo')),
-    );
-  }
-}
-
 class NotFoundScreen extends StatelessWidget {
   const NotFoundScreen({Key? key}) : super(key: key);
 

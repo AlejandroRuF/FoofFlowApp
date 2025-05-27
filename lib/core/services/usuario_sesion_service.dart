@@ -27,8 +27,8 @@ class UserSessionService {
       if (accessToken != null && refreshToken != null) {
         _auth = Auth(accessToken: accessToken, refreshToken: refreshToken);
       }
-    } else {
-      await prefs.clear();
+      // } else {
+      //   await prefs.clear();
     }
 
     final accessToken = prefs.getString('access_token');
@@ -156,6 +156,7 @@ class UserSessionService {
     await prefs.setString("nombre", user.nombre);
     await prefs.setString("tipo_usuario", user.tipoUsuario);
 
+    rememberMe = await prefs.getBool(_rememberCredentialsKey) ?? false;
     await prefs.setBool(_rememberCredentialsKey, rememberMe);
 
     if (kDebugMode) {
