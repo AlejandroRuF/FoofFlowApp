@@ -33,7 +33,15 @@ class OrderListViewModel extends ChangeNotifier {
   DateTime? get fechaInicio => _fechaInicio;
   DateTime? get fechaFin => _fechaFin;
 
+  bool get puedeVerPedidos => _interactor.puedeVerPedidos();
+  bool get puedeCrearPedidos => _interactor.puedeCrearPedidos();
+  bool get puedeEditarPedidos => _interactor.puedeEditarPedidos();
+
   List<Pedido> get pedidosFiltrados {
+    if (!puedeVerPedidos) {
+      return [];
+    }
+
     return _model.filtrarPedidos(
       estado: _estadoSeleccionado,
       tipoPedido: _tipoPedidoSeleccionado,
@@ -47,10 +55,31 @@ class OrderListViewModel extends ChangeNotifier {
   }
 
   OrderListViewModel() {
-    cargarPedidos();
+    _verificarPermisosYCargar();
+  }
+
+  Future<void> _verificarPermisosYCargar() async {
+    if (!puedeVerPedidos) {
+      _model = _model.copyWith(
+        isLoading: false,
+        error: 'No tienes permisos para acceder a la gestión de pedidos',
+      );
+      notifyListeners();
+      return;
+    }
+    await cargarPedidos();
   }
 
   Future<void> cargarPedidos() async {
+    if (!puedeVerPedidos) {
+      _model = _model.copyWith(
+        isLoading: false,
+        error: 'No tienes permisos para ver pedidos',
+      );
+      notifyListeners();
+      return;
+    }
+
     final ahora = DateTime.now();
     if (_ultimaActualizacion != null &&
         ahora.difference(_ultimaActualizacion!).inSeconds < 5 &&
@@ -129,7 +158,9 @@ class OrderListViewModel extends ChangeNotifier {
         final permisos = _sessionService.permisos;
         final empleadorId = usuarioActual.empleadorId;
 
-        if (empleadorId != null && permisos?.puedeVerPedidos == true) {}
+        if (empleadorId != null && permisos?.puedeVerPedidos == true) {
+          filtros['empleador_id'] = empleadorId;
+        }
       }
     }
 
@@ -137,46 +168,55 @@ class OrderListViewModel extends ChangeNotifier {
   }
 
   void setEstadoFiltro(String estado) {
+    if (!puedeVerPedidos) return;
     _estadoSeleccionado = estado;
     notifyListeners();
   }
 
   void setTipoPedidoFiltro(String tipoPedido) {
+    if (!puedeVerPedidos) return;
     _tipoPedidoSeleccionado = tipoPedido;
     notifyListeners();
   }
 
   void setUrgenteFiltro(bool? urgente) {
+    if (!puedeVerPedidos) return;
     _urgenteSeleccionado = urgente;
     notifyListeners();
   }
 
   void setImporteMin(double? min) {
+    if (!puedeVerPedidos) return;
     _importeMin = min;
     notifyListeners();
   }
 
   void setImporteMax(double? max) {
+    if (!puedeVerPedidos) return;
     _importeMax = max;
     notifyListeners();
   }
 
   void setBusquedaTexto(String texto) {
+    if (!puedeVerPedidos) return;
     _busquedaTexto = texto;
     notifyListeners();
   }
 
   void setFechaInicio(DateTime? fecha) {
+    if (!puedeVerPedidos) return;
     _fechaInicio = fecha;
     notifyListeners();
   }
 
   void setFechaFin(DateTime? fecha) {
+    if (!puedeVerPedidos) return;
     _fechaFin = fecha;
     notifyListeners();
   }
 
   void limpiarFiltros() {
+    if (!puedeVerPedidos) return;
     _estadoSeleccionado = '';
     _tipoPedidoSeleccionado = '';
     _urgenteSeleccionado = null;

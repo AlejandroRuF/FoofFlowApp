@@ -51,45 +51,21 @@ class UserService {
     return null;
   }
 
+  @deprecated
   Future<PermisosEmpleado?> obtenerPermisosUsuario(int userId) async {
-    try {
-      if (kDebugMode) {
-        print('Obteniendo permisos para el usuario ID: $userId');
-        print(
-          'URL: ${ApiEndpoints.getFullUrl(ApiEndpoints.permisosEmpleado(userId))}',
-        );
-      }
-
-      final response = await ApiServices.dio.get(
-        ApiEndpoints.permisosEmpleado(userId),
+    if (kDebugMode) {
+      print(
+        'ADVERTENCIA: obtenerPermisosUsuario está obsoleto. Los permisos ahora se obtienen directamente desde obtenerDatosCompletos()',
       );
-
-      if (response.statusCode == 200) {
-        final permisosData = response.data;
-
-        if (kDebugMode) {
-          print('Permisos obtenidos: $permisosData');
-        }
-
-        if (permisosData != null && permisosData.isNotEmpty) {
-          final permisos = PermisosEmpleado.fromJson(permisosData);
-
-          await UserSessionService().guardarPermisos(permisos);
-
-          return permisos;
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error al obtener permisos: $e');
-        if (e is DioException) {
-          print('DioError tipo: ${e.type}');
-          print('DioError mensaje: ${e.message}');
-          print('DioError respuesta: ${e.response}');
-        }
-      }
     }
-    return null;
+
+    final user = UserSessionService().user;
+    if (user?.permisos != null) {
+      return user!.permisos;
+    }
+
+    final userCompleto = await obtenerDatosCompletos(userId);
+    return userCompleto?.permisos;
   }
 
   Future<User?> actualizarUsuario(

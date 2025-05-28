@@ -65,48 +65,8 @@ class UserSessionService {
       }
     }
 
-    if (_user?.tipoUsuario == 'empleado') {
-      final permisosId = prefs.getInt('permisos_id');
-      if (permisosId != null) {
-        _permisos = PermisosEmpleado(
-          id: permisosId,
-          puedeVerProductos: prefs.getBool('puede_ver_productos') ?? false,
-          puedeCrearProductos: prefs.getBool('puede_crear_productos') ?? false,
-          puedeEditarProductos:
-              prefs.getBool('puede_editar_productos') ?? false,
-          puedeDesactivarProductos:
-              prefs.getBool('puede_desactivar_productos') ?? false,
-          puedeVerHistorialProducto:
-              prefs.getBool('puede_ver_historial_producto') ?? false,
-          puedeVerUsuarios: prefs.getBool('puede_ver_usuarios') ?? false,
-          puedeCrearUsuarios: prefs.getBool('puede_crear_usuarios') ?? false,
-          puedeEditarUsuarios: prefs.getBool('puede_editar_usuarios') ?? false,
-          puedeEliminarUsuarios:
-              prefs.getBool('puede_eliminar_usuarios') ?? false,
-          puedeVerAlmacenes: prefs.getBool('puede_ver_almacenes') ?? false,
-          puedeCrearAlmacenes: prefs.getBool('puede_crear_almacenes') ?? false,
-          puedeModificarAlmacenes:
-              prefs.getBool('puede_modificar_almacenes') ?? false,
-          puedeVerPedidos: prefs.getBool('puede_ver_pedidos') ?? false,
-          puedeCrearPedidos: prefs.getBool('puede_crear_pedidos') ?? false,
-          puedeEditarPedidos: prefs.getBool('puede_editar_pedidos') ?? false,
-          puedeVerIncidencias: prefs.getBool('puede_ver_incidencias') ?? false,
-          puedeCrearIncidencias:
-              prefs.getBool('puede_crear_incidencias') ?? false,
-          puedeVerPedidoProducto:
-              prefs.getBool('puede_ver_pedidoProducto') ?? false,
-          puedeCrearPedidoProducto:
-              prefs.getBool('puede_crear_pedidoProducto') ?? false,
-          puedeEditarPedidoProducto:
-              prefs.getBool('puede_editar_pedidoProducto') ?? false,
-          puedeEliminarPedidoProducto:
-              prefs.getBool('puede_eliminar_pedidoProducto') ?? false,
-          puedeVerMetricas: prefs.getBool('puede_ver_metricas') ?? false,
-          puedeVerPrevisionDemanda:
-              prefs.getBool('puede_ver_prevision_demanda') ?? false,
-          empleadoId: _user!.id,
-        );
-      }
+    if (_user?.tipoUsuario == 'empleado' && _user?.permisos != null) {
+      _permisos = _user!.permisos;
     }
 
     if (kDebugMode) {
@@ -167,6 +127,11 @@ class UserSessionService {
 
     _auth = auth;
     _user = user;
+
+    if (user.tipoUsuario == 'empleado' && user.permisos != null) {
+      _permisos = user.permisos;
+      await guardarPermisos(user.permisos!);
+    }
   }
 
   String? get token => _auth?.accessToken;
@@ -204,6 +169,11 @@ class UserSessionService {
     }
 
     _user = user;
+
+    if (user.tipoUsuario == 'empleado' && user.permisos != null) {
+      _permisos = user.permisos;
+      await guardarPermisos(user.permisos!);
+    }
   }
 
   Future<void> guardarPermisos(PermisosEmpleado permisos) async {

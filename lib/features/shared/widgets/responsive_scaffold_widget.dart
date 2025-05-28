@@ -216,6 +216,9 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
       appBar: AppBar(
         title: Text(widget.title),
         actions: appBarActions,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        elevation: 0,
         leading:
             isSmallScreen
                 ? shouldShowBackButton

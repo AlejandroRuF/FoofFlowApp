@@ -9,27 +9,8 @@ class PedidosService {
   factory PedidosService() => _instance;
   PedidosService._internal();
 
-  List<Pedido>? _cachePedidos;
-  DateTime? _cacheTimestamp;
-  final Duration cacheDuration = Duration(minutes: 2);
-
-  bool _isCacheValid() {
-    if (_cachePedidos == null || _cacheTimestamp == null) {
-      return false;
-    }
-    final difference = DateTime.now().difference(_cacheTimestamp!);
-    return difference < cacheDuration;
-  }
-
   Future<List<Pedido>> obtenerPedidos({Map<String, dynamic>? filtros}) async {
     try {
-      if (_isCacheValid()) {
-        if (kDebugMode) {
-          print('Usando cache de pedidos');
-        }
-        return _cachePedidos!;
-      }
-
       String url = ApiEndpoints.pedidos;
 
       if (filtros != null && filtros.isNotEmpty) {
@@ -46,10 +27,6 @@ class PedidosService {
         final List<dynamic> pedidosData = response.data;
         final pedidos =
             pedidosData.map((pedido) => Pedido.fromJson(pedido)).toList();
-
-        _cachePedidos = pedidos;
-        _cacheTimestamp = DateTime.now();
-
         return pedidos;
       }
 

@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
+import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/features/orders/orders_interactor/orders_interactor.dart';
 import 'package:foodflow_app/models/pedido_model.dart';
 
 class OrderFormViewModel extends ChangeNotifier {
   final OrdersInteractor _interactor = OrdersInteractor();
+  final UserSessionService _sessionService = UserSessionService();
 
   Pedido? _pedido;
   bool _isLoading = false;
@@ -12,6 +14,157 @@ class OrderFormViewModel extends ChangeNotifier {
   Pedido? get pedido => _pedido;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  bool get puedeEditarRestauranteId {
+    final usuario = _sessionService.user;
+    if (usuario == null) return false;
+
+    if (usuario.isSuperuser || usuario.tipoUsuario == 'administrador') {
+      return _pedido == null;
+    }
+    return false;
+  }
+
+  bool get puedeEditarCocinaCentralId {
+    final usuario = _sessionService.user;
+    if (usuario == null) return false;
+
+    if (usuario.isSuperuser || usuario.tipoUsuario == 'administrador') {
+      return _pedido == null;
+    }
+    return false;
+  }
+
+  bool get puedeEditarFechaEntregaEstimada {
+    final usuario = _sessionService.user;
+    if (usuario == null) return false;
+
+    return usuario.isSuperuser || usuario.tipoUsuario == 'administrador';
+  }
+
+  bool get puedeEditarFechaEntregaReal {
+    final usuario = _sessionService.user;
+    if (usuario == null) return false;
+
+    if (usuario.isSuperuser || usuario.tipoUsuario == 'administrador') {
+      return true;
+    }
+
+    if (usuario.tipoUsuario == 'cocina_central') {
+      return true;
+    }
+
+    if (usuario.tipoUsuario == 'empleado') {
+      final permisos = _sessionService.permisos;
+      return permisos?.puedeEditarPedidos == true;
+    }
+
+    return false;
+  }
+
+  bool get puedeEditarEstado {
+    final usuario = _sessionService.user;
+    if (usuario == null) return false;
+
+    if (usuario.isSuperuser || usuario.tipoUsuario == 'administrador') {
+      return true;
+    }
+
+    if (usuario.tipoUsuario == 'cocina_central') {
+      return true;
+    }
+
+    if (usuario.tipoUsuario == 'empleado') {
+      final permisos = _sessionService.permisos;
+      return permisos?.puedeEditarPedidos == true;
+    }
+
+    return false;
+  }
+
+  bool get puedeEditarNotas {
+    final usuario = _sessionService.user;
+    if (usuario == null) return false;
+
+    if (usuario.isSuperuser || usuario.tipoUsuario == 'administrador') {
+      return true;
+    }
+
+    if (usuario.tipoUsuario == 'restaurante') {
+      return true;
+    }
+
+    if (usuario.tipoUsuario == 'empleado') {
+      final permisos = _sessionService.permisos;
+      return permisos?.puedeEditarPedidos == true;
+    }
+
+    return false;
+  }
+
+  bool get puedeEditarTipoPedido {
+    final usuario = _sessionService.user;
+    if (usuario == null) return false;
+
+    return usuario.isSuperuser || usuario.tipoUsuario == 'administrador';
+  }
+
+  bool get puedeEditarUrgente {
+    final usuario = _sessionService.user;
+    if (usuario == null) return false;
+
+    if (usuario.isSuperuser || usuario.tipoUsuario == 'administrador') {
+      return true;
+    }
+
+    if (usuario.tipoUsuario == 'restaurante') {
+      return true;
+    }
+
+    if (usuario.tipoUsuario == 'empleado') {
+      final permisos = _sessionService.permisos;
+      return permisos?.puedeEditarPedidos == true;
+    }
+
+    return false;
+  }
+
+  bool get puedeEditarMotivoCancelacion {
+    final usuario = _sessionService.user;
+    if (usuario == null) return false;
+
+    if (usuario.isSuperuser || usuario.tipoUsuario == 'administrador') {
+      return true;
+    }
+
+    if (usuario.tipoUsuario == 'cocina_central') {
+      return true;
+    }
+
+    if (usuario.tipoUsuario == 'empleado') {
+      final permisos = _sessionService.permisos;
+      return permisos?.puedeEditarPedidos == true;
+    }
+
+    return false;
+  }
+
+  bool get esCampoSoloLectura => true;
+  bool get puedeEditarId => false;
+  bool get puedeEditarFechaPedido => false;
+  bool get puedeEditarMontoTotal => false;
+
+  bool get tieneAlgunCampoEditable {
+    return puedeEditarRestauranteId ||
+        puedeEditarCocinaCentralId ||
+        puedeEditarFechaEntregaEstimada ||
+        puedeEditarFechaEntregaReal ||
+        puedeEditarEstado ||
+        puedeEditarNotas ||
+        puedeEditarTipoPedido ||
+        puedeEditarUrgente ||
+        puedeEditarMotivoCancelacion;
+  }
 
   Future<void> cargarPedido(int pedidoId) async {
     _setLoading(true);
@@ -34,24 +187,71 @@ class OrderFormViewModel extends ChangeNotifier {
 
     _setLoading(true);
     try {
+      final Map<String, dynamic> cambiosPermitidos = {};
+
+      if (puedeEditarRestauranteId && cambios.containsKey('restauranteId')) {
+        cambiosPermitidos['restauranteId'] = cambios['restauranteId'];
+      }
+
+      if (puedeEditarCocinaCentralId &&
+          cambios.containsKey('cocinaCentralId')) {
+        cambiosPermitidos['cocinaCentralId'] = cambios['cocinaCentralId'];
+      }
+
+      if (puedeEditarFechaEntregaEstimada &&
+          cambios.containsKey('fechaEntregaEstimada')) {
+        cambiosPermitidos['fechaEntregaEstimada'] =
+            cambios['fechaEntregaEstimada'];
+      }
+
+      if (puedeEditarFechaEntregaReal &&
+          cambios.containsKey('fechaEntregaReal')) {
+        cambiosPermitidos['fechaEntregaReal'] = cambios['fechaEntregaReal'];
+      }
+
+      if (puedeEditarEstado && cambios.containsKey('estado')) {
+        cambiosPermitidos['estado'] = cambios['estado'];
+      }
+
+      if (puedeEditarNotas && cambios.containsKey('notas')) {
+        cambiosPermitidos['notas'] = cambios['notas'];
+      }
+
+      if (puedeEditarTipoPedido && cambios.containsKey('tipoPedido')) {
+        cambiosPermitidos['tipoPedido'] = cambios['tipoPedido'];
+      }
+
+      if (puedeEditarUrgente && cambios.containsKey('urgente')) {
+        cambiosPermitidos['urgente'] = cambios['urgente'];
+      }
+
+      if (puedeEditarMotivoCancelacion &&
+          cambios.containsKey('motivoCancelacion')) {
+        cambiosPermitidos['motivoCancelacion'] = cambios['motivoCancelacion'];
+      }
+
       final Pedido pedidoActualizado = Pedido(
         id: _pedido!.id,
-        restauranteId: _pedido!.restauranteId,
+        restauranteId:
+            cambiosPermitidos['restauranteId'] ?? _pedido!.restauranteId,
         restauranteNombre: _pedido!.restauranteNombre,
-        cocinaCentralId: _pedido!.cocinaCentralId,
+        cocinaCentralId:
+            cambiosPermitidos['cocinaCentralId'] ?? _pedido!.cocinaCentralId,
         cocinaCentralNombre: _pedido!.cocinaCentralNombre,
         fechaPedido: _pedido!.fechaPedido,
         fechaEntregaEstimada:
-            cambios['fechaEntregaEstimada'] ?? _pedido!.fechaEntregaEstimada,
+            cambiosPermitidos['fechaEntregaEstimada'] ??
+            _pedido!.fechaEntregaEstimada,
         fechaEntregaReal:
-            cambios['fechaEntregaReal'] ?? _pedido!.fechaEntregaReal,
-        estado: cambios['estado'] ?? _pedido!.estado,
+            cambiosPermitidos['fechaEntregaReal'] ?? _pedido!.fechaEntregaReal,
+        estado: cambiosPermitidos['estado'] ?? _pedido!.estado,
         montoTotal: _pedido!.montoTotal,
-        notas: cambios['notas'] ?? _pedido!.notas,
-        tipoPedido: _pedido!.tipoPedido,
-        urgente: cambios['urgente'] ?? _pedido!.urgente,
+        notas: cambiosPermitidos['notas'] ?? _pedido!.notas,
+        tipoPedido: cambiosPermitidos['tipoPedido'] ?? _pedido!.tipoPedido,
+        urgente: cambiosPermitidos['urgente'] ?? _pedido!.urgente,
         motivoCancelacion:
-            cambios['motivoCancelacion'] ?? _pedido!.motivoCancelacion,
+            cambiosPermitidos['motivoCancelacion'] ??
+            _pedido!.motivoCancelacion,
         productos: _pedido!.productos,
       );
 

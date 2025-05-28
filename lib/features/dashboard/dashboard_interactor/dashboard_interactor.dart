@@ -13,18 +13,6 @@ class DashboardInteractor {
   final _inventarioService = InventarioService();
   final _incidenciasService = IncidenciasService();
 
-  Map<String, dynamic>? _cachePedidosActivos;
-  DateTime? _cacheTimestampPedidos;
-  final Duration _cacheDuration = Duration(minutes: 2);
-
-  bool _isCachePedidosValido() {
-    if (_cachePedidosActivos == null || _cacheTimestampPedidos == null) {
-      return false;
-    }
-    final diferencia = DateTime.now().difference(_cacheTimestampPedidos!);
-    return diferencia < _cacheDuration;
-  }
-
   Future<Map<String, dynamic>> obtenerDatosDashboard() async {
     try {
       final User? currentUser = _sessionService.user;
@@ -48,23 +36,14 @@ class DashboardInteractor {
       resultado['metricas_ventas'] = await _metricasMockService
           .obtenerResumenMetricasMock(usuarioId);
 
-      if (_isCachePedidosValido()) {
-        if (kDebugMode) {
-          print('Usando cache de pedidos activos en DashboardInteractor');
-        }
-        resultado['pedidos_activos'] = _cachePedidosActivos;
-      } else {
-        if (tipoUsuario == 'administrador' ||
-            tipoUsuario == 'restaurante' ||
-            tipoUsuario == 'cocina_central' ||
-            (tipoUsuario == 'empleado' &&
-                (_sessionService.permisos?.puedeVerPedidos ?? false))) {
-          final pedidosActivos =
-              await _pedidosService.obtenerResumenPedidosDashboard();
-          _cachePedidosActivos = pedidosActivos;
-          _cacheTimestampPedidos = DateTime.now();
-          resultado['pedidos_activos'] = pedidosActivos;
-        }
+      if (tipoUsuario == 'administrador' ||
+          tipoUsuario == 'restaurante' ||
+          tipoUsuario == 'cocina_central' ||
+          (tipoUsuario == 'empleado' &&
+              (_sessionService.permisos?.puedeVerPedidos ?? false))) {
+        final pedidosActivos =
+            await _pedidosService.obtenerResumenPedidosDashboard();
+        resultado['pedidos_activos'] = pedidosActivos;
       }
 
       switch (tipoUsuario) {
@@ -128,8 +107,6 @@ class DashboardInteractor {
   }
 
   Future<Map<String, dynamic>> recargarDatosDashboard() async {
-    _cachePedidosActivos = null;
-    _cacheTimestampPedidos = null;
     return await obtenerDatosDashboard();
   }
 }

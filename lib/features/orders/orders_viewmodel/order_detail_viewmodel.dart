@@ -89,6 +89,11 @@ class OrderDetailViewModel extends ChangeNotifier {
       return true;
     }
 
+    if (usuario.tipoUsuario == 'restaurante' &&
+        _pedido!.restauranteId == usuario.id) {
+      return true;
+    }
+
     if (usuario.tipoUsuario == 'empleado' &&
         _sessionService.permisos?.puedeEditarPedidos == true) {
       final empleador = usuario.propietarioId;
