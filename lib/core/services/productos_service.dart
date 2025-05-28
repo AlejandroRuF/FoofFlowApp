@@ -59,9 +59,24 @@ class ProductosService {
 
       if (response.statusCode == 200) {
         final List<dynamic> productosData = response.data;
-        return productosData
-            .map((producto) => Producto.fromJson(producto))
-            .toList();
+        final List<Producto> productos = [];
+
+        for (var productoJson in productosData) {
+          try {
+            final producto = Producto.fromJson(productoJson);
+            productos.add(producto);
+          } catch (e) {
+            if (kDebugMode) {
+              print('Error al procesar producto individual: $e');
+            }
+          }
+        }
+
+        if (kDebugMode) {
+          print('Productos procesados con éxito: ${productos.length}');
+        }
+
+        return productos;
       }
       return [];
     } catch (e) {
@@ -247,7 +262,19 @@ class ProductosService {
       );
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
-        return data.map((item) => Producto.fromJson(item)).toList();
+        List<Producto> productos = [];
+
+        for (var item in data) {
+          try {
+            productos.add(Producto.fromJson(item));
+          } catch (e) {
+            if (kDebugMode) {
+              print('Error al procesar producto por ID: $e');
+            }
+          }
+        }
+
+        return productos;
       }
       return [];
     } catch (e) {

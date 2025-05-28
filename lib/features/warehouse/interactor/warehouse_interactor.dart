@@ -3,6 +3,9 @@ import 'package:foodflow_app/core/services/productos_service.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/features/warehouse/warehouse_model/warehouse_model.dart';
 
+import '../../../core/constants/api_endpoints.dart';
+import '../../../core/services/api_services.dart';
+import '../../../models/categoria_model.dart';
 
 class WarehouseInteractor {
   final InventarioService _inventarioService = InventarioService();
@@ -110,5 +113,23 @@ class WarehouseInteractor {
     }
 
     return false;
+  }
+
+  Future<WarehouseModel> obtenerCategorias() async {
+    try {
+      final response = await ApiServices.dio.get(ApiEndpoints.categorias);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        final categorias =
+            data.map((item) => Categoria.fromJson(item)).toList();
+
+        return WarehouseModel(categorias: categorias);
+      }
+    } catch (e) {
+      print('Error al obtener categorías: $e');
+    }
+
+    return WarehouseModel(categorias: []);
   }
 }

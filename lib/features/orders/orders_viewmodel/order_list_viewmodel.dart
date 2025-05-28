@@ -11,7 +11,6 @@ class OrderListViewModel extends ChangeNotifier {
 
   OrdersModel _model = OrdersModel(isLoading: true);
 
-  // Estado de los filtros
   String _estadoSeleccionado = '';
   String _tipoPedidoSeleccionado = '';
   bool? _urgenteSeleccionado;
@@ -23,7 +22,6 @@ class OrderListViewModel extends ChangeNotifier {
 
   OrdersModel get model => _model;
 
-  // Getters para los filtros
   String get estadoSeleccionado => _estadoSeleccionado;
   String get tipoPedidoSeleccionado => _tipoPedidoSeleccionado;
   bool? get urgenteSeleccionado => _urgenteSeleccionado;
@@ -33,7 +31,6 @@ class OrderListViewModel extends ChangeNotifier {
   DateTime? get fechaInicio => _fechaInicio;
   DateTime? get fechaFin => _fechaFin;
 
-  // Pedidos filtrados para mostrar
   List<Pedido> get pedidosFiltrados {
     return _model.filtrarPedidos(
       estado: _estadoSeleccionado,
@@ -77,11 +74,9 @@ class OrderListViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Construye solo los filtros que se envían al backend (API).
   Map<String, dynamic> _construirFiltrosAPI() {
     final Map<String, dynamic> filtros = {};
 
-    // Fechas
     if (_fechaInicio != null) {
       filtros['fecha_pedido__gte'] =
           _fechaInicio!.toIso8601String().split('T')[0];
@@ -90,22 +85,18 @@ class OrderListViewModel extends ChangeNotifier {
       filtros['fecha_pedido__lte'] = _fechaFin!.toIso8601String().split('T')[0];
     }
 
-    // Estado
     if (_estadoSeleccionado.isNotEmpty) {
       filtros['estado'] = _estadoSeleccionado;
     }
 
-    // Tipo de pedido
     if (_tipoPedidoSeleccionado.isNotEmpty) {
       filtros['tipo_pedido'] = _tipoPedidoSeleccionado;
     }
 
-    // Urgente
     if (_urgenteSeleccionado != null) {
       filtros['urgente'] = _urgenteSeleccionado.toString();
     }
 
-    // Importe mínimo y máximo
     if (_importeMin != null) {
       filtros['monto_total__gte'] = _importeMin;
     }
@@ -113,9 +104,6 @@ class OrderListViewModel extends ChangeNotifier {
       filtros['monto_total__lte'] = _importeMax;
     }
 
-    // El filtro global de texto se aplica SOLO en front, nunca en backend.
-
-    // Lógica por tipo de usuario (igual que antes)
     final usuarioActual = _sessionService.user;
     if (usuarioActual != null) {
       if (usuarioActual.tipoUsuario == 'restaurante') {
@@ -126,17 +114,12 @@ class OrderListViewModel extends ChangeNotifier {
         final permisos = _sessionService.permisos;
         final empleadorId = usuarioActual.empleadorId;
 
-        if (empleadorId != null && permisos?.puedeVerPedidos == true) {
-          // Asigna filtros según empleador
-          // (opcional: puedes replicar lógica extendida aquí si quieres buscar por usuario)
-        }
+        if (empleadorId != null && permisos?.puedeVerPedidos == true) {}
       }
     }
 
     return filtros;
   }
-
-  // ====== Métodos para actualizar filtros y notificar cambios ======
 
   void setEstadoFiltro(String estado) {
     _estadoSeleccionado = estado;

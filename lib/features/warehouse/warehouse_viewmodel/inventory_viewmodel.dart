@@ -18,6 +18,7 @@ class InventoryViewModel extends ChangeNotifier {
 
   InventoryViewModel() {
     cargarInventario();
+    cargarCategorias();
   }
 
   Future<void> cargarInventario() async {
@@ -55,6 +56,14 @@ class InventoryViewModel extends ChangeNotifier {
       _state = _state.copyWith(
         productosDisponibles: productosModel.productosDisponibles,
       );
+      notifyListeners();
+    } catch (e) {}
+  }
+
+  Future<void> cargarCategorias() async {
+    try {
+      final categoriasModel = await _interactor.obtenerCategorias();
+      _state = _state.copyWith(categorias: categoriasModel.categorias);
       notifyListeners();
     } catch (e) {}
   }
@@ -116,8 +125,52 @@ class InventoryViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleMostrarStockBajo() {
-    _state = _state.copyWith(mostrarStockBajo: !_state.mostrarStockBajo);
+  void toggleMostrarStockBajo(bool valor) {
+    _state = _state.copyWith(mostrarStockBajo: valor);
+    notifyListeners();
+  }
+
+  void establecerStockMinimo(String? valor) {
+    _state = _state.copyWith(
+      stockMinimo:
+          (valor == null || valor.isEmpty) ? null : double.tryParse(valor),
+    );
+    notifyListeners();
+  }
+
+  void establecerStockMaximo(String? valor) {
+    _state = _state.copyWith(
+      stockMaximo:
+          (valor == null || valor.isEmpty) ? null : double.tryParse(valor),
+    );
+    notifyListeners();
+  }
+
+  void establecerCategoria(int? categoriaId) {
+    _state = _state.copyWith(categoriaIdSeleccionada: categoriaId);
+    notifyListeners();
+  }
+
+  void toggleSoloActivos(bool soloActivos) {
+    _state = _state.copyWith(soloActivos: soloActivos);
+    notifyListeners();
+  }
+
+  void limpiarFiltros() {
+    _state = _state.copyWith(
+      busqueda: '',
+      mostrarStockBajo: false,
+      stockMinimo: null,
+      stockMaximo: null,
+      categoriaIdSeleccionada: null,
+      soloActivos: true,
+    );
+    notifyListeners();
+  }
+
+  void aplicarFiltros() {
+    // Los filtros ya están aplicados a través de los setters individuales
+    // Solo necesitamos notificar para forzar una actualización de la UI
     notifyListeners();
   }
 }

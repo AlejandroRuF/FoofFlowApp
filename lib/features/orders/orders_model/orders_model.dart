@@ -7,8 +7,6 @@ class OrdersModel {
   final bool isLoading;
   final String? error;
   final Map<String, dynamic> filtros;
-
-  // NUEVOS FILTROS
   final String? estado;
   final String? tipoPedido;
   final bool? urgente;
@@ -66,7 +64,6 @@ class OrdersModel {
     );
   }
 
-  /// Filtra los pedidos en memoria usando los filtros activos
   List<Pedido> filtrarPedidos({
     String? estado,
     String? tipoPedido,
@@ -78,23 +75,17 @@ class OrdersModel {
     DateTime? fechaFin,
   }) {
     return pedidos.where((pedido) {
-      // Excluir carrito
       if (pedido.estado == 'carrito') return false;
-
-      // Estado
       if (estado != null && estado.isNotEmpty && pedido.estado != estado)
         return false;
 
-      // Tipo de pedido
       if (tipoPedido != null &&
           tipoPedido.isNotEmpty &&
           pedido.tipoPedido != tipoPedido)
         return false;
 
-      // Urgente
       if (urgente != null && pedido.urgente != urgente) return false;
 
-      // Fecha de pedido
       if (fechaInicio != null) {
         final fechaPedido = DateTime.tryParse(pedido.fechaPedido);
         if (fechaPedido == null || fechaPedido.isBefore(fechaInicio))
@@ -105,11 +96,9 @@ class OrdersModel {
         if (fechaPedido == null || fechaPedido.isAfter(fechaFin)) return false;
       }
 
-      // Importe total
       if (importeMin != null && pedido.montoTotal < importeMin) return false;
       if (importeMax != null && pedido.montoTotal > importeMax) return false;
 
-      // Buscador global de texto
       if (textoBusqueda != null && textoBusqueda.isNotEmpty) {
         final query = textoBusqueda.toLowerCase();
 

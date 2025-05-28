@@ -1,90 +1,93 @@
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/models/categoria_model.dart';
 
-class ProductFiltersWidget extends StatefulWidget {
+class InventoryFiltersWidget extends StatefulWidget {
   final String busqueda;
+  final bool mostrarStockBajo;
+  final double? stockMinimo;
+  final double? stockMaximo;
   final int? categoriaIdSeleccionada;
-  final double? precioMin;
-  final double? precioMax;
-  final bool mostrarSoloActivos;
+  final bool soloActivos;
   final List<Categoria> categorias;
   final ValueChanged<String> onBusquedaChanged;
+  final ValueChanged<bool> onMostrarStockBajoChanged;
+  final ValueChanged<String?> onStockMinimoChanged;
+  final ValueChanged<String?> onStockMaximoChanged;
   final ValueChanged<int?> onCategoriaChanged;
-  final ValueChanged<String?> onPrecioMinChanged;
-  final ValueChanged<String?> onPrecioMaxChanged;
-  final ValueChanged<bool> onMostrarSoloActivosChanged;
+  final ValueChanged<bool> onSoloActivosChanged;
   final VoidCallback onLimpiarFiltros;
   final VoidCallback onAplicarFiltros;
 
-  const ProductFiltersWidget({
+  const InventoryFiltersWidget({
     super.key,
     required this.busqueda,
-    required this.categoriaIdSeleccionada,
-    required this.precioMin,
-    required this.precioMax,
-    required this.mostrarSoloActivos,
-    required this.categorias,
+    required this.mostrarStockBajo,
+    this.stockMinimo,
+    this.stockMaximo,
+    this.categoriaIdSeleccionada,
+    required this.soloActivos,
+    this.categorias = const [],
     required this.onBusquedaChanged,
+    required this.onMostrarStockBajoChanged,
+    required this.onStockMinimoChanged,
+    required this.onStockMaximoChanged,
     required this.onCategoriaChanged,
-    required this.onPrecioMinChanged,
-    required this.onPrecioMaxChanged,
-    required this.onMostrarSoloActivosChanged,
+    required this.onSoloActivosChanged,
     required this.onLimpiarFiltros,
     required this.onAplicarFiltros,
   });
 
   @override
-  State<ProductFiltersWidget> createState() => _ProductFiltersWidgetState();
+  State<InventoryFiltersWidget> createState() => _InventoryFiltersWidgetState();
 }
 
-class _ProductFiltersWidgetState extends State<ProductFiltersWidget> {
+class _InventoryFiltersWidgetState extends State<InventoryFiltersWidget> {
   bool _filtersExpanded = false;
   late final TextEditingController _searchController;
-  late final TextEditingController _precioMinController;
-  late final TextEditingController _precioMaxController;
-  bool _ignoreBusquedaChange = false;
-  bool _ignorePrecioMinChange = false;
-  bool _ignorePrecioMaxChange = false;
+  late final TextEditingController _stockMinimoController;
+  late final TextEditingController _stockMaximoController;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController(text: widget.busqueda);
-    _precioMinController = TextEditingController(
-      text: widget.precioMin?.toString() ?? '',
+    _stockMinimoController = TextEditingController(
+      text: widget.stockMinimo?.toString() ?? '',
     );
-    _precioMaxController = TextEditingController(
-      text: widget.precioMax?.toString() ?? '',
+    _stockMaximoController = TextEditingController(
+      text: widget.stockMaximo?.toString() ?? '',
     );
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    _precioMinController.dispose();
-    _precioMaxController.dispose();
+    _stockMinimoController.dispose();
+    _stockMaximoController.dispose();
     super.dispose();
   }
 
   @override
-  void didUpdateWidget(covariant ProductFiltersWidget oldWidget) {
+  void didUpdateWidget(covariant InventoryFiltersWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    // Solo actualizamos el campo de búsqueda si cambia externamente
     if (oldWidget.busqueda != widget.busqueda &&
         _searchController.text != widget.busqueda) {
       _searchController.text = widget.busqueda;
     }
 
-    if (widget.precioMin == null &&
-        oldWidget.precioMin != null &&
-        _precioMinController.text.isNotEmpty) {
-      _precioMinController.text = '';
+    // Solo actualizamos los campos de stock si los filtros fueron limpiados
+    if (widget.stockMinimo == null &&
+        oldWidget.stockMinimo != null &&
+        _stockMinimoController.text.isNotEmpty) {
+      _stockMinimoController.text = '';
     }
 
-    if (widget.precioMax == null &&
-        oldWidget.precioMax != null &&
-        _precioMaxController.text.isNotEmpty) {
-      _precioMaxController.text = '';
+    if (widget.stockMaximo == null &&
+        oldWidget.stockMaximo != null &&
+        _stockMaximoController.text.isNotEmpty) {
+      _stockMaximoController.text = '';
     }
   }
 
@@ -115,15 +118,11 @@ class _ProductFiltersWidgetState extends State<ProductFiltersWidget> {
           child: TextField(
             controller: _searchController,
             decoration: const InputDecoration(
-              hintText: 'Buscar por nombre, descripción o cocina central',
+              hintText: 'Buscar productos en inventario...',
               prefixIcon: Icon(Icons.search),
               border: OutlineInputBorder(),
             ),
-            onChanged: (value) {
-              if (!_ignoreBusquedaChange) {
-                widget.onBusquedaChanged(value);
-              }
-            },
+            onChanged: widget.onBusquedaChanged,
           ),
         ),
         IconButton(
@@ -141,11 +140,13 @@ class _ProductFiltersWidgetState extends State<ProductFiltersWidget> {
   Widget _buildExpandedFilters() {
     return Column(
       children: [
-        _buildCategoriaFilter(),
+        if (widget.categorias.isNotEmpty) ...[
+          _buildCategoriaFilter(),
+          const SizedBox(height: 8),
+        ],
+        _buildStockFilter(),
         const SizedBox(height: 8),
-        _buildPreciosFilter(),
-        const SizedBox(height: 8),
-        _buildSoloActivosFilter(),
+        _buildCheckboxFilters(),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -154,8 +155,8 @@ class _ProductFiltersWidgetState extends State<ProductFiltersWidget> {
               onPressed: () {
                 setState(() {
                   _searchController.clear();
-                  _precioMinController.clear();
-                  _precioMaxController.clear();
+                  _stockMinimoController.clear();
+                  _stockMaximoController.clear();
                 });
                 widget.onLimpiarFiltros();
               },
@@ -192,21 +193,21 @@ class _ProductFiltersWidgetState extends State<ProductFiltersWidget> {
     );
   }
 
-  Widget _buildPreciosFilter() {
+  Widget _buildStockFilter() {
     return Row(
       children: [
         Expanded(
           child: TextField(
-            controller: _precioMinController,
+            controller: _stockMinimoController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: const InputDecoration(
-              labelText: 'Precio mínimo',
+              labelText: 'Stock mínimo',
               border: OutlineInputBorder(),
             ),
             onChanged: (value) {
               Future.delayed(const Duration(milliseconds: 800), () {
-                if (_precioMinController.text == value) {
-                  widget.onPrecioMinChanged(value);
+                if (_stockMinimoController.text == value) {
+                  widget.onStockMinimoChanged(value);
                 }
               });
             },
@@ -215,16 +216,16 @@ class _ProductFiltersWidgetState extends State<ProductFiltersWidget> {
         const SizedBox(width: 8),
         Expanded(
           child: TextField(
-            controller: _precioMaxController,
+            controller: _stockMaximoController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: const InputDecoration(
-              labelText: 'Precio máximo',
+              labelText: 'Stock máximo',
               border: OutlineInputBorder(),
             ),
             onChanged: (value) {
               Future.delayed(const Duration(milliseconds: 800), () {
-                if (_precioMaxController.text == value) {
-                  widget.onPrecioMaxChanged(value);
+                if (_stockMaximoController.text == value) {
+                  widget.onStockMaximoChanged(value);
                 }
               });
             },
@@ -234,15 +235,28 @@ class _ProductFiltersWidgetState extends State<ProductFiltersWidget> {
     );
   }
 
-  Widget _buildSoloActivosFilter() {
-    return Row(
+  Widget _buildCheckboxFilters() {
+    return Column(
       children: [
-        Checkbox(
-          value: widget.mostrarSoloActivos,
-          onChanged:
-              (value) => widget.onMostrarSoloActivosChanged(value ?? true),
+        Row(
+          children: [
+            Checkbox(
+              value: widget.mostrarStockBajo,
+              onChanged:
+                  (value) => widget.onMostrarStockBajoChanged(value ?? false),
+            ),
+            const Text('Mostrar solo productos con stock bajo'),
+          ],
         ),
-        const Text('Solo activos'),
+        Row(
+          children: [
+            Checkbox(
+              value: widget.soloActivos,
+              onChanged: (value) => widget.onSoloActivosChanged(value ?? true),
+            ),
+            const Text('Solo activos'),
+          ],
+        ),
       ],
     );
   }

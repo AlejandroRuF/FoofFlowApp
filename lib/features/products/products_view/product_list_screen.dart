@@ -78,73 +78,80 @@ class ProductListScreen extends StatelessWidget {
 
     final productos = viewModel.productosFiltrados;
 
-    if (productos.isEmpty) {
-      return const Center(child: Text('No se encontraron productos'));
-    }
-
     return Column(
       children: [
         ProductFiltersWidget(
-          busqueda: viewModel.busqueda,
-          mostrarInactivos: viewModel.mostrarProductosInactivos,
-          onBusquedaChanged: viewModel.establecerBusqueda,
-          onMostrarInactivosChanged:
-              viewModel.esCocinaCentral || viewModel.esAdministrador
-                  ? viewModel.toggleMostrarInactivos
-                  : null,
+          busqueda: viewModel.busquedaTexto,
+          categoriaIdSeleccionada: viewModel.categoriaSeleccionadaId,
+          precioMin: viewModel.precioMin,
+          precioMax: viewModel.precioMax,
+          mostrarSoloActivos: viewModel.soloActivos,
+          categorias: viewModel.categoriasDisponibles,
+          onBusquedaChanged: viewModel.establecerBusquedaTexto,
+          onCategoriaChanged: viewModel.establecerCategoria,
+          onPrecioMinChanged: viewModel.establecerPrecioMin,
+          onPrecioMaxChanged: viewModel.establecerPrecioMax,
+          onMostrarSoloActivosChanged: viewModel.establecerSoloActivos,
+          onLimpiarFiltros: viewModel.limpiarFiltros,
+          onAplicarFiltros: viewModel.aplicarFiltros,
         ),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              int crossAxisCount;
-              double aspectRatio;
-              if (constraints.maxWidth < 400) {
-                crossAxisCount = 2;
-                aspectRatio = 0.6;
-              } else if (constraints.maxWidth < 700) {
-                crossAxisCount = 3;
-                aspectRatio = 0.50;
-              } else if (constraints.maxWidth < 1000) {
-                crossAxisCount = 4;
-                aspectRatio = 0.65;
-              } else if (constraints.maxWidth < 1300) {
-                crossAxisCount = 5;
-                aspectRatio = 0.7;
-              } else {
-                crossAxisCount = 6;
-                aspectRatio = 0.7;
-              }
+        if (productos.isEmpty)
+          const Expanded(
+            child: Center(child: Text('No se encontraron productos')),
+          )
+        else
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                int crossAxisCount;
+                double aspectRatio;
+                if (constraints.maxWidth < 400) {
+                  crossAxisCount = 2;
+                  aspectRatio = 0.6;
+                } else if (constraints.maxWidth < 700) {
+                  crossAxisCount = 3;
+                  aspectRatio = 0.50;
+                } else if (constraints.maxWidth < 1000) {
+                  crossAxisCount = 4;
+                  aspectRatio = 0.65;
+                } else if (constraints.maxWidth < 1300) {
+                  crossAxisCount = 5;
+                  aspectRatio = 0.7;
+                } else {
+                  crossAxisCount = 6;
+                  aspectRatio = 0.7;
+                }
 
-              return GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: aspectRatio,
-                ),
-                itemCount: productos.length,
-                itemBuilder: (context, index) {
-                  final producto = productos[index];
-                  return ProductCardWidget(
-                    product: producto,
-                    onTap:
-                        viewModel.esRestaurante
-                            ? () => _showAddToCartDialog(
-                              context,
-                              viewModel,
-                              producto.id,
-                            )
-                            : () {
-                              context.push('/products/detail/${producto.id}');
-                            },
-                    tipoUsuario: viewModel.tipoUsuario,
-                  );
-                },
-              );
-            },
+                return GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: aspectRatio,
+                  ),
+                  itemCount: productos.length,
+                  itemBuilder: (context, index) {
+                    final producto = productos[index];
+                    return ProductCardWidget(
+                      product: producto,
+                      onTap:
+                          viewModel.esRestaurante
+                              ? () => _showAddToCartDialog(
+                                context,
+                                viewModel,
+                                producto.id,
+                              )
+                              : () {
+                                context.push('/products/detail/${producto.id}');
+                              },
+                      tipoUsuario: viewModel.tipoUsuario,
+                    );
+                  },
+                );
+              },
+            ),
           ),
-        ),
       ],
     );
   }

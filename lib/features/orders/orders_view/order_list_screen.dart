@@ -67,7 +67,6 @@ class _OrderListBody extends StatelessWidget {
       );
     }
 
-    // Filtrado avanzado: si hay pedidos tras aplicar filtros locales
     final pedidosFiltrados = viewModel.pedidosFiltrados;
 
     return SingleChildScrollView(

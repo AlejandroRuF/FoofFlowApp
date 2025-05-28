@@ -2,25 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:foodflow_app/features/products/products_interactor/products_interactor.dart';
 import 'package:foodflow_app/features/products/products_model/products_model.dart';
 import 'package:foodflow_app/models/producto_model.dart';
+import 'package:foodflow_app/models/categoria_model.dart';
 
 class ProductListViewModel extends ChangeNotifier {
   final ProductsInteractor _interactor = ProductsInteractor();
 
   ProductsModel _model = ProductsModel();
 
+  String _busquedaTexto = '';
+  int? _categoriaSeleccionadaId;
+  double? _precioMin;
+  double? _precioMax;
+  bool _soloActivos = true;
+  int? _cocinaCentralIdSeleccionada;
+  bool _cargandoCategorias = false;
+
   List<Producto> get productos => _model.productos;
-  bool get isLoading => _model.isLoading;
+  bool get isLoading => _model.isLoading || _cargandoCategorias;
   String? get error => _model.error;
 
-  String _busqueda = '';
-  String get busqueda => _busqueda;
-
-  bool _mostrarProductosInactivos = false;
-  bool get mostrarProductosInactivos => _mostrarProductosInactivos;
-
-  int? _cocinaCentralIdSeleccionada;
-
-  ProductListViewModel();
+  String get busquedaTexto => _busquedaTexto;
+  int? get categoriaSeleccionadaId => _categoriaSeleccionadaId;
+  double? get precioMin => _precioMin;
+  double? get precioMax => _precioMax;
+  bool get soloActivos => _soloActivos;
 
   bool get esCocinaCentral =>
       _interactor.obtenerTipoUsuario() == 'cocina_central';
@@ -31,29 +36,98 @@ class ProductListViewModel extends ChangeNotifier {
   String get tipoUsuario => _interactor.obtenerTipoUsuario();
   bool get puedeCrearProductos => _interactor.puedeCrearEditarProductos();
 
+  List<Categoria> get categoriasDisponibles => _model.categorias;
+
+  ProductListViewModel() {
+    _cargarCategorias();
+  }
+
+  Future<void> _cargarCategorias() async {
+    _cargandoCategorias = true;
+    notifyListeners();
+
+    try {
+      final categorias = await _interactor.obtenerCategorias();
+      _model = _model.copyWith(categorias: categorias);
+      print('Categorías cargadas: ${categorias.length}');
+    } catch (e) {
+      print('Error al cargar categorías: $e');
+    } finally {
+      _cargandoCategorias = false;
+      notifyListeners();
+    }
+  }
+
+  void establecerBusquedaTexto(String texto) {
+    _busquedaTexto = texto;
+    notifyListeners();
+  }
+
+  void establecerCategoria(int? categoriaId) {
+    _categoriaSeleccionadaId = categoriaId;
+    notifyListeners();
+  }
+
+  void establecerPrecioMin(String? valor) {
+    _precioMin =
+        (valor == null || valor.isEmpty) ? null : double.tryParse(valor);
+    notifyListeners();
+  }
+
+  void establecerPrecioMax(String? valor) {
+    _precioMax =
+        (valor == null || valor.isEmpty) ? null : double.tryParse(valor);
+    notifyListeners();
+  }
+
+  void establecerSoloActivos(bool valor) {
+    _soloActivos = valor;
+    notifyListeners();
+  }
+
   void establecerCocinaCentral(int cocinaCentralId) {
     _cocinaCentralIdSeleccionada = cocinaCentralId;
     cargarProductos();
   }
 
-  void establecerBusqueda(String busqueda) {
-    _busqueda = busqueda;
+  void limpiarFiltros() {
+    _busquedaTexto = '';
+    _categoriaSeleccionadaId = null;
+    _precioMin = null;
+    _precioMax = null;
+    _soloActivos = true;
     notifyListeners();
   }
 
-  void toggleMostrarInactivos() {
-    _mostrarProductosInactivos = !_mostrarProductosInactivos;
-    cargarProductos();
+  void aplicarFiltros() {
+    print(
+      'Aplicando filtros. Búsqueda: $_busquedaTexto, Categoría: $_categoriaSeleccionadaId, PrecioMin: $_precioMin, PrecioMax: $_precioMax, SoloActivos: $_soloActivos',
+    );
+
+    final productosFiltrados = _model.filtrarProductosAvanzado(
+      textoBusqueda: _busquedaTexto,
+      categoriaId: _categoriaSeleccionadaId,
+      precioMin: _precioMin,
+      precioMax: _precioMax,
+      soloActivos: _soloActivos,
+    );
+
+    print(
+      'Productos filtrados: ${productosFiltrados.length} de ${_model.productos.length} totales',
+    );
+
+    notifyListeners();
   }
 
   List<Producto> get productosFiltrados {
-    var productosFiltrados = _model.filtrarProductosPorNombre(_busqueda);
-
-    if (!_mostrarProductosInactivos) {
-      productosFiltrados = productosFiltrados.where((p) => p.isActive).toList();
-    }
-
-    return productosFiltrados;
+    return _model.filtrarProductosAvanzado(
+      textoBusqueda: _busquedaTexto,
+      categoriaId: _categoriaSeleccionadaId,
+      precioMin: _precioMin,
+      precioMax: _precioMax,
+      soloActivos: _soloActivos,
+      cocinaCentralId: _cocinaCentralIdSeleccionada, // Añadir esta línea
+    );
   }
 
   Future<void> cargarProductos() async {
@@ -61,13 +135,30 @@ class ProductListViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      print(
+        'Iniciando carga de productos. CocinaCentralId: $_cocinaCentralIdSeleccionada',
+      );
       final nuevoModelo = await _interactor.obtenerProductos(
         cocinaCentralId: _cocinaCentralIdSeleccionada,
       );
 
-      _model = nuevoModelo.copyWith(isLoading: false);
+      print('Productos cargados: ${nuevoModelo.productos.length}');
+
+      _model = nuevoModelo.copyWith(
+        isLoading: false,
+        categorias: _model.categorias,
+      );
+
+      if (nuevoModelo.productos.isEmpty) {
+        print('Advertencia: No se encontraron productos');
+        _model = _model.copyWith(
+          error: nuevoModelo.error ?? 'No se encontraron productos',
+        );
+      }
+
       notifyListeners();
     } catch (e) {
+      print('Error al cargar productos: $e');
       _model = _model.copyWith(
         isLoading: false,
         error: 'Error al cargar productos: $e',

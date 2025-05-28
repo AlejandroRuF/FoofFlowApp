@@ -1,13 +1,16 @@
 import 'dart:io';
 
+import 'package:foodflow_app/core/services/categoria_service.dart';
 import 'package:foodflow_app/core/services/productos_service.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/features/products/products_model/products_model.dart';
+import 'package:foodflow_app/models/categoria_model.dart';
 import 'package:foodflow_app/models/producto_model.dart';
 import 'package:foodflow_app/models/user_model.dart';
 
 class ProductsInteractor {
   final ProductosService _productosService = ProductosService();
+  final CategoriaService _categoriaService = CategoriaService();
   final UserSessionService _userSessionService = UserSessionService();
 
   Future<ProductsModel> obtenerCocinaCentrales() async {
@@ -16,6 +19,15 @@ class ProductsInteractor {
       return ProductsModel(cocinas: cocinas);
     } catch (e) {
       return ProductsModel(error: 'Error al obtener cocinas centrales: $e');
+    }
+  }
+
+  Future<List<Categoria>> obtenerCategorias() async {
+    try {
+      return await _categoriaService.obtenerCategorias();
+    } catch (e) {
+      print('Error al obtener categorías: $e');
+      return [];
     }
   }
 

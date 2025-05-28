@@ -211,7 +211,7 @@ class _OrderFiltersWidgetState extends State<OrderFiltersWidget> {
           onChanged: (value) {
             widget.onUrgenteChanged(
               value == null || value == false ? null : value,
-            ); // null = todos, true/false = filtrado
+            );
           },
         ),
         const Text('(Marcar para solo urgentes)'),
