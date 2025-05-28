@@ -3,15 +3,18 @@ import 'dart:io';
 import 'package:foodflow_app/core/services/categoria_service.dart';
 import 'package:foodflow_app/core/services/productos_service.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
+import 'package:foodflow_app/core/services/carrito_service.dart';
 import 'package:foodflow_app/features/products/products_model/products_model.dart';
 import 'package:foodflow_app/models/categoria_model.dart';
 import 'package:foodflow_app/models/producto_model.dart';
 import 'package:foodflow_app/models/user_model.dart';
+import 'package:foodflow_app/models/carrito_model.dart';
 
 class ProductsInteractor {
   final ProductosService _productosService = ProductosService();
   final CategoriaService _categoriaService = CategoriaService();
   final UserSessionService _userSessionService = UserSessionService();
+  final CarritoService _carritoService = CarritoService();
 
   Future<ProductsModel> obtenerCocinaCentrales() async {
     try {
@@ -83,9 +86,27 @@ class ProductsInteractor {
         }
       }
 
+      Map<int, int> cantidadesEnCarrito = {};
+      if (usuario.tipoUsuario == 'restaurante' && cocinaCentralId != null) {
+        try {
+          final carritos = await _carritoService.obtenerCarritos(
+            filtros: {'cocina_central': cocinaCentralId.toString()},
+          );
+
+          if (carritos.isNotEmpty) {
+            for (var item in carritos.first.productos) {
+              cantidadesEnCarrito[item.productoId] = item.cantidad;
+            }
+          }
+        } catch (e) {
+          print('Error al cargar carrito: $e');
+        }
+      }
+
       return ProductsModel(
         productos: productos,
         cocinaSeleccionada: cocinaSeleccionada,
+        cantidadesEnCarrito: cantidadesEnCarrito,
       );
     } catch (e) {
       return ProductsModel(error: 'Error al obtener productos: $e');
@@ -140,6 +161,20 @@ class ProductsInteractor {
       cantidad,
       cocinaCentralId,
     );
+  }
+
+  Future<List<Carrito>> obtenerCarritos({int? cocinaCentralId}) async {
+    if (cocinaCentralId == null) return [];
+
+    try {
+      final carritos = await _carritoService.obtenerCarritos(
+        filtros: {'cocina_central': cocinaCentralId.toString()},
+      );
+      return carritos;
+    } catch (e) {
+      print('Error al obtener carritos: $e');
+      return [];
+    }
   }
 
   bool puedeVerProductos() {

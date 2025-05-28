@@ -7,18 +7,39 @@ import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.
 
 import '../products_viewmodel/product_list_view_model.dart';
 
-class ProductListScreen extends StatelessWidget {
+class ProductListScreen extends StatefulWidget {
   final int? cocinaCentralId;
 
   const ProductListScreen({super.key, this.cocinaCentralId});
+
+  @override
+  State<ProductListScreen> createState() => _ProductListScreenState();
+}
+
+class _ProductListScreenState extends State<ProductListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final viewModel = Provider.of<ProductListViewModel>(
+          context,
+          listen: false,
+        );
+        if (viewModel.esRestaurante) {
+          viewModel.cargarCarrito();
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) {
         final viewModel = ProductListViewModel();
-        if (cocinaCentralId != null) {
-          viewModel.establecerCocinaCentral(cocinaCentralId!);
+        if (widget.cocinaCentralId != null) {
+          viewModel.establecerCocinaCentral(widget.cocinaCentralId!);
         } else {
           viewModel.cargarProductos();
         }
@@ -28,14 +49,16 @@ class ProductListScreen extends StatelessWidget {
         builder: (context, viewModel, _) {
           return ResponsiveScaffold(
             title:
-                cocinaCentralId != null ? 'Productos' : 'Todos los Productos',
+                widget.cocinaCentralId != null
+                    ? 'Productos'
+                    : 'Todos los Productos',
             body: _buildBody(context, viewModel),
             floatingActionButton: _buildFloatingActionButton(
               context,
               viewModel,
             ),
             initialIndex: 2,
-            showBackButton: cocinaCentralId != null,
+            showBackButton: widget.cocinaCentralId != null,
           );
         },
       ),
@@ -135,17 +158,19 @@ class ProductListScreen extends StatelessWidget {
                     final producto = productos[index];
                     return ProductCardWidget(
                       product: producto,
-                      onTap:
-                          viewModel.esRestaurante
-                              ? () => _showAddToCartDialog(
-                                context,
-                                viewModel,
-                                producto.id,
-                              )
-                              : () {
-                                context.push('/products/detail/${producto.id}');
-                              },
+                      onTap: () {
+                        context.push('/products/detail/${producto.id}');
+                      },
                       tipoUsuario: viewModel.tipoUsuario,
+                      cantidadEnCarrito: viewModel.model.getCantidadEnCarrito(
+                        producto.id,
+                      ),
+                      onAgregarAlCarrito:
+                          viewModel.esRestaurante
+                              ? (productoId, cantidad) => viewModel
+                                  .agregarAlCarrito(productoId, cantidad)
+                              : null,
+                      actualizandoCarrito: viewModel.actualizandoCarrito,
                     );
                   },
                 );
@@ -169,78 +194,5 @@ class ProductListScreen extends StatelessWidget {
       );
     }
     return null;
-  }
-
-  void _showAddToCartDialog(
-    BuildContext context,
-    ProductListViewModel viewModel,
-    int productoId,
-  ) {
-    final cantidadController = TextEditingController(text: '1');
-
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Agregar al carrito'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Ingrese la cantidad deseada:'),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: cantidadController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Cantidad',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  final cantidad = int.tryParse(cantidadController.text) ?? 0;
-                  if (cantidad <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Ingrese una cantidad válida'),
-                      ),
-                    );
-                    return;
-                  }
-
-                  Navigator.pop(context);
-                  final result = await viewModel.agregarAlCarrito(
-                    productoId,
-                    cantidad,
-                  );
-
-                  if (result) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Producto agregado al carrito'),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          viewModel.error ?? 'Error al agregar al carrito',
-                        ),
-                      ),
-                    );
-                  }
-                },
-                child: const Text('Agregar'),
-              ),
-            ],
-          ),
-    );
   }
 }

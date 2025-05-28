@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/models/carrito_model.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/models/producto_model.dart';
+import 'package:foodflow_app/models/pedido_producto_model.dart';
 import 'package:foodflow_app/core/services/productos_service.dart';
 
 import '../cart_interactor/cart_interactor.dart';
@@ -16,10 +17,13 @@ class CartDetailViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
+  Map<int, bool> _actualizandoProductos = {};
+
   Carrito? get carrito => _carrito;
   Map<int, Producto> get productosById => _productosById;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  Map<int, bool> get actualizandoProductos => _actualizandoProductos;
 
   Future<void> cargarCarritoDetalle(int carritoId) async {
     _setLoading(true);
@@ -105,6 +109,71 @@ class CartDetailViewModel extends ChangeNotifier {
     }
   }
 
+  Future<bool> actualizarCantidadProducto(
+    int productoId,
+    int nuevaCantidad,
+  ) async {
+    if (_carrito == null) return false;
+
+    _actualizandoProductos[productoId] = true;
+    notifyListeners();
+
+    try {
+      final cocina = _carrito!.cocinaCentralId;
+
+      final resultado = await _productosService.agregarAlCarrito(
+        productoId,
+        nuevaCantidad,
+        cocina,
+      );
+
+      if (resultado) {
+        await cargarCarritoDetalle(_carrito!.id);
+        return true;
+      } else {
+        _error = 'No se pudo actualizar el producto';
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error al actualizar producto: $e';
+      if (kDebugMode) {
+        print('Error en actualizarCantidadProducto: $e');
+      }
+      return false;
+    } finally {
+      _actualizandoProductos.remove(productoId);
+      notifyListeners();
+    }
+  }
+
+  Future<bool> eliminarProducto(int productoId) async {
+    return actualizarCantidadProducto(productoId, 0);
+  }
+
+  Future<bool> confirmarCarrito() async {
+    if (_carrito == null) return false;
+
+    _setLoading(true);
+    try {
+      final resultado = await _interactor.confirmarCarrito(_carrito!.id);
+      if (resultado) {
+        await cargarCarritoDetalle(_carrito!.id);
+        return true;
+      } else {
+        _error = 'No se pudo confirmar el carrito';
+        return false;
+      }
+    } catch (e) {
+      _error = 'Error al confirmar el carrito: $e';
+      if (kDebugMode) {
+        print('Error en confirmarCarrito: $e');
+      }
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   bool puedeEditarCarrito() {
     final usuario = _sessionService.user;
     if (usuario == null || _carrito == null) return false;
@@ -133,5 +202,9 @@ class CartDetailViewModel extends ChangeNotifier {
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
+  }
+
+  bool estaActualizandoProducto(int productoId) {
+    return _actualizandoProductos[productoId] ?? false;
   }
 }

@@ -196,35 +196,60 @@ class ProductosService {
         carritoId = nuevoCarritoResponse.data['id'];
       }
 
-      final productosCarritoResponse = await ApiServices.dio.get(
-        '${ApiEndpoints.pedidoProductos}?pedido=$carritoId',
-      );
-      if (productosCarritoResponse.statusCode == 200) {
-        final List<dynamic> productosCarrito = productosCarritoResponse.data;
-        final existente = productosCarrito.firstWhere(
-          (item) =>
-              item['producto'] == productoId && item['pedido'] == carritoId,
-          orElse: () => null,
+      if (cantidad <= 0) {
+        final productosCarritoResponse = await ApiServices.dio.get(
+          '${ApiEndpoints.pedidoProductos}?pedido=$carritoId',
         );
-        if (existente != null) {
-          final nuevaCantidad = (existente['cantidad'] ?? 0) + cantidad;
-          final patchResponse = await ApiServices.dio.patch(
-            '${ApiEndpoints.pedidoProductos}${existente['id']}/',
-            data: {'cantidad': nuevaCantidad},
-          );
-          return patchResponse.statusCode == 200;
-        }
-      }
 
-      final productoResponse = await ApiServices.dio.post(
-        ApiEndpoints.pedidoProductos,
-        data: {
-          'pedido': carritoId,
-          'producto': productoId,
-          'cantidad': cantidad,
-        },
-      );
-      return productoResponse.statusCode == 201;
+        if (productosCarritoResponse.statusCode == 200) {
+          final List<dynamic> productosCarrito = productosCarritoResponse.data;
+          final existente = productosCarrito.firstWhere(
+            (item) =>
+                item['producto'] == productoId && item['pedido'] == carritoId,
+            orElse: () => null,
+          );
+
+          if (existente != null) {
+            final quitarResponse = await ApiServices.dio.delete(
+              '${ApiEndpoints.pedidoProductos}${existente['id']}/',
+            );
+            return quitarResponse.statusCode == 204;
+          }
+          return true;
+        }
+        return false;
+      } else {
+        final productosCarritoResponse = await ApiServices.dio.get(
+          '${ApiEndpoints.pedidoProductos}?pedido=$carritoId',
+        );
+
+        if (productosCarritoResponse.statusCode == 200) {
+          final List<dynamic> productosCarrito = productosCarritoResponse.data;
+          final existente = productosCarrito.firstWhere(
+            (item) =>
+                item['producto'] == productoId && item['pedido'] == carritoId,
+            orElse: () => null,
+          );
+
+          if (existente != null) {
+            final patchResponse = await ApiServices.dio.patch(
+              '${ApiEndpoints.pedidoProductos}${existente['id']}/',
+              data: {'cantidad': cantidad},
+            );
+            return patchResponse.statusCode == 200;
+          }
+        }
+
+        final productoResponse = await ApiServices.dio.post(
+          ApiEndpoints.pedidoProductos,
+          data: {
+            'pedido': carritoId,
+            'producto': productoId,
+            'cantidad': cantidad,
+          },
+        );
+        return productoResponse.statusCode == 201;
+      }
     } catch (e) {
       if (kDebugMode) {
         print('Error al agregar producto al carrito: $e');

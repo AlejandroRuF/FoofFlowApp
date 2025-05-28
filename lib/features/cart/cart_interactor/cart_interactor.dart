@@ -1,9 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/core/services/carrito_service.dart';
+import 'package:foodflow_app/core/services/productos_service.dart';
 import 'package:foodflow_app/models/carrito_model.dart';
+
+import '../../../core/constants/api_endpoints.dart';
+import '../../../core/services/api_services.dart';
 
 class CartInteractor {
   final CarritoService _carritoService = CarritoService();
+  final ProductosService _productosService = ProductosService();
 
   Future<List<Carrito>> obtenerCarritos({Map<String, dynamic>? filtros}) async {
     try {
@@ -58,6 +63,39 @@ class CartInteractor {
     } catch (e) {
       if (kDebugMode) {
         print('Error en eliminarCarrito: $e');
+      }
+      return false;
+    }
+  }
+
+  Future<bool> agregarProductoAlCarrito(
+    int productoId,
+    int cantidad,
+    int cocinaCentralId,
+  ) async {
+    try {
+      return await _productosService.agregarAlCarrito(
+        productoId,
+        cantidad,
+        cocinaCentralId,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al agregar producto al carrito: $e');
+      }
+      return false;
+    }
+  }
+
+  Future<bool> confirmarCarrito(int carritoId) async {
+    try {
+      final response = await ApiServices.dio.post(
+        '${ApiEndpoints.carritos}$carritoId/confirmar/',
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al confirmar carrito: $e');
       }
       return false;
     }

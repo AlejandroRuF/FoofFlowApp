@@ -1,6 +1,7 @@
 import 'package:foodflow_app/models/categoria_model.dart';
 import 'package:foodflow_app/models/producto_model.dart';
 import 'package:foodflow_app/models/user_model.dart';
+import 'package:foodflow_app/models/carrito_model.dart';
 
 class ProductsModel {
   final List<Producto> productos;
@@ -10,6 +11,7 @@ class ProductsModel {
   final User? cocinaSeleccionada;
   final bool isLoading;
   final String? error;
+  final Map<int, int> cantidadesEnCarrito;
 
   ProductsModel({
     this.productos = const [],
@@ -19,6 +21,7 @@ class ProductsModel {
     this.cocinaSeleccionada,
     this.isLoading = false,
     this.error,
+    this.cantidadesEnCarrito = const {},
   });
 
   ProductsModel copyWith({
@@ -29,6 +32,7 @@ class ProductsModel {
     User? cocinaSeleccionada,
     bool? isLoading,
     String? error,
+    Map<int, int>? cantidadesEnCarrito,
   }) {
     return ProductsModel(
       productos: productos ?? this.productos,
@@ -38,6 +42,7 @@ class ProductsModel {
       cocinaSeleccionada: cocinaSeleccionada ?? this.cocinaSeleccionada,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
+      cantidadesEnCarrito: cantidadesEnCarrito ?? this.cantidadesEnCarrito,
     );
   }
 
@@ -143,5 +148,17 @@ class ProductsModel {
           activosOk &&
           cocinaCentralOk;
     }).toList();
+  }
+
+  int getCantidadEnCarrito(int productoId) {
+    return cantidadesEnCarrito[productoId] ?? 0;
+  }
+
+  ProductsModel actualizarCantidadesDesdeCarrito(Carrito carrito) {
+    Map<int, int> nuevasCantidades = {};
+    for (var item in carrito.productos) {
+      nuevasCantidades[item.productoId] = item.cantidad;
+    }
+    return copyWith(cantidadesEnCarrito: nuevasCantidades);
   }
 }

@@ -5,12 +5,18 @@ class ProductCardWidget extends StatelessWidget {
   final Producto product;
   final VoidCallback? onTap;
   final String tipoUsuario;
+  final int cantidadEnCarrito;
+  final Function(int, int)? onAgregarAlCarrito;
+  final bool actualizandoCarrito;
 
   const ProductCardWidget({
     super.key,
     required this.product,
     this.onTap,
     required this.tipoUsuario,
+    this.cantidadEnCarrito = 0,
+    this.onAgregarAlCarrito,
+    this.actualizandoCarrito = false,
   });
 
   @override
@@ -19,7 +25,7 @@ class ProductCardWidget extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       elevation: 3,
       child: InkWell(
-        onTap: onTap,
+        onTap: tipoUsuario == 'restaurante' ? null : onTap,
         child: LayoutBuilder(
           builder: (context, constraints) {
             double imageHeight = constraints.maxWidth < 200 ? 100 : 120;
@@ -138,14 +144,7 @@ class ProductCardWidget extends StatelessWidget {
                             ),
                           ),
                           if (tipoUsuario == 'restaurante')
-                            Container(
-                              margin: const EdgeInsets.only(left: 2),
-                              child: Icon(
-                                Icons.add_shopping_cart,
-                                color: Colors.amber,
-                                size: constraints.maxWidth < 200 ? 16 : 20,
-                              ),
-                            ),
+                            _buildCartControls(context, constraints),
                         ],
                       ),
                       const SizedBox(height: 2),
@@ -167,5 +166,86 @@ class ProductCardWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildCartControls(BuildContext context, BoxConstraints constraints) {
+    if (actualizandoCarrito) {
+      return SizedBox(
+        width: constraints.maxWidth < 200 ? 20 : 24,
+        height: constraints.maxWidth < 200 ? 20 : 24,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+        ),
+      );
+    }
+
+    if (cantidadEnCarrito > 0) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.amber.shade100,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(
+                Icons.remove,
+                size: constraints.maxWidth < 200 ? 14 : 18,
+              ),
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints(
+                minWidth: constraints.maxWidth < 200 ? 24 : 30,
+                minHeight: constraints.maxWidth < 200 ? 24 : 30,
+              ),
+              onPressed: () {
+                if (onAgregarAlCarrito != null) {
+                  onAgregarAlCarrito!(product.id, cantidadEnCarrito - 1);
+                }
+              },
+            ),
+            Text(
+              '$cantidadEnCarrito',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: constraints.maxWidth < 200 ? 14 : 16,
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.add, size: constraints.maxWidth < 200 ? 14 : 18),
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints(
+                minWidth: constraints.maxWidth < 200 ? 24 : 30,
+                minHeight: constraints.maxWidth < 200 ? 24 : 30,
+              ),
+              onPressed: () {
+                if (onAgregarAlCarrito != null) {
+                  onAgregarAlCarrito!(product.id, cantidadEnCarrito + 1);
+                }
+              },
+            ),
+          ],
+        ),
+      );
+    } else {
+      return IconButton(
+        icon: Icon(
+          Icons.add_shopping_cart,
+          color: Colors.amber,
+          size: constraints.maxWidth < 200 ? 16 : 20,
+        ),
+        padding: EdgeInsets.zero,
+        constraints: BoxConstraints(
+          minWidth: constraints.maxWidth < 200 ? 24 : 30,
+          minHeight: constraints.maxWidth < 200 ? 24 : 30,
+        ),
+        onPressed: () {
+          if (onAgregarAlCarrito != null) {
+            onAgregarAlCarrito!(product.id, 1);
+          }
+        },
+      );
+    }
   }
 }

@@ -16,6 +16,7 @@ class ProductListViewModel extends ChangeNotifier {
   bool _soloActivos = true;
   int? _cocinaCentralIdSeleccionada;
   bool _cargandoCategorias = false;
+  bool _actualizandoCarrito = false;
 
   List<Producto> get productos => _model.productos;
   bool get isLoading => _model.isLoading || _cargandoCategorias;
@@ -35,8 +36,10 @@ class ProductListViewModel extends ChangeNotifier {
   bool get esRestaurante => _interactor.obtenerTipoUsuario() == 'restaurante';
   String get tipoUsuario => _interactor.obtenerTipoUsuario();
   bool get puedeCrearProductos => _interactor.puedeCrearEditarProductos();
+  bool get actualizandoCarrito => _actualizandoCarrito;
 
   List<Categoria> get categoriasDisponibles => _model.categorias;
+  ProductsModel get model => _model;
 
   ProductListViewModel() {
     _cargarCategorias();
@@ -55,6 +58,29 @@ class ProductListViewModel extends ChangeNotifier {
     } finally {
       _cargandoCategorias = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> cargarCarrito() async {
+    if (!esRestaurante || _model.cocinaSeleccionada == null) {
+      return;
+    }
+
+    try {
+      final carritos = await _interactor.obtenerCarritos(
+        cocinaCentralId: _model.cocinaSeleccionada!.id,
+      );
+
+      if (carritos.isNotEmpty) {
+        Map<int, int> cantidades = {};
+        for (var item in carritos.first.productos) {
+          cantidades[item.productoId] = item.cantidad;
+        }
+        _model = _model.copyWith(cantidadesEnCarrito: cantidades);
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error al cargar carrito: $e');
     }
   }
 
@@ -130,6 +156,10 @@ class ProductListViewModel extends ChangeNotifier {
     );
   }
 
+  int getCantidadEnCarrito(int productoId) {
+    return _model.getCantidadEnCarrito(productoId);
+  }
+
   Future<void> cargarProductos() async {
     _model = _model.copyWith(isLoading: true, error: null);
     notifyListeners();
@@ -174,6 +204,9 @@ class ProductListViewModel extends ChangeNotifier {
       return false;
     }
 
+    _actualizandoCarrito = true;
+    notifyListeners();
+
     try {
       final resultado = await _interactor.agregarAlCarrito(
         productoId,
@@ -181,13 +214,26 @@ class ProductListViewModel extends ChangeNotifier {
         _model.cocinaSeleccionada!.id,
       );
 
-      if (!resultado) {
+      if (resultado) {
+        Map<int, int> nuevasCantidades = Map.from(_model.cantidadesEnCarrito);
+
+        if (cantidad <= 0) {
+          nuevasCantidades.remove(productoId);
+        } else {
+          nuevasCantidades[productoId] = cantidad;
+        }
+
+        _model = _model.copyWith(cantidadesEnCarrito: nuevasCantidades);
+      } else {
         _model = _model.copyWith(error: 'Error al agregar producto al carrito');
       }
 
+      _actualizandoCarrito = false;
+      notifyListeners();
       return resultado;
     } catch (e) {
       _model = _model.copyWith(error: 'Error al agregar al carrito: $e');
+      _actualizandoCarrito = false;
       notifyListeners();
       return false;
     }

@@ -14,13 +14,15 @@ class CartDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => CartDetailViewModel()..cargarCarritoDetalle(carritoId),
-      child: const _CartDetailBody(),
+      child: _CartDetailBody(carritoId: carritoId),
     );
   }
 }
 
 class _CartDetailBody extends StatelessWidget {
-  const _CartDetailBody();
+  final int carritoId;
+
+  const _CartDetailBody({required this.carritoId});
 
   @override
   Widget build(BuildContext context) {
@@ -28,29 +30,53 @@ class _CartDetailBody extends StatelessWidget {
     final carrito = viewModel.carrito;
 
     if (viewModel.isLoading) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/icons/app_icon.png', width: 100, height: 100),
-            SizedBox(height: 24),
-            CircularProgressIndicator(),
-          ],
+      return const ResponsiveScaffold(
+        title: 'Cargando...',
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image(
+                image: AssetImage('assets/icons/app_icon.png'),
+                width: 100,
+                height: 100,
+              ),
+              SizedBox(height: 24),
+              CircularProgressIndicator(),
+            ],
+          ),
         ),
       );
     }
 
     if (viewModel.error != null) {
-      return Center(
-        child: Text(
-          'Error: ${viewModel.error}',
-          style: const TextStyle(color: Colors.red),
+      return ResponsiveScaffold(
+        title: 'Error',
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Error: ${viewModel.error}',
+                style: const TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => viewModel.cargarCarritoDetalle(carritoId),
+                child: const Text('Reintentar'),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     if (carrito == null) {
-      return const Center(child: Text('Carrito no encontrado'));
+      return const ResponsiveScaffold(
+        title: 'Carrito no encontrado',
+        body: Center(child: Text('Carrito no encontrado')),
+      );
     }
 
     final editable = viewModel.puedeEditarCarrito();
@@ -85,6 +111,7 @@ class _CartDetailBody extends StatelessWidget {
                         ),
                   ) ??
                   false;
+
               if (confirmado) {
                 final ok = await viewModel.eliminarCarrito();
                 if (ok && context.mounted) {
@@ -111,6 +138,26 @@ class _CartDetailBody extends StatelessWidget {
                           final producto =
                               viewModel.productosById[pedidoProducto
                                   .productoId];
+                          final actualizando = viewModel
+                              .estaActualizandoProducto(
+                                pedidoProducto.productoId,
+                              );
+
+                          if (actualizando) {
+                            return const Card(
+                              margin: EdgeInsets.symmetric(
+                                vertical: 6,
+                                horizontal: 12,
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(12),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                            );
+                          }
+
                           return CartProductWidget(
                             pedidoProducto: pedidoProducto,
                             producto: producto,
@@ -164,16 +211,25 @@ class _CartDetailBody extends StatelessWidget {
             if (editable)
               ElevatedButton.icon(
                 onPressed:
-                    carrito.productos.isEmpty
+                    carrito.productos.isEmpty || viewModel.isLoading
                         ? null
                         : () async {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Funcionalidad no implementada en el backend',
+                          final resultado = await viewModel.confirmarCarrito();
+                          if (resultado && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Carrito confirmado con éxito'),
                               ),
-                            ),
-                          );
+                            );
+                            Navigator.of(context).pop();
+                          } else if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Error al confirmar el carrito'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
                         },
                 icon: const Icon(Icons.check),
                 label: const Text('Confirmar carrito'),
@@ -192,29 +248,45 @@ class _CartDetailBody extends StatelessWidget {
     BuildContext context,
     PedidoProducto producto,
     int delta,
-  ) {
+  ) async {
     final viewModel = Provider.of<CartDetailViewModel>(context, listen: false);
-    final carrito = viewModel.carrito;
-    if (carrito == null) return;
-    final productosActualizados = List<PedidoProducto>.from(carrito.productos);
-    final idx = productosActualizados.indexWhere((p) => p.id == producto.id);
-    if (idx != -1) {
-      final p = productosActualizados[idx];
-      productosActualizados[idx] = p.copyWith(cantidad: p.cantidad + delta);
-      viewModel.actualizarCarrito(
-        carrito.copyWith(productos: productosActualizados),
-      );
-    }
+
+    final nuevaCantidad = producto.cantidad + delta;
+
+    await viewModel.actualizarCantidadProducto(
+      producto.productoId,
+      nuevaCantidad,
+    );
   }
 
-  void _eliminarProducto(BuildContext context, PedidoProducto producto) {
+  void _eliminarProducto(BuildContext context, PedidoProducto producto) async {
     final viewModel = Provider.of<CartDetailViewModel>(context, listen: false);
-    final carrito = viewModel.carrito;
-    if (carrito == null) return;
-    final productosActualizados =
-        carrito.productos.where((p) => p.id != producto.id).toList();
-    viewModel.actualizarCarrito(
-      carrito.copyWith(productos: productosActualizados),
-    );
+
+    final confirmar =
+        await showDialog<bool>(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Eliminar producto'),
+                content: Text(
+                  '¿Seguro que deseas eliminar ${producto.productoNombre} del carrito?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Cancelar'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('Eliminar'),
+                  ),
+                ],
+              ),
+        ) ??
+        false;
+
+    if (confirmar) {
+      await viewModel.eliminarProducto(producto.productoId);
+    }
   }
 }
