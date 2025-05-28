@@ -15,7 +15,7 @@ import '../../features/products/products_view/product_list_screen.dart';
 import '../../features/products/products_view/product_form_screen.dart';
 import '../../features/products/products_view/product_detail_screen.dart';
 import '../../features/warehouse/warehouse_view/warehouse_management_screen.dart';
-import '../../features/warehouse/warehouse_view/inventory_screen_widget.dart';
+import '../../features/warehouse/warehouse_view/inventory_screen.dart';
 import '../../features/warehouse/warehouse_view/modify_by_q_r_screen.dart';
 import '../../features/profile/profile_view/profile_screen.dart';
 import '../../features/profile/profile_view/edit_profile_screen.dart';

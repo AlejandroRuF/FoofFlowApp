@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:foodflow_app/features/orders/orders_viewmodel/order_detail_viewmodel.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
 import 'package:foodflow_app/models/pedido_producto_model.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 
 class OrderDetailScreen extends StatelessWidget {
   final int pedidoId;
@@ -254,9 +255,9 @@ class OrderDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Divider(),
-            ...productos
-                .map((producto) => _buildProductoItem(context, producto))
-                ,
+            ...productos.map(
+              (producto) => _buildProductoItem(context, producto),
+            ),
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -378,26 +379,43 @@ class OrderDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget? _buildFloatingActionButton(
+  Widget _buildFloatingActionButton(
     BuildContext context,
     OrderDetailViewModel viewModel,
   ) {
-    final pedido = viewModel.pedido;
-    if (pedido == null) return null;
-
-    if (pedido.estado == 'completado' || pedido.estado == 'cancelado') {
-      return null;
+    if (!viewModel.puedeCambiarEstado() || viewModel.pedido == null) {
+      return Container();
     }
 
-    return FloatingActionButton.extended(
-      onPressed: () => _navegarAFormularioEdicion(context, pedido.id),
-      label: const Text('Editar Pedido'),
-      icon: const Icon(Icons.edit),
+    final EventBusService _eventBus = EventBusService();
+
+    return FloatingActionButton(
+      onPressed: () {
+        context.push('/orders/edit/${viewModel.pedido!.id}').then((result) {
+          if (result == true) {
+            _eventBus.publishRefresh(
+              RefreshEventType.orders,
+              data: {'action': 'edited', 'pedidoId': viewModel.pedido!.id},
+            );
+          }
+          viewModel.cargarPedidoDetalle(viewModel.pedido!.id);
+        });
+      },
+      child: const Icon(Icons.edit),
     );
   }
 
   void _navegarAFormularioEdicion(BuildContext context, int pedidoId) {
-    context.push('/orders/edit/$pedidoId').then((_) {
+    final EventBusService _eventBus = EventBusService();
+
+    context.push('/orders/edit/$pedidoId').then((result) {
+      if (result == true) {
+        _eventBus.publishRefresh(
+          RefreshEventType.orders,
+          data: {'action': 'edited', 'pedidoId': pedidoId},
+        );
+      }
+
       Provider.of<OrderDetailViewModel>(
         context,
         listen: false,
@@ -410,6 +428,7 @@ class OrderDetailScreen extends StatelessWidget {
     OrderDetailViewModel viewModel,
   ) {
     final controller = TextEditingController();
+    final EventBusService _eventBus = EventBusService();
 
     showDialog(
       context: context,
@@ -438,7 +457,7 @@ class OrderDetailScreen extends StatelessWidget {
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () {
+                onPressed: () async {
                   if (controller.text.trim().isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Debe indicar un motivo')),
@@ -446,7 +465,19 @@ class OrderDetailScreen extends StatelessWidget {
                     return;
                   }
                   Navigator.pop(context);
-                  viewModel.cancelarPedido(controller.text.trim());
+                  final success = await viewModel.cancelarPedido(
+                    controller.text.trim(),
+                  );
+
+                  if (success) {
+                    _eventBus.publishRefresh(
+                      RefreshEventType.orders,
+                      data: {
+                        'action': 'canceled',
+                        'pedidoId': viewModel.pedido!.id,
+                      },
+                    );
+                  }
                 },
                 child: const Text('Confirmar'),
               ),

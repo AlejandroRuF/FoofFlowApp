@@ -126,7 +126,7 @@ class ProductListViewModel extends ChangeNotifier {
       precioMin: _precioMin,
       precioMax: _precioMax,
       soloActivos: _soloActivos,
-      cocinaCentralId: _cocinaCentralIdSeleccionada, // Añadir esta línea
+      cocinaCentralId: _cocinaCentralIdSeleccionada,
     );
   }
 

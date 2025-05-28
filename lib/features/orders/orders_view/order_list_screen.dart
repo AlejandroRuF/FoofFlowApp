@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -6,14 +7,58 @@ import 'package:foodflow_app/features/orders/orders_view/widgets/order_filters_w
 import 'package:foodflow_app/features/orders/orders_view/widgets/orders_status_widget.dart';
 import 'package:foodflow_app/features/orders/orders_viewmodel/order_list_viewmodel.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 
-class OrderListScreen extends StatelessWidget {
+class OrderListScreen extends StatefulWidget {
   const OrderListScreen({super.key});
 
   @override
+  State<OrderListScreen> createState() => _OrderListScreenState();
+}
+
+class _OrderListScreenState extends State<OrderListScreen>
+    with WidgetsBindingObserver {
+  late OrderListViewModel _viewModel;
+  final EventBusService _eventBus = EventBusService();
+  StreamSubscription? _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    _subscription = _eventBus.stream.listen((event) {
+      if (event.type == RefreshEventType.orders && mounted) {
+        print("Recibido evento de actualización de pedidos: ${event.data}");
+        _viewModel.forzarRecarga();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _viewModel = Provider.of<OrderListViewModel>(context);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _viewModel.cargarPedidos();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => OrderListViewModel(),
+    return ChangeNotifierProvider.value(
+      value: _viewModel,
       child: const _OrderListBody(),
     );
   }
@@ -135,8 +180,6 @@ class _OrderListBody extends StatelessWidget {
   }
 
   void _navegarADetallePedido(BuildContext context, int pedidoId) {
-    context.push('/orders/detail/$pedidoId').then((_) {
-      Provider.of<OrderListViewModel>(context, listen: false).cargarPedidos();
-    });
+    context.push('/orders/detail/$pedidoId');
   }
 }

@@ -10,6 +10,7 @@ class OrderListViewModel extends ChangeNotifier {
   final UserSessionService _sessionService = UserSessionService();
 
   OrdersModel _model = OrdersModel(isLoading: true);
+  DateTime? _ultimaActualizacion;
 
   String _estadoSeleccionado = '';
   String _tipoPedidoSeleccionado = '';
@@ -21,6 +22,7 @@ class OrderListViewModel extends ChangeNotifier {
   DateTime? _fechaFin;
 
   OrdersModel get model => _model;
+  DateTime? get ultimaActualizacion => _ultimaActualizacion;
 
   String get estadoSeleccionado => _estadoSeleccionado;
   String get tipoPedidoSeleccionado => _tipoPedidoSeleccionado;
@@ -49,6 +51,13 @@ class OrderListViewModel extends ChangeNotifier {
   }
 
   Future<void> cargarPedidos() async {
+    final ahora = DateTime.now();
+    if (_ultimaActualizacion != null &&
+        ahora.difference(_ultimaActualizacion!).inSeconds < 5 &&
+        _model.pedidos.isNotEmpty) {
+      return;
+    }
+
     _setLoading(true);
     try {
       final filtros = _construirFiltrosAPI();
@@ -62,6 +71,7 @@ class OrderListViewModel extends ChangeNotifier {
         error: null,
         filtros: filtros,
       );
+      _ultimaActualizacion = ahora;
     } catch (e) {
       _model = _model.copyWith(
         isLoading: false,
@@ -72,6 +82,11 @@ class OrderListViewModel extends ChangeNotifier {
       }
     }
     notifyListeners();
+  }
+
+  Future<void> forzarRecarga() async {
+    _ultimaActualizacion = null;
+    await cargarPedidos();
   }
 
   Map<String, dynamic> _construirFiltrosAPI() {

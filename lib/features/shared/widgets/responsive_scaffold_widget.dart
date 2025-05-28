@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:foodflow_app/features/auth/login/login_viewmodel/login_viewmodel.dart';
 import 'package:foodflow_app/features/shared/widgets/app_bottom_navigation_bar.dart';
 import 'package:foodflow_app/features/shared/widgets/main_navigator_bar.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 
 class ResponsiveScaffold extends StatefulWidget {
   final String title;
@@ -34,6 +35,7 @@ class ResponsiveScaffold extends StatefulWidget {
 class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
   late int _currentIndex;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final EventBusService _eventBus = EventBusService();
 
   @override
   void initState() {
@@ -62,7 +64,7 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
       _currentIndex = 4;
     } else if (currentLocation.startsWith('/profile')) {
       _currentIndex = 5;
-    } else {}
+    }
   }
 
   void _onItemSelected(int index) {
@@ -138,6 +140,31 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
     }
   }
 
+  void _handleBackNavigation() {
+    final currentLocation = GoRouterState.of(context).matchedLocation;
+    RefreshEventType? eventType;
+
+    if (currentLocation.contains('/orders/')) {
+      eventType = RefreshEventType.orders;
+    } else if (currentLocation.contains('/products/')) {
+      eventType = RefreshEventType.products;
+    } else if (currentLocation.contains('/inventory/')) {
+      eventType = RefreshEventType.inventory;
+    } else if (currentLocation.contains('/incidents/')) {
+      eventType = RefreshEventType.incidents;
+    } else if (currentLocation.contains('/dashboard/')) {
+      eventType = RefreshEventType.dashboard;
+    } else if (currentLocation.contains('/profile/')) {
+      eventType = RefreshEventType.profile;
+    }
+
+    if (eventType != null) {
+      _eventBus.publishRefresh(eventType, data: {'source': currentLocation});
+    }
+
+    context.pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
@@ -194,13 +221,13 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
                 ? shouldShowBackButton
                     ? IconButton(
                       icon: const Icon(Icons.arrow_back),
-                      onPressed: () => context.pop(),
+                      onPressed: _handleBackNavigation,
                     )
                     : null
                 : shouldShowBackButton
                 ? IconButton(
                   icon: const Icon(Icons.arrow_back),
-                  onPressed: () => context.pop(),
+                  onPressed: _handleBackNavigation,
                 )
                 : IconButton(
                   icon: const Icon(Icons.menu),

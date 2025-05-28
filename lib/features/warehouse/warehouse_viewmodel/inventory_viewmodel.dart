@@ -169,8 +169,6 @@ class InventoryViewModel extends ChangeNotifier {
   }
 
   void aplicarFiltros() {
-    // Los filtros ya están aplicados a través de los setters individuales
-    // Solo necesitamos notificar para forzar una actualización de la UI
     notifyListeners();
   }
 }

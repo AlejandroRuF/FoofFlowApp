@@ -37,7 +37,6 @@ class InventoryScreen extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, InventoryViewModel viewModel) {
-    // Siempre mostramos el widget de filtros en la parte superior
     Widget filtersWidget = InventoryFiltersWidget(
       busqueda: viewModel.state.busqueda,
       mostrarStockBajo: viewModel.state.mostrarStockBajo,
@@ -56,7 +55,6 @@ class InventoryScreen extends StatelessWidget {
       onAplicarFiltros: viewModel.aplicarFiltros,
     );
 
-    // Si está cargando, mostramos el indicador de carga
     if (viewModel.state.isLoading) {
       return Column(
         children: [
@@ -81,7 +79,6 @@ class InventoryScreen extends StatelessWidget {
       );
     }
 
-    // Si hay un error, mostramos el mensaje de error
     if (viewModel.state.error != null) {
       return Column(
         children: [
@@ -121,7 +118,6 @@ class InventoryScreen extends StatelessWidget {
 
     final inventario = viewModel.inventarioFiltrado;
 
-    // Si no hay productos, mostramos un mensaje pero mantenemos los filtros
     if (inventario.isEmpty) {
       return Column(
         children: [
@@ -158,7 +154,6 @@ class InventoryScreen extends StatelessWidget {
       );
     }
 
-    // Lista de productos con filtros
     return Column(
       children: [
         filtersWidget,

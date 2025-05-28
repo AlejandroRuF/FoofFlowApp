@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:foodflow_app/features/orders/orders_viewmodel/order_form_viewmodel.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 
 class OrderFormScreen extends StatefulWidget {
   final int pedidoId;
@@ -20,6 +21,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   DateTime? _fechaEntregaReal;
   String? _motivoCancelacion;
   final _motivoCancelacionController = TextEditingController();
+  final EventBusService _eventBus = EventBusService();
 
   @override
   void dispose() {
@@ -171,7 +173,48 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
-                  onPressed: () => _guardarCambios(context, viewModel),
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      final cambios = {
+                        'estado': _estado,
+                        'notas': _notasController.text,
+                        'urgente': _urgente,
+                      };
+
+                      if (_estado == 'cancelado') {
+                        cambios['motivoCancelacion'] =
+                            _motivoCancelacionController.text;
+                      }
+
+                      if (_estado == 'completado' &&
+                          _fechaEntregaReal != null) {
+                        cambios['fechaEntregaReal'] =
+                            _fechaEntregaReal!.toIso8601String();
+                      }
+
+                      final resultado = await viewModel.guardarCambios(cambios);
+                      if (resultado) {
+                        _eventBus.publishRefresh(
+                          RefreshEventType.orders,
+                          data: {
+                            'action': 'edited',
+                            'pedidoId': widget.pedidoId,
+                          },
+                        );
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Cambios guardados correctamente'),
+                          ),
+                        );
+                        Navigator.pop(context, true);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: ${viewModel.error}')),
+                        );
+                      }
+                    }
+                  },
                   child: const Text('Guardar Cambios'),
                 ),
               ],

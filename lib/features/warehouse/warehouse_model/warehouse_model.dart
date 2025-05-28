@@ -84,17 +84,8 @@ class WarehouseModel {
           stockMinimo == null || item.stockActual >= stockMinimo!;
       final cumpleStockMaximo =
           stockMaximo == null || item.stockActual <= stockMaximo!;
-
-      // Implementación para filtrado por categoría
-      // En un caso real, esto dependería de cómo está estructurado tu modelo de datos
-      final cumpleCategoria =
-          categoriaIdSeleccionada ==
-          null; // Por defecto considera que cumple si no hay filtro
-
-      // Implementación para filtrado por activos
-      // En un caso real, esto dependería de si tienes un campo "activo" en tu modelo
-      final cumpleActivos =
-          !soloActivos || true; // Por defecto considera que cumple
+      final cumpleCategoria = categoriaIdSeleccionada == null;
+      final cumpleActivos = !soloActivos || true;
 
       if (!cumpleBusqueda ||
           !cumpleFiltroStockBajo ||

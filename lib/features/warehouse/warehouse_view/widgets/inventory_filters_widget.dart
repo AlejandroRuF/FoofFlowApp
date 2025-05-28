@@ -71,13 +71,11 @@ class _InventoryFiltersWidgetState extends State<InventoryFiltersWidget> {
   void didUpdateWidget(covariant InventoryFiltersWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Solo actualizamos el campo de búsqueda si cambia externamente
     if (oldWidget.busqueda != widget.busqueda &&
         _searchController.text != widget.busqueda) {
       _searchController.text = widget.busqueda;
     }
 
-    // Solo actualizamos los campos de stock si los filtros fueron limpiados
     if (widget.stockMinimo == null &&
         oldWidget.stockMinimo != null &&
         _stockMinimoController.text.isNotEmpty) {

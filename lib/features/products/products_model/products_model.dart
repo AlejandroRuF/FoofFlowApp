@@ -88,7 +88,7 @@ class ProductsModel {
     double? precioMin,
     double? precioMax,
     bool soloActivos = true,
-    int? cocinaCentralId, // Añadir este parámetro
+    int? cocinaCentralId,
   }) {
     print('Filtrando productos. Total antes de filtrar: ${productos.length}');
     print(
@@ -121,7 +121,6 @@ class ProductsModel {
 
       final activosOk = !soloActivos || producto.isActive;
 
-      // Agregar esta línea para filtrar por cocina central
       final cocinaCentralOk =
           cocinaCentralId == null ||
           producto.cocinaCentralId == cocinaCentralId;
