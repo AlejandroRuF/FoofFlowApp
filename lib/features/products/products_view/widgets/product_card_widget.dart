@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:foodflow_app/models/producto_model.dart';
 
 class ProductCardWidget extends StatelessWidget {
@@ -40,45 +41,7 @@ class ProductCardWidget extends StatelessWidget {
               children: [
                 Stack(
                   children: [
-                    if (product.getImagenUrlCompleta() != null)
-                      Image.network(
-                        product.getImagenUrlCompleta()!,
-                        height: imageHeight,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            height: imageHeight,
-                            color: Colors.grey[300],
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                value:
-                                    loadingProgress.expectedTotalBytes != null
-                                        ? loadingProgress
-                                                .cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                        : null,
-                              ),
-                            ),
-                          );
-                        },
-                        errorBuilder:
-                            (context, error, stackTrace) => Container(
-                              height: imageHeight,
-                              color: Colors.grey[300],
-                              child: const Icon(
-                                Icons.image_not_supported,
-                                size: 40,
-                              ),
-                            ),
-                      )
-                    else
-                      Container(
-                        height: imageHeight,
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.image, size: 40),
-                      ),
+                    _buildProductImage(imageHeight),
                     if (!product.isActive)
                       Positioned(
                         top: 0,
@@ -168,12 +131,47 @@ class ProductCardWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildProductImage(double imageHeight) {
+    final imagenUrl = product.getImagenUrlCompleta();
+
+    if (imagenUrl != null && imagenUrl.isNotEmpty) {
+      // Añadir timestamp para evitar caché
+      final imagenUrlConTimestamp =
+          '$imagenUrl?v=${DateTime.now().millisecondsSinceEpoch}';
+
+      return CachedNetworkImage(
+        imageUrl: imagenUrlConTimestamp,
+        height: imageHeight,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        placeholder:
+            (context, url) => Container(
+              height: imageHeight,
+              color: Colors.grey[300],
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+        errorWidget:
+            (context, url, error) => Container(
+              height: imageHeight,
+              color: Colors.grey[300],
+              child: const Icon(Icons.image_not_supported, size: 40),
+            ),
+      );
+    } else {
+      return Container(
+        height: imageHeight,
+        color: Colors.grey[300],
+        child: const Icon(Icons.image, size: 40),
+      );
+    }
+  }
+
   Widget _buildCartControls(BuildContext context, BoxConstraints constraints) {
     if (actualizandoCarrito) {
       return SizedBox(
         width: constraints.maxWidth < 200 ? 20 : 24,
         height: constraints.maxWidth < 200 ? 20 : 24,
-        child: CircularProgressIndicator(
+        child: const CircularProgressIndicator(
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
         ),

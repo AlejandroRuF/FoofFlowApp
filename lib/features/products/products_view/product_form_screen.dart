@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
 
 import '../products_viewmodel/product_form_view_model.dart';
@@ -40,8 +41,8 @@ class ProductFormScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset('assets/icons/app_icon.png', width: 100, height: 100),
-            SizedBox(height: 24),
-            CircularProgressIndicator(),
+            const SizedBox(height: 24),
+            const CircularProgressIndicator(),
           ],
         ),
       );
@@ -109,59 +110,15 @@ class ProductFormScreen extends StatelessWidget {
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child:
-                        viewModel.imagenSeleccionada != null
-                            ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.file(
-                                viewModel.imagenSeleccionada!,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                            : viewModel.producto?.getImagenUrlCompleta() != null
-                            ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                viewModel.producto!.getImagenUrlCompleta()!,
-                                fit: BoxFit.cover,
-                                loadingBuilder: (context, child, progress) {
-                                  if (progress == null) return child;
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      value:
-                                          progress.expectedTotalBytes != null
-                                              ? progress.cumulativeBytesLoaded /
-                                                  progress.expectedTotalBytes!
-                                              : null,
-                                    ),
-                                  );
-                                },
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Center(
-                                    child: Icon(
-                                      Icons.broken_image,
-                                      size: 50,
-                                      color: Colors.grey,
-                                    ),
-                                  );
-                                },
-                              ),
-                            )
-                            : const Center(
-                              child: Icon(
-                                Icons.image,
-                                size: 50,
-                                color: Colors.grey,
-                              ),
-                            ),
+                    child: _buildImageWidget(viewModel),
                   ),
                   if (viewModel.imagenSeleccionada != null ||
-                      viewModel.producto?.getImagenUrlCompleta() != null)
+                      (viewModel.producto?.getImagenUrlCompleta() != null))
                     Positioned(
                       top: 5,
                       right: 5,
                       child: Container(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.red,
                           shape: BoxShape.circle,
                         ),
@@ -207,6 +164,49 @@ class ProductFormScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildImageWidget(ProductFormViewModel viewModel) {
+    // PRIORIDAD 1: Imagen seleccionada local (archivo)
+    if (viewModel.imagenSeleccionada != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.file(
+          viewModel.imagenSeleccionada!,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+        ),
+      );
+    }
+
+    // PRIORIDAD 2: Imagen del servidor (usando producto.getImagenUrlCompleta())
+    if (viewModel.producto?.getImagenUrlCompleta() != null) {
+      final imagenUrl = viewModel.producto!.getImagenUrlCompleta()!;
+      // Añadir timestamp para evitar caché
+      final imagenUrlConTimestamp =
+          '$imagenUrl?v=${DateTime.now().millisecondsSinceEpoch}';
+
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: CachedNetworkImage(
+          imageUrl: imagenUrlConTimestamp,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+          placeholder:
+              (context, url) =>
+                  const Center(child: CircularProgressIndicator()),
+          errorWidget:
+              (context, url, error) => const Center(
+                child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
+              ),
+        ),
+      );
+    }
+
+    // DEFAULT: Sin imagen
+    return const Center(child: Icon(Icons.image, size: 50, color: Colors.grey));
+  }
+
   Widget _buildFormFields(
     BuildContext context,
     ProductFormViewModel viewModel,
@@ -222,7 +222,6 @@ class ProductFormScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
-
             DropdownButtonFormField(
               decoration: const InputDecoration(
                 labelText: 'Cocina Central *',
@@ -335,6 +334,9 @@ class ProductFormScreen extends StatelessWidget {
               viewModel.isSaving
                   ? null
                   : () async {
+                    // Limpiar errores previos
+                    viewModel.limpiarError();
+
                     final result = await viewModel.guardarProducto();
                     if (result) {
                       if (context.mounted) {
@@ -360,18 +362,12 @@ class ProductFormScreen extends StatelessWidget {
                   },
           child:
               viewModel.isSaving
-                  ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          'assets/icons/app_icon.png',
-                          width: 100,
-                          height: 100,
-                        ),
-                        SizedBox(height: 24),
-                        CircularProgressIndicator(),
-                      ],
+                  ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   )
                   : Text(

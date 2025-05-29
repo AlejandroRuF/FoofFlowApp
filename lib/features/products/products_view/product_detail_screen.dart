@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
 import '../products_viewmodel/product_detail_view_model.dart';
 
@@ -37,8 +38,8 @@ class ProductDetailScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset('assets/icons/app_icon.png', width: 100, height: 100),
-            SizedBox(height: 24),
-            CircularProgressIndicator(),
+            const SizedBox(height: 24),
+            const CircularProgressIndicator(),
           ],
         ),
       );
@@ -81,28 +82,7 @@ class ProductDetailScreen extends StatelessWidget {
                 flex: 3,
                 child: Card(
                   clipBehavior: Clip.antiAlias,
-                  child:
-                      producto.getImagenUrlCompleta() != null
-                          ? Image.network(
-                            producto.getImagenUrlCompleta()!,
-                            height: 250,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (context, error, stackTrace) => Container(
-                                  height: 250,
-                                  color: Colors.grey[300],
-                                  child: const Icon(
-                                    Icons.image_not_supported,
-                                    size: 50,
-                                  ),
-                                ),
-                          )
-                          : Container(
-                            height: 250,
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.image, size: 50),
-                          ),
+                  child: _buildProductImage(viewModel),
                 ),
               ),
               if (producto.imagenQrUrl != null)
@@ -120,20 +100,7 @@ class ProductDetailScreen extends StatelessWidget {
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8),
-                            Image.network(
-                              producto.getImagenQrUrlCompleta() ?? '',
-                              height: 150,
-                              fit: BoxFit.contain,
-                              errorBuilder:
-                                  (context, error, stackTrace) => Container(
-                                    height: 150,
-                                    color: Colors.grey[300],
-                                    child: const Icon(
-                                      Icons.qr_code_2,
-                                      size: 50,
-                                    ),
-                                  ),
-                            ),
+                            _buildQrImage(viewModel),
                           ],
                         ),
                       ),
@@ -258,6 +225,67 @@ class ProductDetailScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildProductImage(ProductDetailViewModel viewModel) {
+    final imagenUrl = viewModel.obtenerImagenUrlConTimestamp();
+
+    if (imagenUrl != null && imagenUrl.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: imagenUrl,
+        height: 250,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        placeholder:
+            (context, url) => Container(
+              height: 250,
+              color: Colors.grey[300],
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+        errorWidget:
+            (context, url, error) => Container(
+              height: 250,
+              color: Colors.grey[300],
+              child: const Icon(Icons.image_not_supported, size: 50),
+            ),
+      );
+    } else {
+      return Container(
+        height: 250,
+        color: Colors.grey[300],
+        child: const Icon(Icons.image, size: 50),
+      );
+    }
+  }
+
+  Widget _buildQrImage(ProductDetailViewModel viewModel) {
+    final qrUrl = viewModel.obtenerImagenQrUrlConTimestamp();
+
+    if (qrUrl != null && qrUrl.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: qrUrl,
+        height: 150,
+        fit: BoxFit.contain,
+        placeholder:
+            (context, url) => Container(
+              height: 150,
+              color: Colors.grey[300],
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+        errorWidget:
+            (context, url, error) => Container(
+              height: 150,
+              color: Colors.grey[300],
+              child: const Icon(Icons.qr_code_2, size: 50),
+            ),
+      );
+    } else {
+      return Container(
+        height: 150,
+        color: Colors.grey[300],
+        child: const Icon(Icons.qr_code_2, size: 50),
+      );
+    }
   }
 
   Widget _buildInfoItem(

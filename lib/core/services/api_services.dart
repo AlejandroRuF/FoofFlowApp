@@ -20,6 +20,7 @@ class ApiServices {
             },
           ),
         )
+        ..options.headers['Cache-Control'] = 'no-cache'
         ..interceptors.add(
           InterceptorsWrapper(
             onRequest: (options, handler) async {
@@ -86,6 +87,20 @@ class ApiServices {
               if (kDebugMode) {
                 print(obj);
               }
+            },
+          ),
+        )
+        ..interceptors.add(
+          InterceptorsWrapper(
+            onRequest: (options, handler) {
+              // Para requests de imágenes, añadir headers anti-cache
+              if (options.path.contains('productos')) {
+                options.headers['Cache-Control'] =
+                    'no-cache, no-store, must-revalidate';
+                options.headers['Pragma'] = 'no-cache';
+                options.headers['Expires'] = '0';
+              }
+              handler.next(options);
             },
           ),
         );

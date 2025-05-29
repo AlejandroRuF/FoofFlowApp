@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:foodflow_app/core/services/productos_service.dart';
+import 'package:foodflow_app/features/products/products_interactor/products_interactor.dart';
 import 'package:foodflow_app/features/products/products_model/products_model.dart';
 import 'package:foodflow_app/models/categoria_model.dart';
 import 'package:foodflow_app/models/producto_model.dart';
@@ -9,7 +9,7 @@ import 'package:foodflow_app/models/user_model.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProductFormViewModel extends ChangeNotifier {
-  final ProductosService _productosService = ProductosService();
+  final ProductsInteractor _interactor = ProductsInteractor();
 
   ProductsModel _model = ProductsModel();
 
@@ -31,6 +31,8 @@ class ProductFormViewModel extends ChangeNotifier {
 
   File? imagenSeleccionada;
   String? imagenUrl;
+  bool _imagenEliminada =
+      false; // Nueva bandera para indicar si se eliminó la imagen
 
   List<User> cocinasCentrales = [];
   User? cocinaCentralSeleccionada;
@@ -44,9 +46,10 @@ class ProductFormViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final producto = await _productosService.obtenerProductoDetalle(
+      final productoModel = await _interactor.obtenerProductoDetalle(
         productoId,
       );
+      final producto = productoModel.productoSeleccionado;
 
       if (producto != null) {
         _model = _model.copyWith(
@@ -62,6 +65,7 @@ class ProductFormViewModel extends ChangeNotifier {
         categoriaSeleccionada = producto.categoria;
         productoActivo = producto.isActive;
         imagenUrl = producto.imagenUrl;
+        _imagenEliminada = false; // Resetear bandera
 
         for (var cocina in cocinasCentrales) {
           if (cocina.id == producto.cocinaCentralId) {
@@ -88,7 +92,8 @@ class ProductFormViewModel extends ChangeNotifier {
 
   Future<void> _cargarCocinasCentrales() async {
     try {
-      cocinasCentrales = await _productosService.obtenerCocinaCentrales();
+      final cocinasModel = await _interactor.obtenerCocinaCentrales();
+      cocinasCentrales = cocinasModel.cocinas ?? [];
       if (cocinasCentrales.isNotEmpty) {
         cocinaCentralSeleccionada = cocinasCentrales.first;
       }
@@ -110,12 +115,14 @@ class ProductFormViewModel extends ChangeNotifier {
 
     if (pickedFile != null) {
       imagenSeleccionada = File(pickedFile.path);
+      _imagenEliminada = false; // Si selecciona nueva imagen, resetear bandera
       notifyListeners();
     }
   }
 
   void eliminarImagen() {
     imagenSeleccionada = null;
+    _imagenEliminada = true; // Marcar que se eliminó la imagen
     notifyListeners();
   }
 
@@ -146,12 +153,18 @@ class ProductFormViewModel extends ChangeNotifier {
         datos['categoria'] = categoriaSeleccionada!.id;
       }
 
+      // Si se eliminó la imagen, indicarlo en los datos
+      if (_imagenEliminada && imagenSeleccionada == null) {
+        datos['eliminar_imagen'] = true;
+      }
+
       bool resultado;
       if (_model.productoSeleccionado == null) {
-        // CAMBIO IMPORTANTE: Pasar la imagen al crear producto
-        resultado = await _productosService.crearProducto(datos);
+        // Crear nuevo producto
+        resultado = await _interactor.crearProducto(datos, imagenSeleccionada);
       } else {
-        resultado = await _productosService.actualizarProducto(
+        // Actualizar producto existente
+        resultado = await _interactor.actualizarProducto(
           _model.productoSeleccionado!.id,
           datos,
           imagenSeleccionada,
@@ -167,6 +180,39 @@ class ProductFormViewModel extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  // MÉTODO PARA COMPATIBILIDAD: Para obtener imagen con timestamp y evitar caché
+  String? obtenerImagenUrlConTimestamp() {
+    if (imagenSeleccionada != null) {
+      // Si hay una imagen seleccionada localmente, no devolver URL
+      return null;
+    }
+
+    if (_imagenEliminada) {
+      // Si se eliminó la imagen, no mostrar nada
+      return null;
+    }
+
+    if (imagenUrl != null && imagenUrl!.isNotEmpty) {
+      // Añadir timestamp para evitar caché
+      return '$imagenUrl?v=${DateTime.now().millisecondsSinceEpoch}';
+    }
+
+    return null;
+  }
+
+  // NUEVO MÉTODO: Para refrescar el producto después de guardar (útil para edición)
+  Future<void> refrescarProducto() async {
+    if (_model.productoSeleccionado?.id != null) {
+      await cargarProducto(_model.productoSeleccionado!.id);
+    }
+  }
+
+  // NUEVO MÉTODO: Para limpiar errores
+  void limpiarError() {
+    _model = _model.copyWith(error: null);
+    notifyListeners();
   }
 
   bool _validarCampos() {

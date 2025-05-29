@@ -136,7 +136,7 @@ class ProductsInteractor {
   }
 
   Future<bool> crearProducto(Map<String, dynamic> datos, File? imagen) async {
-    return await _productosService.crearProducto(datos);
+    return await _productosService.crearProducto(datos, imagen);
   }
 
   Future<bool> actualizarProducto(
@@ -144,11 +144,27 @@ class ProductsInteractor {
     Map<String, dynamic> datos,
     File? imagen,
   ) async {
-    return await _productosService.actualizarProducto(
+    final resultado = await _productosService.actualizarProducto(
       productoId,
       datos,
       imagen,
     );
+
+    // Si se actualizó exitosamente, invalidar datos cacheados
+    if (resultado) {
+      await _invalidarCacheProducto(productoId);
+    }
+
+    return resultado;
+  }
+
+  Future<void> _invalidarCacheProducto(int productoId) async {
+    try {
+      // Forzar recarga del producto desde el servidor
+      await _productosService.obtenerProductoDetalle(productoId);
+    } catch (e) {
+      print('Error al invalidar cache del producto: $e');
+    }
   }
 
   Future<bool> agregarAlCarrito(

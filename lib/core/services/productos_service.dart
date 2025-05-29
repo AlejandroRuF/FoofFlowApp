@@ -1,7 +1,7 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:foodflow_app/core/constants/api_endpoints.dart';
 import 'package:foodflow_app/core/services/api_services.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
@@ -105,17 +105,60 @@ class ProductosService {
     }
   }
 
-  Future<bool> crearProducto(Map<String, dynamic> datos) async {
+  Future<bool> crearProducto(Map<String, dynamic> datos, File? imagen) async {
     try {
+      dynamic requestData;
+      Options? requestOptions;
+
+      if (imagen != null) {
+        // Si hay imagen, usar FormData
+        final Map<String, dynamic> formDataMap = {};
+
+        // Agregar la imagen
+        formDataMap['imagen'] = await MultipartFile.fromFile(
+          imagen.path,
+          filename:
+              'imagen_producto_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        );
+
+        // Agregar otros campos de datos
+        datos.forEach((key, value) {
+          if (value != null) {
+            formDataMap[key] = value;
+          }
+        });
+
+        requestData = FormData.fromMap(formDataMap);
+        requestOptions = Options(
+          headers: {'Content-Type': 'multipart/form-data'},
+        );
+      } else {
+        // Si no hay imagen, usar JSON normal
+        requestData = datos;
+        requestOptions = Options(headers: {'Content-Type': 'application/json'});
+      }
+
       final response = await ApiServices.dio.post(
         ApiEndpoints.productos,
-        data: datos,
+        data: requestData,
+        options: requestOptions,
       );
 
-      return response.statusCode == 201;
+      bool resultado = response.statusCode == 201;
+
+      // Si la creación fue exitosa y había imagen, limpiar cache
+      if (resultado && imagen != null) {
+        await _limpiarCacheImagenes();
+      }
+
+      return resultado;
     } catch (e) {
       if (kDebugMode) {
         print('Error al crear producto: $e');
+        if (e is DioException) {
+          print('Response data: ${e.response?.data}');
+          print('Status code: ${e.response?.statusCode}');
+        }
       }
       return false;
     }
@@ -127,16 +170,24 @@ class ProductosService {
     File? imagen,
   ) async {
     try {
+      bool resultado = false;
+
       if (imagen != null) {
-        // Crear FormData solo con campos permitidos por el servidor
-        final formData = FormData.fromMap({
+        // Cuando hay imagen, solo enviar imagen y is_active (si está presente)
+        final Map<String, dynamic> formDataFields = {
           'imagen': await MultipartFile.fromFile(
             imagen.path,
-            filename: 'imagen_producto.jpg',
+            filename:
+                'imagen_producto_${DateTime.now().millisecondsSinceEpoch}.jpg',
           ),
-          // IMPORTANTE: El servidor espera 'activo', NO 'is_active'
-          if (datos.containsKey('is_active')) 'activo': datos['is_active'],
-        });
+        };
+
+        // Corregir: usar 'is_active' en lugar de 'activo'
+        if (datos.containsKey('is_active')) {
+          formDataFields['is_active'] = datos['is_active'];
+        }
+
+        final formData = FormData.fromMap(formDataFields);
 
         final response = await ApiServices.dio.patch(
           '${ApiEndpoints.productos}$productoId/',
@@ -144,14 +195,22 @@ class ProductosService {
           options: Options(headers: {'Content-Type': 'multipart/form-data'}),
         );
 
-        return response.statusCode == 200;
+        resultado = response.statusCode == 200;
       } else {
-        // Para datos JSON, mapear correctamente los campos
+        // Sin imagen, solo permitir cambios en is_active
         final datosPermitidos = <String, dynamic>{};
 
-        // IMPORTANTE: El servidor espera 'activo', NO 'is_active'
+        // Corregir: usar 'is_active' en lugar de 'activo'
         if (datos.containsKey('is_active')) {
-          datosPermitidos['activo'] = datos['is_active'];
+          datosPermitidos['is_active'] = datos['is_active'];
+        }
+
+        // Si no hay campos permitidos para actualizar, no hacer la petición
+        if (datosPermitidos.isEmpty) {
+          if (kDebugMode) {
+            print('No hay campos permitidos para actualizar');
+          }
+          return true; // Retornar true porque técnicamente no hay error
         }
 
         final response = await ApiServices.dio.patch(
@@ -160,8 +219,18 @@ class ProductosService {
           options: Options(headers: {'Content-Type': 'application/json'}),
         );
 
-        return response.statusCode == 200;
+        resultado = response.statusCode == 200;
       }
+
+      // Si la actualización fue exitosa, limpiar cache y recargar producto
+      if (resultado) {
+        if (imagen != null) {
+          await _limpiarCacheImagenes();
+        }
+        await _actualizarProductoLocal(productoId);
+      }
+
+      return resultado;
     } catch (e) {
       if (kDebugMode) {
         print('Error al actualizar producto: $e');
@@ -320,6 +389,31 @@ class ProductosService {
         print('Error al obtener productos por ids: $e');
       }
       return [];
+    }
+  }
+
+  Future<void> _limpiarCacheImagenes() async {
+    try {
+      // Limpiar cache de imágenes usando cached_network_image
+      await DefaultCacheManager().emptyCache();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al limpiar cache de imágenes: $e');
+      }
+    }
+  }
+
+  Future<void> _actualizarProductoLocal(int productoId) async {
+    try {
+      final productoActualizado = await obtenerProductoDetalle(productoId);
+      if (productoActualizado != null) {
+        // El producto actualizado se obtiene del servidor
+        // Los ViewModels que usen este servicio deberán refrescar sus datos
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al actualizar producto local: $e');
+      }
     }
   }
 }
