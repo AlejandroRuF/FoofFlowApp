@@ -128,27 +128,36 @@ class ProductosService {
   ) async {
     try {
       if (imagen != null) {
-        final formData = FormData.fromMap(datos);
-        formData.files.add(
-          MapEntry(
-            'imagen',
-            await MultipartFile.fromFile(
-              imagen.path,
-              filename: 'imagen_producto.jpg',
-            ),
+        // Crear FormData solo con campos permitidos por el servidor
+        final formData = FormData.fromMap({
+          'imagen': await MultipartFile.fromFile(
+            imagen.path,
+            filename: 'imagen_producto.jpg',
           ),
-        );
+          // IMPORTANTE: El servidor espera 'activo', NO 'is_active'
+          if (datos.containsKey('is_active')) 'activo': datos['is_active'],
+        });
 
         final response = await ApiServices.dio.patch(
           '${ApiEndpoints.productos}$productoId/',
           data: formData,
+          options: Options(headers: {'Content-Type': 'multipart/form-data'}),
         );
 
         return response.statusCode == 200;
       } else {
+        // Para datos JSON, mapear correctamente los campos
+        final datosPermitidos = <String, dynamic>{};
+
+        // IMPORTANTE: El servidor espera 'activo', NO 'is_active'
+        if (datos.containsKey('is_active')) {
+          datosPermitidos['activo'] = datos['is_active'];
+        }
+
         final response = await ApiServices.dio.patch(
           '${ApiEndpoints.productos}$productoId/',
-          data: datos,
+          data: datosPermitidos,
+          options: Options(headers: {'Content-Type': 'application/json'}),
         );
 
         return response.statusCode == 200;
@@ -156,6 +165,10 @@ class ProductosService {
     } catch (e) {
       if (kDebugMode) {
         print('Error al actualizar producto: $e');
+        if (e is DioException) {
+          print('Response data: ${e.response?.data}');
+          print('Status code: ${e.response?.statusCode}');
+        }
       }
       return false;
     }

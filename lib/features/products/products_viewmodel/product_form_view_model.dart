@@ -143,11 +143,12 @@ class ProductFormViewModel extends ChangeNotifier {
       }
 
       if (categoriaSeleccionada != null) {
-        datos['categoria'] = categoriaSeleccionada as Object;
+        datos['categoria'] = categoriaSeleccionada!.id;
       }
 
       bool resultado;
       if (_model.productoSeleccionado == null) {
+        // CAMBIO IMPORTANTE: Pasar la imagen al crear producto
         resultado = await _productosService.crearProducto(datos);
       } else {
         resultado = await _productosService.actualizarProducto(

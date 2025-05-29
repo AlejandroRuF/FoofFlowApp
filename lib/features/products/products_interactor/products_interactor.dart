@@ -135,7 +135,7 @@ class ProductsInteractor {
     }
   }
 
-  Future<bool> crearProducto(Map<String, dynamic> datos) async {
+  Future<bool> crearProducto(Map<String, dynamic> datos, File? imagen) async {
     return await _productosService.crearProducto(datos);
   }
 
