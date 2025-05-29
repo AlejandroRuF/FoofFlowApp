@@ -93,7 +93,6 @@ class ApiServices {
         ..interceptors.add(
           InterceptorsWrapper(
             onRequest: (options, handler) {
-              // Para requests de imágenes, añadir headers anti-cache
               if (options.path.contains('productos')) {
                 options.headers['Cache-Control'] =
                     'no-cache, no-store, must-revalidate';

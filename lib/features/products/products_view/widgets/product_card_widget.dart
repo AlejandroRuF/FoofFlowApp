@@ -135,7 +135,6 @@ class ProductCardWidget extends StatelessWidget {
     final imagenUrl = product.getImagenUrlCompleta();
 
     if (imagenUrl != null && imagenUrl.isNotEmpty) {
-      // Añadir timestamp para evitar caché
       final imagenUrlConTimestamp =
           '$imagenUrl?v=${DateTime.now().millisecondsSinceEpoch}';
 

@@ -31,11 +31,37 @@ class ProductFormViewModel extends ChangeNotifier {
 
   File? imagenSeleccionada;
   String? imagenUrl;
-  bool _imagenEliminada =
-      false; // Nueva bandera para indicar si se eliminó la imagen
+  bool _imagenEliminada = false;
 
   List<User> cocinasCentrales = [];
   User? cocinaCentralSeleccionada;
+
+  bool get isEditMode => _model.productoSeleccionado != null;
+
+  bool get puedeEditarDatosBasicos {
+    if (!isEditMode) return true;
+    final tipoUsuario = _interactor.obtenerTipoUsuario();
+    return tipoUsuario == 'administrador';
+  }
+
+  bool get puedeEditarImagen {
+    final tipoUsuario = _interactor.obtenerTipoUsuario();
+    return tipoUsuario == 'administrador' ||
+        tipoUsuario == 'cocina_central' ||
+        (tipoUsuario == 'empleado' && _interactor.puedeCrearEditarProductos());
+  }
+
+  bool get puedeEditarEstado {
+    final tipoUsuario = _interactor.obtenerTipoUsuario();
+    return tipoUsuario == 'administrador' ||
+        tipoUsuario == 'cocina_central' ||
+        (tipoUsuario == 'empleado' && _interactor.puedeCrearEditarProductos());
+  }
+
+  bool get puedeSeleccionarCocinaCentral {
+    final tipoUsuario = _interactor.obtenerTipoUsuario();
+    return tipoUsuario == 'administrador';
+  }
 
   ProductFormViewModel() {
     _cargarCocinasCentrales();
@@ -65,7 +91,7 @@ class ProductFormViewModel extends ChangeNotifier {
         categoriaSeleccionada = producto.categoria;
         productoActivo = producto.isActive;
         imagenUrl = producto.imagenUrl;
-        _imagenEliminada = false; // Resetear bandera
+        _imagenEliminada = false;
 
         for (var cocina in cocinasCentrales) {
           if (cocina.id == producto.cocinaCentralId) {
@@ -115,14 +141,14 @@ class ProductFormViewModel extends ChangeNotifier {
 
     if (pickedFile != null) {
       imagenSeleccionada = File(pickedFile.path);
-      _imagenEliminada = false; // Si selecciona nueva imagen, resetear bandera
+      _imagenEliminada = false;
       notifyListeners();
     }
   }
 
   void eliminarImagen() {
     imagenSeleccionada = null;
-    _imagenEliminada = true; // Marcar que se eliminó la imagen
+    _imagenEliminada = true;
     notifyListeners();
   }
 
@@ -153,17 +179,14 @@ class ProductFormViewModel extends ChangeNotifier {
         datos['categoria'] = categoriaSeleccionada!.id;
       }
 
-      // Si se eliminó la imagen, indicarlo en los datos
       if (_imagenEliminada && imagenSeleccionada == null) {
         datos['eliminar_imagen'] = true;
       }
 
       bool resultado;
       if (_model.productoSeleccionado == null) {
-        // Crear nuevo producto
         resultado = await _interactor.crearProducto(datos, imagenSeleccionada);
       } else {
-        // Actualizar producto existente
         resultado = await _interactor.actualizarProducto(
           _model.productoSeleccionado!.id,
           datos,
@@ -182,34 +205,28 @@ class ProductFormViewModel extends ChangeNotifier {
     }
   }
 
-  // MÉTODO PARA COMPATIBILIDAD: Para obtener imagen con timestamp y evitar caché
   String? obtenerImagenUrlConTimestamp() {
     if (imagenSeleccionada != null) {
-      // Si hay una imagen seleccionada localmente, no devolver URL
       return null;
     }
 
     if (_imagenEliminada) {
-      // Si se eliminó la imagen, no mostrar nada
       return null;
     }
 
     if (imagenUrl != null && imagenUrl!.isNotEmpty) {
-      // Añadir timestamp para evitar caché
       return '$imagenUrl?v=${DateTime.now().millisecondsSinceEpoch}';
     }
 
     return null;
   }
 
-  // NUEVO MÉTODO: Para refrescar el producto después de guardar (útil para edición)
   Future<void> refrescarProducto() async {
     if (_model.productoSeleccionado?.id != null) {
       await cargarProducto(_model.productoSeleccionado!.id);
     }
   }
 
-  // NUEVO MÉTODO: Para limpiar errores
   void limpiarError() {
     _model = _model.copyWith(error: null);
     notifyListeners();

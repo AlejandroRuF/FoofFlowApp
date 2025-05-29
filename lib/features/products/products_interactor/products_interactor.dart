@@ -150,7 +150,6 @@ class ProductsInteractor {
       imagen,
     );
 
-    // Si se actualizó exitosamente, invalidar datos cacheados
     if (resultado) {
       await _invalidarCacheProducto(productoId);
     }
@@ -160,7 +159,6 @@ class ProductsInteractor {
 
   Future<void> _invalidarCacheProducto(int productoId) async {
     try {
-      // Forzar recarga del producto desde el servidor
       await _productosService.obtenerProductoDetalle(productoId);
     } catch (e) {
       print('Error al invalidar cache del producto: $e');

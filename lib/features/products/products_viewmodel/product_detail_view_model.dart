@@ -42,7 +42,6 @@ class ProductDetailViewModel extends ChangeNotifier {
     return '$urlImagen?v=${DateTime.now().millisecondsSinceEpoch}';
   }
 
-  // MÉTODO CLAVE: Actualizar producto y refrescar vista
   Future<bool> actualizarProductoYRefrescar(
     int productoId,
     Map<String, dynamic> datos,
@@ -59,7 +58,6 @@ class ProductDetailViewModel extends ChangeNotifier {
       );
 
       if (resultado) {
-        // Forzar recarga inmediata del producto
         await cargarProducto(productoId);
       } else {
         _model = _model.copyWith(
@@ -80,7 +78,6 @@ class ProductDetailViewModel extends ChangeNotifier {
     }
   }
 
-  // Método para obtener la URL de imagen con timestamp para evitar cache
   String? obtenerImagenUrlConTimestamp() {
     if (producto == null) return null;
 
@@ -90,7 +87,6 @@ class ProductDetailViewModel extends ChangeNotifier {
     return obtenerUrlImagenConTimestamp(imagenUrl);
   }
 
-  // Método para obtener la URL de imagen QR con timestamp
   String? obtenerImagenQrUrlConTimestamp() {
     if (producto == null) return null;
 
@@ -100,13 +96,11 @@ class ProductDetailViewModel extends ChangeNotifier {
     return obtenerUrlImagenConTimestamp(imagenQrUrl);
   }
 
-  // Método para limpiar errores
   void limpiarError() {
     _model = _model.copyWith(error: null);
     notifyListeners();
   }
 
-  // Método para forzar actualización de la vista (útil después de editar)
   void forzarActualizacion() {
     notifyListeners();
   }
