@@ -154,7 +154,7 @@ class InventarioService {
         data: {
           'producto_id': productoId,
           'stock_actual': cantidad,
-          'usuario': usuarioId,
+          'usuario_id': usuarioId,
         },
       );
 
