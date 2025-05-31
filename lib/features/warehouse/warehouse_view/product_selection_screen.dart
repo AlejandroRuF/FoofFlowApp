@@ -440,17 +440,28 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
     });
 
     try {
-      final exito = await _viewModel.agregarMultiplesProductosAlInventario(
-        _productosSeleccionados,
-        widget.kitchenId,
-      );
+      bool exito;
+      if (_viewModel.esEmpleado) {
+        exito = await _viewModel.agregarProductosComoEmpleado(
+          _productosSeleccionados,
+        );
+      } else {
+        exito = await _viewModel.agregarMultiplesProductosAlInventario(
+          _productosSeleccionados,
+          widget.kitchenId,
+        );
+      }
 
       if (!mounted) return;
 
       if (exito) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Productos agregados exitosamente al inventario'),
+          SnackBar(
+            content: Text(
+              _viewModel.esEmpleado
+                  ? 'Productos agregados exitosamente al inventario de tu empleador'
+                  : 'Productos agregados exitosamente al inventario',
+            ),
             backgroundColor: Colors.green,
           ),
         );

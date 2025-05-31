@@ -421,10 +421,7 @@ class InventoryViewModel extends ChangeNotifier {
     }
 
     try {
-      // Obtenemos todos los productos disponibles del empleador
       final productosModel = await _interactor.obtenerProductosDisponibles();
-
-      // Filtramos solo los productos que pertenecen al empleador
       return productosModel.productosDisponibles
           .where((producto) => producto.cocinaCentralId == empleadorId)
           .toList();

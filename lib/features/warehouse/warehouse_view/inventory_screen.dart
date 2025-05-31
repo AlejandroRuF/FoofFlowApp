@@ -5,6 +5,7 @@ import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.
 import 'package:foodflow_app/features/warehouse/warehouse_view/widgets/inventory_product_widget.dart';
 import 'package:foodflow_app/features/warehouse/warehouse_view/widgets/inventory_filters_widget.dart';
 import 'package:foodflow_app/models/user_model.dart';
+import '../../../models/producto_model.dart';
 import '../warehouse_viewmodel/inventory_viewmodel.dart';
 
 class InventoryScreen extends StatelessWidget {
@@ -290,8 +291,15 @@ class InventoryScreen extends StatelessWidget {
     String nombreCocina,
   ) async {
     try {
-      await viewModel.cargarProductosDisponibles();
-      if (viewModel.state.productosDisponibles.isEmpty) {
+      List<Producto> productos;
+      if (viewModel.esEmpleado) {
+        productos = await viewModel.obtenerProductosParaEmpleado();
+      } else {
+        await viewModel.cargarProductosDisponibles();
+        productos = viewModel.state.productosDisponibles;
+      }
+
+      if (productos.isEmpty) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -307,7 +315,7 @@ class InventoryScreen extends StatelessWidget {
         context.pushNamed(
           'productSelection',
           extra: {
-            'productos': viewModel.state.productosDisponibles,
+            'productos': productos,
             'kitchenName': nombreCocina,
             'kitchenId': usuarioId,
           },
