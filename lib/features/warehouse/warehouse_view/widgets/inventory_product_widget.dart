@@ -200,45 +200,53 @@ class _InventoryProductWidgetState extends State<InventoryProductWidget> {
 
     final nuevoStock = _stockActual + modificacion;
     if (nuevoStock < 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('El stock no puede ser negativo'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final resultado = await widget.onStockChanged!(nuevoStock);
-
-      if (resultado) {
-        setState(() {
-          _stockActual = nuevoStock;
-        });
-
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Stock actualizado correctamente'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error al actualizar el stock'),
+            content: Text('El stock no puede ser negativo'),
             backgroundColor: Colors.red,
           ),
         );
       }
-    } finally {
+      return;
+    }
+
+    if (mounted) {
       setState(() {
-        _isLoading = false;
+        _isLoading = true;
       });
+    }
+
+    try {
+      final resultado = await widget.onStockChanged!(nuevoStock);
+
+      if (mounted) {
+        if (resultado) {
+          setState(() {
+            _stockActual = nuevoStock;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Stock actualizado correctamente'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Error al actualizar el stock'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 }
