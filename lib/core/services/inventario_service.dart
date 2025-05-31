@@ -143,6 +143,30 @@ class InventarioService {
     }
   }
 
+  Future<bool> agregarProductoAlInventarioDeUsuario(
+    int productoId,
+    int cantidad,
+    int usuarioId,
+  ) async {
+    try {
+      final response = await ApiServices.dio.post(
+        ApiEndpoints.almacenes,
+        data: {
+          'producto_id': productoId,
+          'stock_actual': cantidad,
+          'usuario': usuarioId,
+        },
+      );
+
+      return response.statusCode == 201;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al agregar producto al inventario del usuario: $e');
+      }
+      return false;
+    }
+  }
+
   Future<bool> actualizarStockPorQR(int productoId, int cantidad) async {
     try {
       final response = await ApiServices.dio.get(

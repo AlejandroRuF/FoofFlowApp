@@ -53,12 +53,6 @@ class UserService {
 
   @deprecated
   Future<PermisosEmpleado?> obtenerPermisosUsuario(int userId) async {
-    if (kDebugMode) {
-      print(
-        'ADVERTENCIA: obtenerPermisosUsuario está obsoleto. Los permisos ahora se obtienen directamente desde obtenerDatosCompletos()',
-      );
-    }
-
     final user = UserSessionService().user;
     if (user?.permisos != null) {
       return user!.permisos;
@@ -129,6 +123,51 @@ class UserService {
     } catch (e) {
       if (kDebugMode) {
         print('Error al obtener empleados: $e');
+      }
+    }
+    return [];
+  }
+
+  Future<List<User>> obtenerTodosLosUsuarios() async {
+    try {
+      final response = await ApiServices.dio.get(ApiEndpoints.usuario);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        return data.map((e) => User.fromJson(e)).toList();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al obtener todos los usuarios: $e');
+      }
+    }
+    return [];
+  }
+
+  Future<List<User>> obtenerCocinasDeUsuario(int usuarioId) async {
+    try {
+      final response = await ApiServices.dio.get(
+        ApiEndpoints.usuario,
+        queryParameters: {
+          'propietario': usuarioId,
+          'tipo_usuario': 'cocina_central',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        final cocinas = data.map((e) => User.fromJson(e)).toList();
+
+        final usuario = await obtenerDatosCompletos(usuarioId);
+        if (usuario != null && usuario.tipoUsuario == 'cocina_central') {
+          cocinas.insert(0, usuario);
+        }
+
+        return cocinas;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al obtener cocinas del usuario: $e');
       }
     }
     return [];

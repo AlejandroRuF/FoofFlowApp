@@ -17,9 +17,14 @@ import '../../features/products/products_view/product_detail_screen.dart';
 import '../../features/warehouse/warehouse_view/warehouse_management_screen.dart';
 import '../../features/warehouse/warehouse_view/inventory_screen.dart';
 import '../../features/warehouse/warehouse_view/modify_by_q_r_screen.dart';
+import '../../features/warehouse/warehouse_view/user_selection_screen.dart';
+import '../../features/warehouse/warehouse_view/kitchen_selection_screen.dart';
+import '../../features/warehouse/warehouse_view/product_selection_screen.dart';
 import '../../features/profile/profile_view/profile_screen.dart';
 import '../../features/profile/profile_view/edit_profile_screen.dart';
 import '../../main.dart';
+import '../../models/user_model.dart';
+import '../../models/producto_model.dart';
 
 class NotFoundScreen extends StatelessWidget {
   const NotFoundScreen({super.key});
@@ -155,6 +160,81 @@ final GoRouter appRouter = GoRouter(
           path: 'qr',
           name: 'modifyByQR',
           builder: (context, state) => const ModifyByQRScreen(),
+        ),
+        GoRoute(
+          path: 'user-selection',
+          name: 'userSelection',
+          builder: (context, state) {
+            final usuarios = state.extra as List<User>?;
+            if (usuarios == null) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Error: Lista de usuarios no encontrada'),
+                ),
+              );
+            }
+            return UserSelectionScreen(usuarios: usuarios);
+          },
+        ),
+        GoRoute(
+          path: 'kitchen-selection',
+          name: 'kitchenSelection',
+          builder: (context, state) {
+            final data = state.extra as Map<String, dynamic>?;
+            if (data == null) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Error: Datos de cocinas no encontrados'),
+                ),
+              );
+            }
+            final cocinas = data['cocinas'] as List<User>? ?? [];
+            final userName = data['userName'] as String? ?? '';
+
+            return KitchenSelectionScreen(cocinas: cocinas, userName: userName);
+          },
+        ),
+        GoRoute(
+          path: 'product-selection',
+          name: 'productSelection',
+          builder: (context, state) {
+            final data = state.extra as Map<String, dynamic>?;
+            if (data == null) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Error: Datos de productos no encontrados'),
+                ),
+              );
+            }
+            final productos = data['productos'] as List<Producto>? ?? [];
+            final kitchenName = data['kitchenName'] as String? ?? '';
+            final kitchenId = data['kitchenId'] as int? ?? 0;
+
+            if (productos.isEmpty || kitchenName.isEmpty || kitchenId == 0) {
+              return const Scaffold(
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline, size: 64, color: Colors.red),
+                      SizedBox(height: 16),
+                      Text(
+                        'Error: Datos incompletos para la selección de productos',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            return ProductSelectionScreen(
+              productos: productos,
+              kitchenName: kitchenName,
+              kitchenId: kitchenId,
+            );
+          },
         ),
       ],
     ),

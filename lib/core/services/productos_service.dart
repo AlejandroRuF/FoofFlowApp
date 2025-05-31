@@ -71,18 +71,10 @@ class ProductosService {
             }
           }
         }
-
-        if (kDebugMode) {
-          print('Productos procesados con éxito: ${productos.length}');
-        }
-
         return productos;
       }
       return [];
     } catch (e) {
-      if (kDebugMode) {
-        print('Error al obtener productos: $e');
-      }
       return [];
     }
   }

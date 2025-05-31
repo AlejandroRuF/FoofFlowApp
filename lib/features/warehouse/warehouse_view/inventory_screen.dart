@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
 import 'package:foodflow_app/features/warehouse/warehouse_view/widgets/inventory_product_widget.dart';
 import 'package:foodflow_app/features/warehouse/warehouse_view/widgets/inventory_filters_widget.dart';
-
+import 'package:foodflow_app/models/user_model.dart';
 import '../warehouse_viewmodel/inventory_viewmodel.dart';
 
 class InventoryScreen extends StatelessWidget {
@@ -22,11 +23,9 @@ class InventoryScreen extends StatelessWidget {
             floatingActionButton:
                 viewModel.tienePermisoModificarInventario
                     ? FloatingActionButton(
-                      onPressed:
-                          () => _mostrarDialogoAgregarProducto(
-                            context,
-                            viewModel,
-                          ),
+                      onPressed: () {
+                        _iniciarFlujoAgregarProducto(context, viewModel);
+                      },
                       child: const Icon(Icons.add),
                     )
                     : null,
@@ -137,11 +136,9 @@ class InventoryScreen extends StatelessWidget {
                   if (viewModel.tienePermisoModificarInventario) ...[
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
-                      onPressed:
-                          () => _mostrarDialogoAgregarProducto(
-                            context,
-                            viewModel,
-                          ),
+                      onPressed: () {
+                        _iniciarFlujoAgregarProducto(context, viewModel);
+                      },
                       icon: const Icon(Icons.add),
                       label: const Text('Añadir Producto'),
                     ),
@@ -182,86 +179,149 @@ class InventoryScreen extends StatelessWidget {
     );
   }
 
-  void _mostrarDialogoAgregarProducto(
+  Future<void> _iniciarFlujoAgregarProducto(
     BuildContext context,
     InventoryViewModel viewModel,
-  ) {
-    viewModel.cargarProductosDisponibles();
+  ) async {
+    if (viewModel.esAdmin) {
+      await _mostrarSeleccionUsuarios(context, viewModel);
+    } else if (viewModel.esRestauranteOCocina) {
+      final usuarioActual = viewModel.usuarioActual;
+      if (usuarioActual != null) {
+        await _mostrarSeleccionCocinas(context, viewModel, usuarioActual);
+      }
+    } else if (viewModel.esEmpleado) {
+      final usuarioId = viewModel.idUsuarioParaInventario;
+      if (usuarioId != null) {
+        await _mostrarSeleccionProductos(
+          context,
+          viewModel,
+          usuarioId,
+          viewModel.usuarioActual?.nombre ?? 'Mi inventario',
+        );
+      }
+    }
+  }
 
-    int? productoSeleccionadoId;
-    int cantidad = 1;
+  Future<void> _mostrarSeleccionUsuarios(
+    BuildContext context,
+    InventoryViewModel viewModel,
+  ) async {
+    try {
+      final usuarios = await viewModel.obtenerTodosLosUsuarios();
+      final usuariosDisponibles =
+          usuarios
+              .where(
+                (user) =>
+                    user.tipoUsuario == 'restaurante' ||
+                    user.tipoUsuario == 'cocina_central',
+              )
+              .toList();
 
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Añadir Producto al Inventario'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    DropdownButtonFormField<int>(
-                      decoration: const InputDecoration(
-                        labelText: 'Producto',
-                        border: OutlineInputBorder(),
-                      ),
-                      hint: const Text('Selecciona un producto'),
-                      value: productoSeleccionadoId,
-                      items:
-                          viewModel.state.productosDisponibles.map((producto) {
-                            return DropdownMenuItem<int>(
-                              value: producto.id,
-                              child: Text(producto.nombre),
-                            );
-                          }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          productoSeleccionadoId = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'Cantidad',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      initialValue: cantidad.toString(),
-                      onChanged: (value) {
-                        setState(() {
-                          cantidad = int.tryParse(value) ?? 1;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancelar'),
-                ),
-                ElevatedButton(
-                  onPressed:
-                      productoSeleccionadoId == null
-                          ? null
-                          : () {
-                            viewModel.agregarProductoAlInventario(
-                              productoSeleccionadoId!,
-                              cantidad,
-                            );
-                            Navigator.pop(context);
-                          },
-                  child: const Text('Añadir'),
-                ),
-              ],
-            );
+      if (usuariosDisponibles.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No se encontraron usuarios disponibles'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (context.mounted) {
+        context.pushNamed('userSelection', extra: usuariosDisponibles);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al cargar usuarios: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _mostrarSeleccionCocinas(
+    BuildContext context,
+    InventoryViewModel viewModel,
+    User usuario,
+  ) async {
+    try {
+      final cocinas = await viewModel.obtenerCocinasDeUsuario(usuario.id);
+
+      if (cocinas.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No se encontraron cocinas para este usuario'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (context.mounted) {
+        context.pushNamed(
+          'kitchenSelection',
+          extra: {'cocinas': cocinas, 'userName': usuario.nombre},
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al cargar cocinas: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _mostrarSeleccionProductos(
+    BuildContext context,
+    InventoryViewModel viewModel,
+    int usuarioId,
+    String nombreCocina,
+  ) async {
+    try {
+      await viewModel.cargarProductosDisponibles();
+      if (viewModel.state.productosDisponibles.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No se encontraron productos disponibles'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (context.mounted) {
+        context.pushNamed(
+          'productSelection',
+          extra: {
+            'productos': viewModel.state.productosDisponibles,
+            'kitchenName': nombreCocina,
+            'kitchenId': usuarioId,
           },
         );
-      },
-    );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al cargar productos: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
