@@ -102,13 +102,36 @@ class WarehouseInteractor {
     int usuarioId,
   ) async {
     try {
-      final response = await _inventarioService
-          .agregarProductoAlInventarioDeUsuario(
-            productoId,
-            cantidad,
-            usuarioId,
-          );
-      return response;
+      final inventarioExistente = await obtenerInventarioDeCocina(usuarioId);
+      final itemExistente = inventarioExistente.firstWhere(
+        (item) => item.productoId == productoId,
+        orElse:
+            () => Inventario(
+              id: -1,
+              productoId: productoId,
+              stockActual: 0,
+              productoNombre: '',
+              usuarioNombre: '',
+              usuarioId: usuarioId,
+            ),
+      );
+
+      if (itemExistente.id != -1) {
+        final nuevoStock = itemExistente.stockActual + cantidad;
+        final response = await _inventarioService.actualizarStock(
+          itemExistente.id,
+          nuevoStock,
+        );
+        return response;
+      } else {
+        final response = await _inventarioService
+            .agregarProductoAlInventarioDeUsuario(
+              productoId,
+              cantidad,
+              usuarioId,
+            );
+        return response;
+      }
     } catch (e) {
       return false;
     }
