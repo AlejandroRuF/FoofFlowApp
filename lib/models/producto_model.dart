@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/models/categoria_model.dart';
 import '../core/constants/api_endpoints.dart';
 
@@ -54,7 +55,9 @@ class Producto {
           json['categoria'] as Map<String, dynamic>,
         );
       } catch (e) {
-        print('Error al procesar categoría: $e');
+        if (kDebugMode) {
+          print('Error al procesar categoría: $e');
+        }
         categoriaObj = null;
       }
     }

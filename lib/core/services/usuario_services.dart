@@ -174,6 +174,7 @@ class UserService {
   Future<List<User>> obtenerCocinasDeUsuario(int usuarioId) async {
     try {
       final usuario = await obtenerDatosUsuario(usuarioId);
+
       if (usuario == null) return [];
 
       List<User> cocinasRelacionadas = [];
@@ -181,8 +182,12 @@ class UserService {
       if (usuario.tipoUsuario == 'cocina_central') {
         cocinasRelacionadas.add(usuario);
       } else if (usuario.tipoUsuario == 'restaurante') {
-        cocinasRelacionadas = await _cocinaCentralRestauranteService
-            .obtenerCocinasDeRestaurante(usuarioId);
+        if (UserSessionService().user?.tipoUsuario == 'administrador') {
+          cocinasRelacionadas = await _cocinaCentralRestauranteService
+              .obtenerCocinasDeRestaurante(usuarioId);
+        } else {
+          cocinasRelacionadas = await obtenerTodosLosUsuarios();
+        }
       }
 
       return cocinasRelacionadas;

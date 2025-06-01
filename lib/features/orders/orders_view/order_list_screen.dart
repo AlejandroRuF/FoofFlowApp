@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +30,9 @@ class _OrderListScreenState extends State<OrderListScreen>
 
     _subscription = _eventBus.stream.listen((event) {
       if (event.type == RefreshEventType.orders && mounted) {
-        print("Recibido evento de actualización de pedidos: ${event.data}");
+        if (kDebugMode) {
+          print("Recibido evento de actualización de pedidos: ${event.data}");
+        }
         _viewModel.forzarRecarga();
       }
     });
