@@ -194,15 +194,14 @@ class InventoryViewModel extends ChangeNotifier {
 
   Future<List<User>> obtenerCocinasDeUsuario(int usuarioId) async {
     try {
-      final todasLasCocinas = await _userService.obtenerCocinasDeUsuario(
+      final cocinasRelacionadas = await _userService.obtenerCocinasDeUsuario(
         usuarioId,
       );
 
-      final soloCocinaCentral =
-          todasLasCocinas.where((cocina) {
-            return cocina.tipoUsuario == 'cocina_central';
-          }).toList();
-      return soloCocinaCentral;
+      // Filtrar solo las cocinas centrales (por si acaso hay otros tipos en la respuesta)
+      return cocinasRelacionadas
+          .where((cocina) => cocina.tipoUsuario == 'cocina_central')
+          .toList();
     } catch (e) {
       return [];
     }
@@ -246,13 +245,7 @@ class InventoryViewModel extends ChangeNotifier {
 
   Future<List<User>> obtenerCocinasParaUsuario(int usuarioId) async {
     try {
-      final todasLasCocinas = await _userService.obtenerCocinasDeUsuario(
-        usuarioId,
-      );
-
-      return todasLasCocinas.where((cocina) {
-        return cocina.tipoUsuario == 'cocina_central';
-      }).toList();
+      return await obtenerCocinasDeUsuario(usuarioId);
     } catch (e) {
       return [];
     }

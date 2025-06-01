@@ -1,4 +1,3 @@
-
 class ApiConfig {
   static const String hostUrl = 'http://192.168.1.130:8000/';
   static const String baseUrl = '${hostUrl}api/';
@@ -21,6 +20,7 @@ class ApiEndpoints {
   static const String usuario = 'usuarios/';
   static String permisosEmpleado(int userId) =>
       'permisos-empleados/usuario/$userId/';
+  static const String cocinaCentralRestaurante = 'cocinas-restaurantes/';
 
   // Endpoints de métricas
   static const String metricasVentas = 'metricas-ventas/';

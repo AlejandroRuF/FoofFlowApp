@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/core/constants/api_endpoints.dart';
 import 'package:foodflow_app/core/services/api_services.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
+import 'package:foodflow_app/core/services/cocina_central_restaurante_service.dart';
 import 'package:foodflow_app/models/permisos_empleado_model.dart';
 import 'package:foodflow_app/models/user_model.dart';
 
@@ -11,6 +12,9 @@ class UserService {
   static final UserService _instance = UserService._internal();
   factory UserService() => _instance;
   UserService._internal();
+
+  final CocinaCentralRestauranteService _cocinaCentralRestauranteService =
+      CocinaCentralRestauranteService();
 
   Future<User?> obtenerDatosCompletos(int userId) async {
     try {
@@ -146,25 +150,22 @@ class UserService {
 
   Future<List<User>> obtenerCocinasDeUsuario(int usuarioId) async {
     try {
-      final response = await ApiServices.dio.get(
-        ApiEndpoints.usuario,
-        queryParameters: {
-          'propietario': usuarioId,
-          'tipo_usuario': 'cocina_central',
-        },
-      );
+      // Obtener los datos completos del usuario para saber su tipo
+      final usuario = await obtenerDatosCompletos(usuarioId);
+      if (usuario == null) return [];
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        final cocinas = data.map((e) => User.fromJson(e)).toList();
+      List<User> cocinasRelacionadas = [];
 
-        final usuario = await obtenerDatosCompletos(usuarioId);
-        if (usuario != null && usuario.tipoUsuario == 'cocina_central') {
-          cocinas.insert(0, usuario);
-        }
-
-        return cocinas;
+      if (usuario.tipoUsuario == 'cocina_central') {
+        // Si es una cocina central, se incluye a sí misma
+        cocinasRelacionadas.add(usuario);
+      } else if (usuario.tipoUsuario == 'restaurante') {
+        // Si es un restaurante, obtener las cocinas centrales relacionadas usando el servicio
+        cocinasRelacionadas = await _cocinaCentralRestauranteService
+            .obtenerCocinasDeRestaurante(usuarioId);
       }
+
+      return cocinasRelacionadas;
     } catch (e) {
       if (kDebugMode) {
         print('Error al obtener cocinas del usuario: $e');

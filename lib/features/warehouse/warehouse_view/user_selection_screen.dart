@@ -141,6 +141,7 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(usuario.nombre),
             Text(usuario.email),
             const SizedBox(height: 4),
             Container(
@@ -211,47 +212,6 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
         setState(() {
           _isLoading = false;
         });
-      }
-    }
-  }
-
-  Future<void> _navegarASeleccionProductos(
-    int kitchenId,
-    String kitchenName,
-  ) async {
-    try {
-      await _viewModel.cargarProductosDisponibles();
-
-      if (_viewModel.state.productosDisponibles.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No se encontraron productos disponibles'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
-        return;
-      }
-
-      if (mounted) {
-        context.pushNamed(
-          'productSelection',
-          extra: {
-            'productos': _viewModel.state.productosDisponibles,
-            'kitchenName': kitchenName,
-            'kitchenId': kitchenId,
-          },
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al cargar productos: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
       }
     }
   }
