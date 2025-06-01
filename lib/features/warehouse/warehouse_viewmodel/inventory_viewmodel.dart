@@ -44,7 +44,6 @@ class InventoryViewModel extends ChangeNotifier {
       if (eventKey == 'responsive_scaffold_inventory_refresh' ||
           eventKey == 'responsive_scaffold_warehouse_refresh' ||
           eventKey == 'responsive_scaffold_all_refresh' ||
-          eventKey == 'inventory_update' ||
           eventKey == 'inventory_add' ||
           eventKey == 'inventory_add_user' ||
           eventKey == 'inventory_bulk_add' ||
@@ -128,25 +127,40 @@ class InventoryViewModel extends ChangeNotifier {
     } catch (e) {}
   }
 
+  void actualizarStockLocal(int inventarioId, int nuevoStock) {
+    final inventarioItems = List<Inventario>.from(_state.inventarioItems);
+    final index = inventarioItems.indexWhere((item) => item.id == inventarioId);
+
+    if (index != -1) {
+      inventarioItems[index] = Inventario(
+        id: inventarioItems[index].id,
+        usuarioId: inventarioItems[index].usuarioId,
+        usuarioNombre: inventarioItems[index].usuarioNombre,
+        productoId: inventarioItems[index].productoId,
+        productoNombre: inventarioItems[index].productoNombre,
+        stockActual: nuevoStock,
+      );
+
+      _state = _state.copyWith(inventarioItems: inventarioItems);
+      notifyListeners();
+    }
+  }
+
   Future<bool> actualizarStockProducto(int inventarioId, int nuevoStock) async {
     if (!tienePermisoModificarInventario) {
       return false;
     }
 
-    _state = _state.copyWith(isLoading: true);
-    notifyListeners();
+    actualizarStockLocal(inventarioId, nuevoStock);
 
     final resultado = await _interactor.actualizarStockProducto(
       inventarioId,
       nuevoStock,
     );
 
-    if (resultado) {
+    if (!resultado) {
       await cargarInventario();
-      _eventBus.publishDataChanged('inventory_update');
-    } else {
       _state = _state.copyWith(
-        isLoading: false,
         error: 'Error al actualizar el stock del producto',
       );
       notifyListeners();
