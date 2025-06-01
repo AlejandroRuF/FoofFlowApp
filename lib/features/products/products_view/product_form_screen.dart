@@ -340,43 +340,75 @@ class ProductFormScreen extends StatelessWidget {
                 ),
 
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child:
-                      puedeEditarDatosBasicos
-                          ? _buildEditableTextField(
-                            context: context,
-                            controller: viewModel.precioController,
-                            label: 'Precio *',
-                            keyboardType: TextInputType.number,
-                            prefixText: '€ ',
-                          )
-                          : _buildReadOnlyField(
-                            context,
-                            'Precio *',
-                            '€ ${viewModel.precioController.text}',
-                          ),
+            MediaQuery.of(context).size.width < 600
+                ? Column(
+                  children: [
+                    puedeEditarDatosBasicos
+                        ? _buildEditableTextField(
+                          context: context,
+                          controller: viewModel.precioController,
+                          label: 'Precio *',
+                          keyboardType: TextInputType.number,
+                          prefixText: '€ ',
+                        )
+                        : _buildReadOnlyField(
+                          context,
+                          'Precio *',
+                          '€ ${viewModel.precioController.text}',
+                        ),
+                    const SizedBox(height: 16),
+                    puedeEditarDatosBasicos
+                        ? _buildEditableTextField(
+                          context: context,
+                          controller: viewModel.impuestosController,
+                          label: 'Impuestos (%)',
+                          keyboardType: TextInputType.number,
+                          suffixText: '%',
+                        )
+                        : _buildReadOnlyField(
+                          context,
+                          'Impuestos (%)',
+                          '${viewModel.impuestosController.text}%',
+                        ),
+                  ],
+                )
+                : Row(
+                  children: [
+                    Expanded(
+                      child:
+                          puedeEditarDatosBasicos
+                              ? _buildEditableTextField(
+                                context: context,
+                                controller: viewModel.precioController,
+                                label: 'Precio *',
+                                keyboardType: TextInputType.number,
+                                prefixText: '€ ',
+                              )
+                              : _buildReadOnlyField(
+                                context,
+                                'Precio *',
+                                '€ ${viewModel.precioController.text}',
+                              ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child:
+                          puedeEditarDatosBasicos
+                              ? _buildEditableTextField(
+                                context: context,
+                                controller: viewModel.impuestosController,
+                                label: 'Impuestos (%)',
+                                keyboardType: TextInputType.number,
+                                suffixText: '%',
+                              )
+                              : _buildReadOnlyField(
+                                context,
+                                'Impuestos (%)',
+                                '${viewModel.impuestosController.text}%',
+                              ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child:
-                      puedeEditarDatosBasicos
-                          ? _buildEditableTextField(
-                            context: context,
-                            controller: viewModel.impuestosController,
-                            label: 'Impuestos (%)',
-                            keyboardType: TextInputType.number,
-                            suffixText: '%',
-                          )
-                          : _buildReadOnlyField(
-                            context,
-                            'Impuestos (%)',
-                            '${viewModel.impuestosController.text}%',
-                          ),
-                ),
-              ],
-            ),
 
             const SizedBox(height: 16),
 
@@ -684,6 +716,7 @@ class ProductFormScreen extends StatelessWidget {
     required ValueChanged<bool> onChanged,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -696,6 +729,7 @@ class ProductFormScreen extends StatelessWidget {
         ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -705,11 +739,13 @@ class ProductFormScreen extends StatelessWidget {
                 color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: 4),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               const SizedBox(width: 4),
@@ -728,21 +764,36 @@ class ProductFormScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const Spacer(),
-              Switch(
-                value: value,
-                onChanged: onChanged,
-                activeColor: Theme.of(context).colorScheme.primary,
-              ),
+              if (!isSmallScreen) ...[
+                const Spacer(),
+                Switch(
+                  value: value,
+                  onChanged: onChanged,
+                  activeColor: Theme.of(context).colorScheme.primary,
+                ),
+              ],
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
             subtitle,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
+          if (isSmallScreen) ...[
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Switch(
+                  value: value,
+                  onChanged: onChanged,
+                  activeColor: Theme.of(context).colorScheme.primary,
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

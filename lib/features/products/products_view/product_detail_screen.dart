@@ -358,7 +358,6 @@ class ProductDetailScreen extends StatelessWidget {
     BuildContext context,
     ProductDetailViewModel viewModel,
   ) {
-    // En escritorio mostramos opciones para elegir ubicación
     if (kIsWeb || Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       return PopupMenuButton<String>(
         icon: const Icon(Icons.download),
@@ -410,7 +409,6 @@ class ProductDetailScreen extends StatelessWidget {
             ],
       );
     } else {
-      // En móviles mostramos opciones para descargar y compartir
       return PopupMenuButton<String>(
         icon: const Icon(Icons.download),
         tooltip: 'Opciones de QR',
@@ -605,14 +603,12 @@ class ProductDetailScreen extends StatelessWidget {
     }
 
     try {
-      // Solicitar permisos si es necesario
       if (Platform.isAndroid) {
         final androidInfo = await DeviceInfoPlugin().androidInfo;
         bool permisoOtorgado = false;
 
         if (androidInfo.version.sdkInt >= 33) {
-          permisoOtorgado =
-              true; // Android 13+ no necesita permisos para archivos propios
+          permisoOtorgado = true;
         } else if (androidInfo.version.sdkInt >= 30) {
           final status = await Permission.manageExternalStorage.request();
           permisoOtorgado = status.isGranted;
@@ -646,7 +642,6 @@ class ProductDetailScreen extends StatelessWidget {
 
       Directory? directory;
       if (Platform.isAndroid) {
-        // Intentar usar Downloads en Android
         directory = Directory('/storage/emulated/0/Download');
         if (!await directory.exists()) {
           directory = await getExternalStorageDirectory();
