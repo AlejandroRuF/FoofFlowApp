@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
 import 'package:foodflow_app/models/pedido_model.dart';
 import 'package:foodflow_app/models/pedido_producto_model.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 
 import '../incidents_interactor/incidents_interactor.dart';
 
@@ -19,6 +20,7 @@ class _IncidentFormScreenState extends State<IncidentFormScreen> {
   final _nuevaCantidadController = TextEditingController();
 
   final _interactor = IncidentsInteractor();
+  final _eventBus = EventBusService();
 
   int? _pedidoSeleccionado;
   int? _productoSeleccionado;
@@ -109,6 +111,7 @@ class _IncidentFormScreenState extends State<IncidentFormScreen> {
       );
 
       if (resultado) {
+        _eventBus.publishDataChanged('incidents.created');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

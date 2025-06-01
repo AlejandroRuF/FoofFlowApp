@@ -1,13 +1,18 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/features/products/products_interactor/products_interactor.dart';
 import 'package:foodflow_app/features/products/products_model/products_model.dart';
 import 'package:foodflow_app/models/producto_model.dart';
 import 'package:foodflow_app/models/categoria_model.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 
 class ProductListViewModel extends ChangeNotifier {
   final ProductsInteractor _interactor = ProductsInteractor();
+  final EventBusService _eventBus = EventBusService();
 
   ProductsModel _model = ProductsModel();
+  StreamSubscription<String>? _dataChangedSubscription;
+  StreamSubscription<RefreshEvent>? _eventSubscription;
 
   String _busquedaTexto = '';
   int? _categoriaSeleccionadaId;
@@ -43,6 +48,42 @@ class ProductListViewModel extends ChangeNotifier {
 
   ProductListViewModel() {
     _cargarCategorias();
+    _subscribeToEvents();
+    _listenToEvents();
+  }
+
+  @override
+  void dispose() {
+    _dataChangedSubscription?.cancel();
+    _eventSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _listenToEvents() {
+    _eventSubscription = _eventBus.stream.listen((event) {
+      if (event.type == RefreshEventType.products ||
+          event.type == RefreshEventType.all) {
+        cargarProductos();
+      }
+    });
+  }
+
+  void _subscribeToEvents() {
+    _dataChangedSubscription = _eventBus.dataChangedStream.listen((eventKey) {
+      if (eventKey == 'responsive_scaffold_products_refresh' ||
+          eventKey == 'responsive_scaffold_inventory_refresh' ||
+          eventKey == 'responsive_scaffold_all_refresh' ||
+          eventKey == 'product_create' ||
+          eventKey == 'product_update' ||
+          eventKey == 'inventory_update' ||
+          eventKey == 'inventory_add' ||
+          eventKey == 'inventory_add_user' ||
+          eventKey == 'inventory_bulk_add' ||
+          eventKey == 'qr_stock_update' ||
+          eventKey == 'cart_update') {
+        cargarProductos();
+      }
+    });
   }
 
   Future<void> _cargarCategorias() async {
@@ -224,6 +265,7 @@ class ProductListViewModel extends ChangeNotifier {
         }
 
         _model = _model.copyWith(cantidadesEnCarrito: nuevasCantidades);
+        _eventBus.publishDataChanged('cart_update');
       } else {
         _model = _model.copyWith(error: 'Error al agregar producto al carrito');
       }

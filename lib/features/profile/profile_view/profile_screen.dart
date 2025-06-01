@@ -20,11 +20,40 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final Map<int, bool> _expandedEmployees = {};
+  ProfileViewModel? _viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_viewModel != null) {
+        _viewModel!.addListener(_onViewModelChange);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    if (_viewModel != null) {
+      _viewModel!.removeListener(_onViewModelChange);
+    }
+    super.dispose();
+  }
+
+  void _onViewModelChange() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => ProfileViewModel(),
+      create: (_) {
+        _viewModel = ProfileViewModel();
+        _viewModel!.addListener(_onViewModelChange);
+        return _viewModel!;
+      },
       child: Consumer<ProfileViewModel>(
         builder: (context, viewModel, _) {
           final usuario = viewModel.usuario;
@@ -488,7 +517,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _editarPerfil(BuildContext context, ProfileViewModel viewModel) {
-    context.push('/profile/edit', extra: viewModel.usuario);
+    context.push('/profile/edit', extra: viewModel.usuario).then((_) {
+      viewModel.refrescarDatos();
+    });
   }
 
   void _cambiarPassword(BuildContext context, ProfileViewModel viewModel) {

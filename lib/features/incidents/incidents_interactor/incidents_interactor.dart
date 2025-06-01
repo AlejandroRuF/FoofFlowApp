@@ -2,6 +2,7 @@ import 'package:foodflow_app/core/services/incidencias_service.dart';
 import 'package:foodflow_app/core/services/pedidos_service.dart';
 import 'package:foodflow_app/core/services/productos_service.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 import 'package:foodflow_app/features/incidents/incidents_model/incidents_model.dart';
 import 'package:foodflow_app/models/pedido_model.dart';
 import 'package:foodflow_app/models/pedido_producto_model.dart';
@@ -11,6 +12,7 @@ class IncidentsInteractor {
   final PedidosService _pedidosService = PedidosService();
   final ProductosService _productosService = ProductosService();
   final UserSessionService _userSessionService = UserSessionService();
+  final EventBusService _eventBus = EventBusService();
 
   Future<IncidentsModel> obtenerIncidencias({
     Map<String, dynamic>? filtros,
@@ -48,12 +50,16 @@ class IncidentsInteractor {
     required String descripcion,
   }) async {
     try {
-      return await _incidenciasService.crearIncidencia(
+      final resultado = await _incidenciasService.crearIncidencia(
         pedidoId: pedidoId,
         productoId: productoId,
         nuevaCantidad: nuevaCantidad,
         descripcion: descripcion,
       );
+      if (resultado) {
+        _eventBus.publishDataChanged('incidents.created');
+      }
+      return resultado;
     } catch (e) {
       return false;
     }
@@ -61,7 +67,13 @@ class IncidentsInteractor {
 
   Future<bool> resolverIncidencia(int incidenciaId) async {
     try {
-      return await _incidenciasService.resolverIncidencia(incidenciaId);
+      final resultado = await _incidenciasService.resolverIncidencia(
+        incidenciaId,
+      );
+      if (resultado) {
+        _eventBus.publishDataChanged('incidents.resolved');
+      }
+      return resultado;
     } catch (e) {
       return false;
     }
@@ -69,7 +81,13 @@ class IncidentsInteractor {
 
   Future<bool> cancelarIncidencia(int incidenciaId) async {
     try {
-      return await _incidenciasService.cancelarIncidencia(incidenciaId);
+      final resultado = await _incidenciasService.cancelarIncidencia(
+        incidenciaId,
+      );
+      if (resultado) {
+        _eventBus.publishDataChanged('incidents.cancelled');
+      }
+      return resultado;
     } catch (e) {
       return false;
     }

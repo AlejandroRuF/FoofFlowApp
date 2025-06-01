@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/models/carrito_model.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/models/producto_model.dart';
 import 'package:foodflow_app/models/pedido_producto_model.dart';
 import 'package:foodflow_app/core/services/productos_service.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 
 import '../cart_interactor/cart_interactor.dart';
 
@@ -11,11 +13,14 @@ class CartDetailViewModel extends ChangeNotifier {
   final CartInteractor _interactor = CartInteractor();
   final ProductosService _productosService = ProductosService();
   final UserSessionService _sessionService = UserSessionService();
+  final EventBusService _eventBus = EventBusService();
 
   Carrito? _carrito;
   Map<int, Producto> _productosById = {};
   bool _isLoading = false;
   String? _error;
+  StreamSubscription<String>? _dataChangedSubscription;
+  StreamSubscription<RefreshEvent>? _eventSubscription;
 
   Map<int, bool> _actualizandoProductos = {};
 
@@ -24,6 +29,42 @@ class CartDetailViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   Map<int, bool> get actualizandoProductos => _actualizandoProductos;
+
+  CartDetailViewModel() {
+    _subscribeToEvents();
+    _listenToEvents();
+  }
+
+  @override
+  void dispose() {
+    _dataChangedSubscription?.cancel();
+    _eventSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _listenToEvents() {
+    _eventSubscription = _eventBus.stream.listen((event) {
+      if ((event.type == RefreshEventType.products ||
+              event.type == RefreshEventType.all) &&
+          _carrito?.id != null) {
+        cargarCarritoDetalle(_carrito!.id);
+      }
+    });
+  }
+
+  void _subscribeToEvents() {
+    _dataChangedSubscription = _eventBus.dataChangedStream.listen((eventKey) {
+      if ((eventKey == 'cart_updated' ||
+              eventKey == 'cart_item_added' ||
+              eventKey == 'cart_item_removed' ||
+              eventKey == 'cart_item_updated' ||
+              eventKey == 'cart_cleared' ||
+              eventKey == 'product_update') &&
+          _carrito?.id != null) {
+        cargarCarritoDetalle(_carrito!.id);
+      }
+    });
+  }
 
   Future<void> cargarCarritoDetalle(int carritoId) async {
     _setLoading(true);
@@ -68,6 +109,7 @@ class CartDetailViewModel extends ChangeNotifier {
         _carrito = resultado;
         await _fetchProductosRelacionados(resultado);
         _error = null;
+        _eventBus.publishDataChanged('cart_updated');
         return true;
       } else {
         _error = 'No se pudo actualizar el carrito';
@@ -94,6 +136,7 @@ class CartDetailViewModel extends ChangeNotifier {
         _carrito = null;
         _productosById = {};
         _error = null;
+        _eventBus.publishDataChanged('cart_cleared');
       } else {
         _error = 'No se pudo eliminar el carrito';
       }
@@ -129,6 +172,7 @@ class CartDetailViewModel extends ChangeNotifier {
 
       if (resultado) {
         await cargarCarritoDetalle(_carrito!.id);
+        _eventBus.publishDataChanged('cart_item_updated');
         return true;
       } else {
         _error = 'No se pudo actualizar el producto';
@@ -147,7 +191,11 @@ class CartDetailViewModel extends ChangeNotifier {
   }
 
   Future<bool> eliminarProducto(int productoId) async {
-    return actualizarCantidadProducto(productoId, 0);
+    final resultado = await actualizarCantidadProducto(productoId, 0);
+    if (resultado) {
+      _eventBus.publishDataChanged('cart_item_removed');
+    }
+    return resultado;
   }
 
   Future<bool> confirmarCarrito() async {
@@ -158,6 +206,7 @@ class CartDetailViewModel extends ChangeNotifier {
       final resultado = await _interactor.confirmarCarrito(_carrito!.id);
       if (resultado) {
         await cargarCarritoDetalle(_carrito!.id);
+        _eventBus.publishDataChanged('cart_updated');
         return true;
       } else {
         _error = 'No se pudo confirmar el carrito';

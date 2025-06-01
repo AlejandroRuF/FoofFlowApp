@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/features/incidents/incidents_model/incidents_model.dart';
 import 'package:foodflow_app/models/incidencia_model.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 
 import '../incidents_interactor/incidents_interactor.dart';
 
 class IncidentDetailViewModel extends ChangeNotifier {
   final IncidentsInteractor _interactor = IncidentsInteractor();
+  final EventBusService _eventBus = EventBusService();
 
   IncidentsModel _model = IncidentsModel();
 
@@ -48,6 +50,7 @@ class IncidentDetailViewModel extends ChangeNotifier {
         _model.incidenciaSeleccionada!.id,
       );
       if (resultado) {
+        _eventBus.publishDataChanged('incidents.resolved');
         await cargarIncidenciaDetalle(_model.incidenciaSeleccionada!.id);
       } else {
         _model = _model.copyWith(
@@ -78,6 +81,7 @@ class IncidentDetailViewModel extends ChangeNotifier {
         _model.incidenciaSeleccionada!.id,
       );
       if (resultado) {
+        _eventBus.publishDataChanged('incidents.cancelled');
         await cargarIncidenciaDetalle(_model.incidenciaSeleccionada!.id);
       } else {
         _model = _model.copyWith(

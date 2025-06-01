@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 import 'package:foodflow_app/features/orders/orders_interactor/orders_interactor.dart';
 import 'package:foodflow_app/features/orders/orders_model/orders_model.dart';
 import 'package:foodflow_app/models/user_model.dart';
@@ -8,9 +10,12 @@ import 'package:foodflow_app/models/pedido_model.dart';
 class OrderListViewModel extends ChangeNotifier {
   final OrdersInteractor _interactor = OrdersInteractor();
   final UserSessionService _sessionService = UserSessionService();
+  final EventBusService _eventBus = EventBusService();
 
   OrdersModel _model = OrdersModel(isLoading: true);
   DateTime? _ultimaActualizacion;
+  StreamSubscription<String>? _dataChangedSubscription;
+  StreamSubscription<RefreshEvent>? _eventSubscription;
 
   String _estadoSeleccionado = '';
   String _tipoPedidoSeleccionado = '';
@@ -55,7 +60,37 @@ class OrderListViewModel extends ChangeNotifier {
   }
 
   OrderListViewModel() {
+    _subscribeToEvents();
+    _listenToEvents();
     _verificarPermisosYCargar();
+  }
+
+  @override
+  void dispose() {
+    _dataChangedSubscription?.cancel();
+    _eventSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _listenToEvents() {
+    _eventSubscription = _eventBus.stream.listen((event) {
+      if (event.type == RefreshEventType.orders ||
+          event.type == RefreshEventType.all) {
+        cargarPedidos();
+      }
+    });
+  }
+
+  void _subscribeToEvents() {
+    _dataChangedSubscription = _eventBus.dataChangedStream.listen((eventKey) {
+      if (eventKey == 'order_created' ||
+          eventKey == 'order_updated' ||
+          eventKey == 'order_status_changed' ||
+          eventKey == 'responsive_scaffold_orders_refresh' ||
+          eventKey == 'responsive_scaffold_all_refresh') {
+        cargarPedidos();
+      }
+    });
   }
 
   Future<void> _verificarPermisosYCargar() async {

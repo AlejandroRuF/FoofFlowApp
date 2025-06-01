@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/features/products/products_interactor/products_interactor.dart';
@@ -7,9 +8,11 @@ import 'package:foodflow_app/models/categoria_model.dart';
 import 'package:foodflow_app/models/producto_model.dart';
 import 'package:foodflow_app/models/user_model.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 
 class ProductFormViewModel extends ChangeNotifier {
   final ProductsInteractor _interactor = ProductsInteractor();
+  final EventBusService _eventBus = EventBusService();
 
   ProductsModel _model = ProductsModel();
 
@@ -186,12 +189,18 @@ class ProductFormViewModel extends ChangeNotifier {
       bool resultado;
       if (_model.productoSeleccionado == null) {
         resultado = await _interactor.crearProducto(datos, imagenSeleccionada);
+        if (resultado) {
+          _eventBus.publishDataChanged('product_create');
+        }
       } else {
         resultado = await _interactor.actualizarProducto(
           _model.productoSeleccionado!.id,
           datos,
           imagenSeleccionada,
         );
+        if (resultado) {
+          _eventBus.publishDataChanged('product_update');
+        }
       }
 
       _isSaving = false;

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -36,11 +37,78 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
   late int _currentIndex;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final EventBusService _eventBus = EventBusService();
+  StreamSubscription<RefreshEvent>? _eventSubscription;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    _subscribeToEvents();
+  }
+
+  @override
+  void dispose() {
+    _eventSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _subscribeToEvents() {
+    _eventSubscription = _eventBus.stream.listen((event) {
+      if (!mounted) return;
+
+      final currentLocation = GoRouterState.of(context).matchedLocation;
+
+      switch (event.type) {
+        case RefreshEventType.orders:
+          if (currentLocation.startsWith('/orders')) {
+            _eventBus.publishDataChanged('responsive_scaffold_orders_refresh');
+          }
+          break;
+        case RefreshEventType.products:
+          if (currentLocation.startsWith('/products')) {
+            _eventBus.publishDataChanged(
+              'responsive_scaffold_products_refresh',
+            );
+          }
+          break;
+        case RefreshEventType.inventory:
+          if (currentLocation.startsWith('/inventory')) {
+            _eventBus.publishDataChanged(
+              'responsive_scaffold_inventory_refresh',
+            );
+          }
+          break;
+        case RefreshEventType.warehouse:
+          if (currentLocation.startsWith('/inventory')) {
+            _eventBus.publishDataChanged(
+              'responsive_scaffold_warehouse_refresh',
+            );
+          }
+          break;
+        case RefreshEventType.incidents:
+          if (currentLocation.startsWith('/incidents')) {
+            _eventBus.publishDataChanged(
+              'responsive_scaffold_incidents_refresh',
+            );
+          }
+          break;
+        case RefreshEventType.dashboard:
+          if (currentLocation.startsWith('/dashboard')) {
+            _eventBus.publishDataChanged(
+              'responsive_scaffold_dashboard_refresh',
+            );
+          }
+          break;
+        case RefreshEventType.profile:
+          if (currentLocation.startsWith('/profile')) {
+            _eventBus.publishDataChanged('responsive_scaffold_profile_refresh');
+          }
+          break;
+        case RefreshEventType.all:
+          _eventBus.publishDataChanged('responsive_scaffold_all_refresh');
+          break;
+      }
+    });
   }
 
   @override

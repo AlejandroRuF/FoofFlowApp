@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/models/user_model.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 import '../../auth/login/login_viewmodel/login_viewmodel.dart';
 import '../profile_interactor/profile_interactor.dart';
 import '../profile_model/Profile_management_model.dart';
@@ -9,8 +11,11 @@ import '../profile_model/Profile_management_model.dart';
 class ProfileViewModel extends ChangeNotifier {
   final ProfileInteractor _interactor = ProfileInteractor();
   final LoginViewModel _loginViewModel = LoginViewModel();
+  final EventBusService _eventBus = EventBusService();
   ProfileModel _state = ProfileModel();
   final Set<int> _empleadosModificados = {};
+  StreamSubscription<String>? _dataChangedSubscription;
+  StreamSubscription<RefreshEvent>? _eventSubscription;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final TextEditingController nombreController = TextEditingController();
@@ -20,6 +25,8 @@ class ProfileViewModel extends ChangeNotifier {
   final TextEditingController direccionController = TextEditingController();
 
   ProfileViewModel() {
+    _subscribeToEvents();
+    _listenToEvents();
     _inicializar();
   }
 
@@ -30,6 +37,38 @@ class ProfileViewModel extends ChangeNotifier {
       _interactor.obtenerCategoriasPermisos();
 
   Map<String, bool> get newEmployeePermissions => _state.newEmployeePermissions;
+
+  @override
+  void dispose() {
+    _dataChangedSubscription?.cancel();
+    _eventSubscription?.cancel();
+    nombreController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    telefonoController.dispose();
+    direccionController.dispose();
+    super.dispose();
+  }
+
+  void _listenToEvents() {
+    _eventSubscription = _eventBus.stream.listen((event) {
+      if (event.type == RefreshEventType.profile ||
+          event.type == RefreshEventType.all) {
+        _cargarDatos();
+      }
+    });
+  }
+
+  void _subscribeToEvents() {
+    _dataChangedSubscription = _eventBus.dataChangedStream.listen((eventKey) {
+      if (eventKey == 'employee_updated' ||
+          eventKey == 'employee_created' ||
+          eventKey == 'employee_permissions_updated' ||
+          eventKey == 'profile_updated') {
+        _cargarDatos();
+      }
+    });
+  }
 
   Future<void> _inicializar() async {
     _actualizarEstado(isLoading: true);
@@ -168,6 +207,7 @@ class ProfileViewModel extends ChangeNotifier {
 
         await _cargarEmpleados();
         cancelarCreacionEmpleado();
+        _eventBus.publishDataChanged('employee_created');
 
         _actualizarEstado(isSaving: false);
         return true;
@@ -226,6 +266,10 @@ class ProfileViewModel extends ChangeNotifier {
         isEditMode: false,
         error: exito ? null : 'Error al guardar datos del usuario',
       );
+
+      if (exito) {
+        _eventBus.publishDataChanged('profile_updated');
+      }
 
       return exito;
     } catch (e) {
@@ -303,6 +347,10 @@ class ProfileViewModel extends ChangeNotifier {
         error: exito ? null : 'Error al subir imagen',
       );
 
+      if (exito) {
+        _eventBus.publishDataChanged('profile_updated');
+      }
+
       return exito;
     } catch (e) {
       _actualizarEstado(isSaving: false, error: 'Error al subir imagen: $e');
@@ -356,6 +404,10 @@ class ProfileViewModel extends ChangeNotifier {
         permissionsChanged: false,
         error: todoCorrecto ? null : 'Error al guardar algunos permisos',
       );
+
+      if (todoCorrecto) {
+        _eventBus.publishDataChanged('employee_permissions_updated');
+      }
 
       return todoCorrecto;
     } catch (e) {
@@ -414,15 +466,5 @@ class ProfileViewModel extends ChangeNotifier {
       );
       return false;
     }
-  }
-
-  @override
-  void dispose() {
-    nombreController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    telefonoController.dispose();
-    direccionController.dispose();
-    super.dispose();
   }
 }

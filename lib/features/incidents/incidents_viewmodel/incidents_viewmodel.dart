@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:foodflow_app/features/incidents/incidents_model/incidents_model.dart';
 import 'package:foodflow_app/models/incidencia_model.dart';
 import 'package:foodflow_app/models/pedido_model.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
+import 'dart:async';
 
 import '../incidents_interactor/incidents_interactor.dart';
 
 class IncidentsViewModel extends ChangeNotifier {
   final IncidentsInteractor _interactor = IncidentsInteractor();
+  final EventBusService _eventBus = EventBusService();
+  StreamSubscription<RefreshEvent>? _eventSubscription;
 
   IncidentsModel _model = IncidentsModel();
 
@@ -26,6 +30,25 @@ class IncidentsViewModel extends ChangeNotifier {
   bool get puedeVerIncidencias => _interactor.puedeVerIncidencias();
   bool get puedeCrearIncidencias => _interactor.puedeCrearIncidencias();
   String get tipoUsuario => _interactor.obtenerTipoUsuario();
+
+  IncidentsViewModel() {
+    _listenToEvents();
+  }
+
+  void _listenToEvents() {
+    _eventSubscription = _eventBus.stream.listen((event) {
+      if (event.type == RefreshEventType.incidents ||
+          event.type == RefreshEventType.all) {
+        cargarIncidencias();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _eventSubscription?.cancel();
+    super.dispose();
+  }
 
   List<Incidencia> get incidenciasFiltradas {
     return _model.filtrarIncidencias(
@@ -167,6 +190,7 @@ class IncidentsViewModel extends ChangeNotifier {
       );
 
       if (resultado) {
+        _eventBus.publishDataChanged('incidents.created');
         await cargarIncidencias();
       }
 

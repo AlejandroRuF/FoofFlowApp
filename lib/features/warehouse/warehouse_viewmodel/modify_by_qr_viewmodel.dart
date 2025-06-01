@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/features/warehouse/interactor/warehouse_interactor.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 
 class ModifyByQRViewModel extends ChangeNotifier {
   final WarehouseInteractor _interactor = WarehouseInteractor();
+  final EventBusService _eventBus = EventBusService();
 
   bool _isLoading = false;
   String? _error;
@@ -11,6 +14,7 @@ class ModifyByQRViewModel extends ChangeNotifier {
   bool _cameraActive = false;
   String? _productoQRScaneado;
   bool _operacionExitosa = false;
+  StreamSubscription<String>? _dataChangedSubscription;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -21,6 +25,36 @@ class ModifyByQRViewModel extends ChangeNotifier {
   bool get operacionExitosa => _operacionExitosa;
   bool get puedeModificarInventario =>
       _interactor.tienePermisoParaModificarInventario();
+
+  ModifyByQRViewModel() {
+    _subscribeToEvents();
+  }
+
+  @override
+  void dispose() {
+    _dataChangedSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _subscribeToEvents() {
+    _dataChangedSubscription = _eventBus.dataChangedStream.listen((eventKey) {
+      if (eventKey == 'inventory_update' ||
+          eventKey == 'inventory_add' ||
+          eventKey == 'inventory_add_user' ||
+          eventKey == 'inventory_bulk_add' ||
+          eventKey == 'product_create' ||
+          eventKey == 'product_update' ||
+          eventKey == 'responsive_scaffold_inventory_refresh' ||
+          eventKey == 'responsive_scaffold_warehouse_refresh' ||
+          eventKey == 'responsive_scaffold_all_refresh') {
+        _refrescarDatos();
+      }
+    });
+  }
+
+  void _refrescarDatos() {
+    notifyListeners();
+  }
 
   void cambiarTipoOperacion(bool suma) {
     _esSuma = suma;
@@ -89,6 +123,7 @@ class ModifyByQRViewModel extends ChangeNotifier {
 
       if (resultado) {
         _operacionExitosa = true;
+        _eventBus.publishDataChanged('qr_stock_update');
         notifyListeners();
         return true;
       } else {

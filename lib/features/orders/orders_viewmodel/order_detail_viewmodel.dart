@@ -1,19 +1,57 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/features/orders/orders_interactor/orders_interactor.dart';
 import 'package:foodflow_app/models/pedido_model.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 
 class OrderDetailViewModel extends ChangeNotifier {
   final OrdersInteractor _interactor = OrdersInteractor();
   final UserSessionService _sessionService = UserSessionService();
+  final EventBusService _eventBus = EventBusService();
 
   Pedido? _pedido;
   bool _isLoading = false;
   String? _error;
+  StreamSubscription<String>? _dataChangedSubscription;
+  StreamSubscription<RefreshEvent>? _eventSubscription;
 
   Pedido? get pedido => _pedido;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  OrderDetailViewModel() {
+    _subscribeToEvents();
+    _listenToEvents();
+  }
+
+  @override
+  void dispose() {
+    _dataChangedSubscription?.cancel();
+    _eventSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _listenToEvents() {
+    _eventSubscription = _eventBus.stream.listen((event) {
+      if ((event.type == RefreshEventType.orders ||
+              event.type == RefreshEventType.all) &&
+          _pedido?.id != null) {
+        cargarPedidoDetalle(_pedido!.id);
+      }
+    });
+  }
+
+  void _subscribeToEvents() {
+    _dataChangedSubscription = _eventBus.dataChangedStream.listen((eventKey) {
+      if ((eventKey == 'order_update' ||
+              eventKey == 'order_cancel' ||
+              eventKey == 'order_create') &&
+          _pedido?.id != null) {
+        cargarPedidoDetalle(_pedido!.id);
+      }
+    });
+  }
 
   Future<void> cargarPedidoDetalle(int pedidoId) async {
     _setLoading(true);
@@ -38,6 +76,7 @@ class OrderDetailViewModel extends ChangeNotifier {
       if (resultado) {
         _pedido = pedidoActualizado;
         _error = null;
+        _eventBus.publishDataChanged('order_update');
       } else {
         _error = 'No se pudo actualizar el pedido';
       }
@@ -61,6 +100,7 @@ class OrderDetailViewModel extends ChangeNotifier {
       final resultado = await _interactor.cancelarPedido(_pedido!.id, motivo);
       if (resultado) {
         await cargarPedidoDetalle(_pedido!.id);
+        _eventBus.publishDataChanged('order_cancel');
       } else {
         _error = 'No se pudo cancelar el pedido';
       }

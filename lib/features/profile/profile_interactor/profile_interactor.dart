@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:foodflow_app/core/services/usuario_services.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/core/services/api_services.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 import 'package:foodflow_app/models/user_model.dart';
 import 'package:foodflow_app/models/permisos_empleado_model.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,6 +12,7 @@ class ProfileInteractor {
   final UserService _userService = UserService();
   final UserSessionService _userSessionService = UserSessionService();
   final ApiServices _apiService = ApiServices();
+  final EventBusService _eventBus = EventBusService();
 
   User? obtenerUsuarioActual() {
     return _userSessionService.user;
@@ -30,7 +32,11 @@ class ProfileInteractor {
   Future<bool> actualizarUsuario(int userId, Map<String, dynamic> datos) async {
     try {
       final user = await _userService.actualizarUsuario(userId, datos);
-      return user != null;
+      if (user != null) {
+        _eventBus.publishDataChanged('profile_updated');
+        return true;
+      }
+      return false;
     } catch (e) {
       return false;
     }
@@ -66,7 +72,11 @@ class ProfileInteractor {
 
   Future<User?> crearEmpleado(Map<String, dynamic> datosEmpleado) async {
     try {
-      return await _userService.crearEmpleado(datosEmpleado);
+      final empleado = await _userService.crearEmpleado(datosEmpleado);
+      if (empleado != null) {
+        _eventBus.publishDataChanged('employee_created');
+      }
+      return empleado;
     } catch (e) {
       print('Error al crear empleado: $e');
       return null;
@@ -115,10 +125,14 @@ class ProfileInteractor {
     Map<String, bool> permisos,
   ) async {
     try {
-      return await _userService.actualizarPermisosEmpleado(
+      final result = await _userService.actualizarPermisosEmpleado(
         empleadoId,
         permisos,
       );
+      if (result) {
+        _eventBus.publishDataChanged('employee_permissions_updated');
+      }
+      return result;
     } catch (e) {
       print('Error al actualizar permisos del empleado: $e');
       return false;
@@ -127,7 +141,11 @@ class ProfileInteractor {
 
   Future<String?> subirImagenPerfil(int userId, File imagen) async {
     try {
-      return await _userService.subirImagenPerfil(userId, imagen);
+      final result = await _userService.subirImagenPerfil(userId, imagen);
+      if (result != null) {
+        _eventBus.publishDataChanged('profile_updated');
+      }
+      return result;
     } catch (e) {
       return null;
     }

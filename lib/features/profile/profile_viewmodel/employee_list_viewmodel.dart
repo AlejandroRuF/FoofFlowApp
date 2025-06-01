@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 import '../profile_interactor/profile_interactor.dart';
 import '../profile_model/Profile_management_model.dart';
 import 'package:foodflow_app/models/user_model.dart';
 
 class EmployeeListViewModel extends ChangeNotifier {
   final ProfileInteractor _interactor = ProfileInteractor();
+  final EventBusService _eventBus = EventBusService();
 
   bool _isLoading = false;
   String? _error;
@@ -12,6 +15,8 @@ class EmployeeListViewModel extends ChangeNotifier {
   Map<int, Map<String, bool>> _employeePermissions = {};
   bool _permissionsChanged = false;
   final Set<int> _empleadosModificados = {};
+  StreamSubscription<String>? _dataChangedSubscription;
+  StreamSubscription<RefreshEvent>? _eventSubscription;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -34,7 +39,36 @@ class EmployeeListViewModel extends ChangeNotifier {
           .toList();
 
   EmployeeListViewModel() {
+    _subscribeToEvents();
+    _listenToEvents();
     cargarDatos();
+  }
+
+  @override
+  void dispose() {
+    _dataChangedSubscription?.cancel();
+    _eventSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _listenToEvents() {
+    _eventSubscription = _eventBus.stream.listen((event) {
+      if (event.type == RefreshEventType.profile ||
+          event.type == RefreshEventType.all) {
+        cargarDatos();
+      }
+    });
+  }
+
+  void _subscribeToEvents() {
+    _dataChangedSubscription = _eventBus.dataChangedStream.listen((eventKey) {
+      if (eventKey == 'employee_updated' ||
+          eventKey == 'employee_created' ||
+          eventKey == 'employee_permissions_updated' ||
+          eventKey == 'profile_updated') {
+        cargarDatos();
+      }
+    });
   }
 
   Future<void> cargarDatos() async {
@@ -110,6 +144,8 @@ class EmployeeListViewModel extends ChangeNotifier {
 
       if (!todoCorrecto) {
         _error = 'Error al guardar algunos permisos';
+      } else {
+        _eventBus.publishDataChanged('employee_permissions_updated');
       }
 
       return todoCorrecto;
