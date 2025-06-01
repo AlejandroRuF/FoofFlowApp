@@ -197,8 +197,6 @@ class InventoryViewModel extends ChangeNotifier {
       final cocinasRelacionadas = await _userService.obtenerCocinasDeUsuario(
         usuarioId,
       );
-
-      // Filtrar solo las cocinas centrales (por si acaso hay otros tipos en la respuesta)
       return cocinasRelacionadas
           .where((cocina) => cocina.tipoUsuario == 'cocina_central')
           .toList();

@@ -16,10 +16,10 @@ class UserService {
   final CocinaCentralRestauranteService _cocinaCentralRestauranteService =
       CocinaCentralRestauranteService();
 
-  Future<User?> obtenerDatosCompletos(int userId) async {
+  Future<User?> obtenerDatosUsuario(int userId) async {
     try {
       if (kDebugMode) {
-        print('Obteniendo datos completos del usuario ID: $userId');
+        print('Obteniendo datos del usuario ID: $userId');
         print(
           'URL completa: ${ApiEndpoints.getFullUrl("${ApiEndpoints.usuario}$userId/")}',
         );
@@ -37,8 +37,6 @@ class UserService {
           print('Datos del usuario obtenidos: ${user.toJson()}');
         }
 
-        await UserSessionService().actualizarDatosUsuario(user);
-
         return user;
       }
     } catch (e) {
@@ -50,6 +48,26 @@ class UserService {
           print('DioError respuesta: ${e.response}');
           print('URL de la solicitud: ${e.requestOptions.uri}');
         }
+      }
+    }
+    return null;
+  }
+
+  Future<User?> obtenerDatosCompletos(int userId) async {
+    try {
+      final user = await obtenerDatosUsuario(userId);
+
+      if (user != null) {
+        final usuarioActual = UserSessionService().user;
+        if (usuarioActual != null && usuarioActual.id == userId) {
+          await UserSessionService().actualizarDatosUsuario(user);
+        }
+      }
+
+      return user;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al obtener datos completos del usuario: $e');
       }
     }
     return null;
@@ -79,7 +97,12 @@ class UserService {
       if (response.statusCode == 200) {
         final userData = response.data;
         final user = User.fromJson(userData);
-        await UserSessionService().actualizarDatosUsuario(user);
+
+        final usuarioActual = UserSessionService().user;
+        if (usuarioActual != null && usuarioActual.id == userId) {
+          await UserSessionService().actualizarDatosUsuario(user);
+        }
+
         return user;
       }
     } catch (e) {
@@ -150,17 +173,14 @@ class UserService {
 
   Future<List<User>> obtenerCocinasDeUsuario(int usuarioId) async {
     try {
-      // Obtener los datos completos del usuario para saber su tipo
-      final usuario = await obtenerDatosCompletos(usuarioId);
+      final usuario = await obtenerDatosUsuario(usuarioId);
       if (usuario == null) return [];
 
       List<User> cocinasRelacionadas = [];
 
       if (usuario.tipoUsuario == 'cocina_central') {
-        // Si es una cocina central, se incluye a sí misma
         cocinasRelacionadas.add(usuario);
       } else if (usuario.tipoUsuario == 'restaurante') {
-        // Si es un restaurante, obtener las cocinas centrales relacionadas usando el servicio
         cocinasRelacionadas = await _cocinaCentralRestauranteService
             .obtenerCocinasDeRestaurante(usuarioId);
       }
@@ -228,7 +248,11 @@ class UserService {
       if (response.statusCode == 200) {
         final userData = response.data;
         final user = User.fromJson(userData);
-        await UserSessionService().actualizarDatosUsuario(user);
+        final usuarioActual = UserSessionService().user;
+        if (usuarioActual != null && usuarioActual.id == userId) {
+          await UserSessionService().actualizarDatosUsuario(user);
+        }
+
         return user.imagen;
       }
     } catch (e) {

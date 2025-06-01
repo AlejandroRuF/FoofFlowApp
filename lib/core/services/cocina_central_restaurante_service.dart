@@ -61,7 +61,6 @@ class CocinaCentralRestauranteService {
 
   Future<List<User>> obtenerCocinasDeRestaurante(int restauranteId) async {
     try {
-      // Obtener las relaciones usando el modelo tipado
       final relaciones = await obtenerRelacionesPorRestaurante(restauranteId);
 
       if (relaciones.isEmpty) {
@@ -75,7 +74,6 @@ class CocinaCentralRestauranteService {
         }
       }
 
-      // Extraer los IDs de las cocinas centrales
       final List<int> cocinasIds =
           relaciones.map((relacion) => relacion.cocinaCentralId).toList();
 
@@ -85,7 +83,6 @@ class CocinaCentralRestauranteService {
         if (cocinasResponse.statusCode == 200) {
           final List<dynamic> cocinasData = cocinasResponse.data;
 
-          // Filtrar solo las cocinas que necesitamos
           final cocinasFiltered =
               cocinasData
                   .where((userData) => cocinasIds.contains(userData['id']))
@@ -114,7 +111,6 @@ class CocinaCentralRestauranteService {
 
   Future<List<User>> obtenerRestaurantesDeCocina(int cocinaCentralId) async {
     try {
-      // Obtener las relaciones usando el modelo tipado
       final relaciones = await obtenerRelacionesPorCocina(cocinaCentralId);
 
       if (relaciones.isEmpty) {
@@ -128,7 +124,6 @@ class CocinaCentralRestauranteService {
         }
       }
 
-      // Extraer los IDs de los restaurantes
       final List<int> restaurantesIds =
           relaciones.map((relacion) => relacion.restauranteId).toList();
 
