@@ -175,7 +175,7 @@ class IncidentDetailScreen extends StatelessWidget {
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       showDialog(
                         context: context,
                         builder:
@@ -194,15 +194,33 @@ class IncidentDetailScreen extends StatelessWidget {
                                     backgroundColor: Colors.green,
                                     foregroundColor: Colors.white,
                                   ),
-                                  onPressed: () {
+                                  onPressed: () async {
                                     Navigator.pop(dialogContext);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Esta funcionalidad aún no está implementada',
+                                    final resultado =
+                                        await viewModel.resolverIncidencia();
+                                    if (resultado) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Incidencia resuelta correctamente',
+                                          ),
+                                          backgroundColor: Colors.green,
                                         ),
-                                      ),
-                                    );
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Error al resolver la incidencia',
+                                          ),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
                                   },
                                   child: const Text('Confirmar'),
                                 ),
@@ -218,7 +236,7 @@ class IncidentDetailScreen extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       showDialog(
                         context: context,
                         builder:
@@ -237,15 +255,33 @@ class IncidentDetailScreen extends StatelessWidget {
                                     backgroundColor: Colors.red,
                                     foregroundColor: Colors.white,
                                   ),
-                                  onPressed: () {
+                                  onPressed: () async {
                                     Navigator.pop(dialogContext);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Esta funcionalidad aún no está implementada',
+                                    final resultado =
+                                        await viewModel.cancelarIncidencia();
+                                    if (resultado) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Incidencia cancelada correctamente',
+                                          ),
+                                          backgroundColor: Colors.green,
                                         ),
-                                      ),
-                                    );
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Error al cancelar la incidencia',
+                                          ),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
                                   },
                                   child: const Text('Sí, cancelar'),
                                 ),

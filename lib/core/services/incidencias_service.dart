@@ -74,7 +74,7 @@ class IncidenciasService {
     try {
       final data = {
         'pedido': pedidoId,
-        'producto': productoId,
+        'producto_id': productoId,
         'nueva_cantidad': nuevaCantidad,
         'descripcion': descripcion,
       };
@@ -180,6 +180,21 @@ class IncidenciasService {
     } catch (e) {
       if (kDebugMode) {
         print('Error al cancelar incidencia: $e');
+      }
+      return false;
+    }
+  }
+
+  Future<bool> resolverIncidencia(int incidenciaId) async {
+    try {
+      final response = await ApiServices.dio.patch(
+        '${ApiEndpoints.incidencias}$incidenciaId/',
+        data: {'estado': 'resuelta'},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al resolver incidencia: $e');
       }
       return false;
     }

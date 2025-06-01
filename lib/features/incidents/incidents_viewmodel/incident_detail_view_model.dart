@@ -36,4 +36,64 @@ class IncidentDetailViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> resolverIncidencia() async {
+    if (_model.incidenciaSeleccionada == null) return false;
+
+    _model = _model.copyWith(isLoading: true, error: null);
+    notifyListeners();
+
+    try {
+      final resultado = await _interactor.resolverIncidencia(
+        _model.incidenciaSeleccionada!.id,
+      );
+      if (resultado) {
+        await cargarIncidenciaDetalle(_model.incidenciaSeleccionada!.id);
+      } else {
+        _model = _model.copyWith(
+          isLoading: false,
+          error: 'Error al resolver la incidencia',
+        );
+        notifyListeners();
+      }
+      return resultado;
+    } catch (e) {
+      _model = _model.copyWith(
+        isLoading: false,
+        error: 'Error al resolver la incidencia: $e',
+      );
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> cancelarIncidencia() async {
+    if (_model.incidenciaSeleccionada == null) return false;
+
+    _model = _model.copyWith(isLoading: true, error: null);
+    notifyListeners();
+
+    try {
+      final resultado = await _interactor.cancelarIncidencia(
+        _model.incidenciaSeleccionada!.id,
+      );
+      if (resultado) {
+        await cargarIncidenciaDetalle(_model.incidenciaSeleccionada!.id);
+      } else {
+        _model = _model.copyWith(
+          isLoading: false,
+          error: 'Error al cancelar la incidencia',
+        );
+        notifyListeners();
+      }
+      return resultado;
+    } catch (e) {
+      _model = _model.copyWith(
+        isLoading: false,
+        error: 'Error al cancelar la incidencia: $e',
+      );
+      notifyListeners();
+      return false;
+    }
+  }
 }

@@ -59,6 +59,22 @@ class IncidentsInteractor {
     }
   }
 
+  Future<bool> resolverIncidencia(int incidenciaId) async {
+    try {
+      return await _incidenciasService.resolverIncidencia(incidenciaId);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> cancelarIncidencia(int incidenciaId) async {
+    try {
+      return await _incidenciasService.cancelarIncidencia(incidenciaId);
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<List<Pedido>> obtenerPedidosUsuario() async {
     try {
       return await _pedidosService.obtenerPedidos();
