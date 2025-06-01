@@ -6,6 +6,7 @@ import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.
 import 'package:foodflow_app/features/profile/profile_view/widgets/profile_avatar_widget.dart';
 import 'package:foodflow_app/features/profile/profile_view/widgets/profile_field_widget.dart';
 import 'package:foodflow_app/features/profile/profile_view/widgets/employee_card_widget.dart';
+import 'package:foodflow_app/features/profile/profile_view/widgets/create_employee_form_widget.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../profile_viewmodel/profile_viewmodel.dart';
@@ -40,19 +41,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
           return ResponsiveScaffold(
             title: 'Perfil',
             body: _buildBody(context, viewModel),
-            floatingActionButton:
-                viewModel.state.permissionsChanged
-                    ? FloatingActionButton.extended(
-                      onPressed:
-                          () => _guardarPermisosEmpleados(context, viewModel),
-                      label: const Text('Guardar cambios'),
-                      icon: const Icon(Icons.save),
-                    )
-                    : null,
+            floatingActionButton: _buildFloatingActionButton(
+              context,
+              viewModel,
+            ),
           );
         },
       ),
     );
+  }
+
+  Widget? _buildFloatingActionButton(
+    BuildContext context,
+    ProfileViewModel viewModel,
+  ) {
+    if (viewModel.state.permissionsChanged) {
+      return FloatingActionButton.extended(
+        onPressed: () => _guardarPermisosEmpleados(context, viewModel),
+        label: const Text('Guardar cambios'),
+        icon: const Icon(Icons.save),
+      );
+    }
+
+    if (viewModel.state.hasPermissionEmployees &&
+        !viewModel.state.isCreatingEmployee) {
+      return FloatingActionButton.extended(
+        onPressed: () => viewModel.iniciarCreacionEmpleado(),
+        label: const Text('Crear empleado'),
+        icon: const Icon(Icons.person_add),
+      );
+    }
+
+    return null;
   }
 
   Widget _buildBody(BuildContext context, ProfileViewModel viewModel) {
@@ -281,7 +301,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: TextStyle(fontSize: 14),
         ),
         const SizedBox(height: 16),
-        if (viewModel.state.employees.isEmpty)
+        if (viewModel.state.isCreatingEmployee)
+          CreateEmployeeFormWidget(
+            viewModel: viewModel,
+            onCancel: () => viewModel.cancelarCreacionEmpleado(),
+            onCreate: () => _crearEmpleado(context, viewModel),
+          )
+        else if (viewModel.state.employees.isEmpty)
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -336,6 +362,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
       ],
     );
+  }
+
+  Future<void> _crearEmpleado(
+    BuildContext context,
+    ProfileViewModel viewModel,
+  ) async {
+    if (viewModel.formKey.currentState?.validate() ?? false) {
+      final success = await viewModel.crearEmpleado();
+      if (success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Empleado creado exitosamente'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(viewModel.state.error ?? 'Error al crear empleado'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   void _mostrarOpcionesFoto(BuildContext context, ProfileViewModel viewModel) {

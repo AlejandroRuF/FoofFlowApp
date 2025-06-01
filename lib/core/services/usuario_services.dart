@@ -155,6 +155,25 @@ class UserService {
     return [];
   }
 
+  Future<User?> crearEmpleado(Map<String, dynamic> datosEmpleado) async {
+    try {
+      final response = await ApiServices.dio.post(
+        ApiEndpoints.usuario,
+        data: datosEmpleado,
+      );
+
+      if (response.statusCode == 201) {
+        final userData = response.data;
+        return User.fromJson(userData);
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al crear empleado: $e');
+      }
+    }
+    return null;
+  }
+
   Future<List<User>> obtenerTodosLosUsuarios() async {
     try {
       final response = await ApiServices.dio.get(ApiEndpoints.usuario);

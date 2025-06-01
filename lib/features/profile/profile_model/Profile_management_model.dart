@@ -10,6 +10,8 @@ class ProfileModel {
   final List<EmployeeItem> employees;
   final Map<int, Map<String, bool>> employeePermissions;
   final bool permissionsChanged;
+  final bool isCreatingEmployee;
+  final Map<String, bool> newEmployeePermissions;
 
   ProfileModel({
     this.isLoading = false,
@@ -23,6 +25,8 @@ class ProfileModel {
     this.employees = const [],
     this.employeePermissions = const {},
     this.permissionsChanged = false,
+    this.isCreatingEmployee = false,
+    this.newEmployeePermissions = const {},
   });
 
   ProfileModel copyWith({
@@ -37,6 +41,8 @@ class ProfileModel {
     List<EmployeeItem>? employees,
     Map<int, Map<String, bool>>? employeePermissions,
     bool? permissionsChanged,
+    bool? isCreatingEmployee,
+    Map<String, bool>? newEmployeePermissions,
   }) {
     return ProfileModel(
       isLoading: isLoading ?? this.isLoading,
@@ -51,6 +57,9 @@ class ProfileModel {
       employees: employees ?? this.employees,
       employeePermissions: employeePermissions ?? this.employeePermissions,
       permissionsChanged: permissionsChanged ?? this.permissionsChanged,
+      isCreatingEmployee: isCreatingEmployee ?? this.isCreatingEmployee,
+      newEmployeePermissions:
+          newEmployeePermissions ?? this.newEmployeePermissions,
     );
   }
 }

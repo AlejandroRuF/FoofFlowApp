@@ -17,6 +17,7 @@ class PermisosEmpleado {
   final bool puedeEditarPedidos;
   final bool puedeVerIncidencias;
   final bool puedeCrearIncidencias;
+  final bool puedeModificarIncidencias;
   final bool puedeVerPedidoProducto;
   final bool puedeCrearPedidoProducto;
   final bool puedeEditarPedidoProducto;
@@ -44,6 +45,7 @@ class PermisosEmpleado {
     required this.puedeEditarPedidos,
     required this.puedeVerIncidencias,
     required this.puedeCrearIncidencias,
+    required this.puedeModificarIncidencias,
     required this.puedeVerPedidoProducto,
     required this.puedeCrearPedidoProducto,
     required this.puedeEditarPedidoProducto,
@@ -73,6 +75,7 @@ class PermisosEmpleado {
       puedeEditarPedidos: json['puede_editar_pedidos'] ?? false,
       puedeVerIncidencias: json['puede_ver_incidencias'] ?? false,
       puedeCrearIncidencias: json['puede_crear_incidencias'] ?? false,
+      puedeModificarIncidencias: json['puede_modificar_incidencias'] ?? false,
       puedeVerPedidoProducto: json['puede_ver_pedidoProducto'] ?? false,
       puedeCrearPedidoProducto: json['puede_crear_pedidoProducto'] ?? false,
       puedeEditarPedidoProducto: json['puede_editar_pedidoProducto'] ?? false,
@@ -98,6 +101,9 @@ class PermisosEmpleado {
 
   bool get puedeGestionarPedidos => puedeCrearPedidos || puedeEditarPedidos;
 
+  bool get puedeGestionarIncidencias =>
+      puedeCrearIncidencias || puedeModificarIncidencias;
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -118,6 +124,7 @@ class PermisosEmpleado {
       'puede_editar_pedidos': puedeEditarPedidos,
       'puede_ver_incidencias': puedeVerIncidencias,
       'puede_crear_incidencias': puedeCrearIncidencias,
+      'puede_modificar_incidencias': puedeModificarIncidencias,
       'puede_ver_pedidoProducto': puedeVerPedidoProducto,
       'puede_crear_pedidoProducto': puedeCrearPedidoProducto,
       'puede_editar_pedidoProducto': puedeEditarPedidoProducto,

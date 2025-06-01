@@ -10,6 +10,13 @@ class ProfileViewModel extends ChangeNotifier {
   ProfileModel _state = ProfileModel();
   final Set<int> _empleadosModificados = {};
 
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final TextEditingController nombreController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController telefonoController = TextEditingController();
+  final TextEditingController direccionController = TextEditingController();
+
   ProfileViewModel() {
     _inicializar();
   }
@@ -19,6 +26,8 @@ class ProfileViewModel extends ChangeNotifier {
 
   List<PermissionCategory> get categoriasPermisos =>
       _interactor.obtenerCategoriasPermisos();
+
+  Map<String, bool> get newEmployeePermissions => _state.newEmployeePermissions;
 
   Future<void> _inicializar() async {
     _actualizarEstado(isLoading: true);
@@ -85,6 +94,8 @@ class ProfileViewModel extends ChangeNotifier {
     List<EmployeeItem>? employees,
     Map<int, Map<String, bool>>? employeePermissions,
     bool? permissionsChanged,
+    bool? isCreatingEmployee,
+    Map<String, bool>? newEmployeePermissions,
   }) {
     _state = _state.copyWith(
       isLoading: isLoading,
@@ -98,8 +109,74 @@ class ProfileViewModel extends ChangeNotifier {
       employees: employees,
       employeePermissions: employeePermissions,
       permissionsChanged: permissionsChanged,
+      isCreatingEmployee: isCreatingEmployee,
+      newEmployeePermissions: newEmployeePermissions,
     );
     notifyListeners();
+  }
+
+  void iniciarCreacionEmpleado() {
+    _limpiarFormulario();
+    _actualizarEstado(isCreatingEmployee: true, newEmployeePermissions: {});
+  }
+
+  void cancelarCreacionEmpleado() {
+    _limpiarFormulario();
+    _actualizarEstado(isCreatingEmployee: false, newEmployeePermissions: {});
+  }
+
+  void _limpiarFormulario() {
+    nombreController.clear();
+    emailController.clear();
+    passwordController.clear();
+    telefonoController.clear();
+    direccionController.clear();
+  }
+
+  void cambiarPermisoNuevoEmpleado(String permissionKey, bool value) {
+    final nuevosPermisos = Map<String, bool>.from(
+      _state.newEmployeePermissions,
+    );
+    nuevosPermisos[permissionKey] = value;
+    _actualizarEstado(newEmployeePermissions: nuevosPermisos);
+  }
+
+  Future<bool> crearEmpleado() async {
+    _actualizarEstado(isSaving: true, error: null);
+
+    try {
+      final datosEmpleado = {
+        'nombre': nombreController.text.trim(),
+        'email': emailController.text.trim(),
+        'password': passwordController.text.trim(),
+        'telefono': telefonoController.text.trim(),
+        'direccion': direccionController.text.trim(),
+        'tipoUsuario': 'empleado',
+      };
+
+      final empleadoCreado = await _interactor.crearEmpleado(datosEmpleado);
+
+      if (empleadoCreado != null) {
+        if (_state.newEmployeePermissions.isNotEmpty) {
+          await _interactor.actualizarPermisosEmpleado(
+            empleadoCreado.id,
+            _state.newEmployeePermissions,
+          );
+        }
+
+        await _cargarEmpleados();
+        cancelarCreacionEmpleado();
+
+        _actualizarEstado(isSaving: false);
+        return true;
+      } else {
+        _actualizarEstado(isSaving: false, error: 'Error al crear el empleado');
+        return false;
+      }
+    } catch (e) {
+      _actualizarEstado(isSaving: false, error: 'Error al crear empleado: $e');
+      return false;
+    }
   }
 
   void activarModoEdicion() {
@@ -295,5 +372,15 @@ class ProfileViewModel extends ChangeNotifier {
       );
       return false;
     }
+  }
+
+  @override
+  void dispose() {
+    nombreController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    telefonoController.dispose();
+    direccionController.dispose();
+    super.dispose();
   }
 }

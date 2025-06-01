@@ -64,6 +64,15 @@ class ProfileInteractor {
     }
   }
 
+  Future<User?> crearEmpleado(Map<String, dynamic> datosEmpleado) async {
+    try {
+      return await _userService.crearEmpleado(datosEmpleado);
+    } catch (e) {
+      print('Error al crear empleado: $e');
+      return null;
+    }
+  }
+
   Map<String, bool>? obtenerPermisosEmpleado(User empleado) {
     try {
       final permisos = empleado.permisos;
@@ -87,6 +96,7 @@ class ProfileInteractor {
         'puede_editar_pedidos': permisos.puedeEditarPedidos,
         'puede_ver_incidencias': permisos.puedeVerIncidencias,
         'puede_crear_incidencias': permisos.puedeCrearIncidencias,
+        'puede_modificar_incidencias': permisos.puedeModificarIncidencias,
         'puede_ver_pedidoProducto': permisos.puedeVerPedidoProducto,
         'puede_crear_pedidoProducto': permisos.puedeCrearPedidoProducto,
         'puede_editar_pedidoProducto': permisos.puedeEditarPedidoProducto,
@@ -275,6 +285,11 @@ class ProfileInteractor {
             key: 'puede_crear_incidencias',
             name: 'Crear incidencias',
             description: 'Permite crear nuevas incidencias',
+          ),
+          PermissionItem(
+            key: 'puede_modificar_incidencias',
+            name: 'Modificar incidencias',
+            description: 'Permite modificar incidencias existentes',
           ),
         ],
       ),
