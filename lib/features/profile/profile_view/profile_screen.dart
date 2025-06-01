@@ -286,13 +286,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               'Gestión de empleados',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            if (viewModel.state.permissionsChanged)
-              ElevatedButton.icon(
-                onPressed: () => _guardarPermisosEmpleados(context, viewModel),
-                icon: const Icon(Icons.save),
-                label: const Text('Guardar cambios'),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              ),
           ],
         ),
         const SizedBox(height: 8),
