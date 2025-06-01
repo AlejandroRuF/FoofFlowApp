@@ -37,6 +37,8 @@ class InventoryScreen extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, InventoryViewModel viewModel) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
+
     Widget filtersWidget = InventoryFiltersWidget(
       busqueda: viewModel.state.busqueda,
       mostrarStockBajo: viewModel.state.mostrarStockBajo,
@@ -66,11 +68,11 @@ class InventoryScreen extends StatelessWidget {
                 children: [
                   Image.asset(
                     'assets/icons/app_icon.png',
-                    width: 100,
-                    height: 100,
+                    width: isSmallScreen ? 80 : 100,
+                    height: isSmallScreen ? 80 : 100,
                   ),
-                  SizedBox(height: 24),
-                  CircularProgressIndicator(),
+                  SizedBox(height: isSmallScreen ? 16 : 24),
+                  const CircularProgressIndicator(),
                 ],
               ),
             ),
@@ -85,30 +87,35 @@ class InventoryScreen extends StatelessWidget {
           filtersWidget,
           Expanded(
             child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 80,
-                    color: Colors.red.shade300,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    viewModel.state.error!,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSmallScreen ? 16 : 32,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: isSmallScreen ? 60 : 80,
+                      color: Colors.red.shade300,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  if (viewModel.tienePermisoVerInventario)
-                    ElevatedButton(
-                      onPressed: () => viewModel.cargarInventario(),
-                      child: const Text('Reintentar'),
+                    const SizedBox(height: 16),
+                    Text(
+                      viewModel.state.error!,
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 16 : 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                ],
+                    const SizedBox(height: 24),
+                    if (viewModel.tienePermisoVerInventario)
+                      ElevatedButton(
+                        onPressed: () => viewModel.cargarInventario(),
+                        child: const Text('Reintentar'),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -124,27 +131,39 @@ class InventoryScreen extends StatelessWidget {
           filtersWidget,
           Expanded(
             child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.inventory, size: 80, color: Colors.grey.shade400),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'No hay productos en el inventario',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  if (viewModel.tienePermisoModificarInventario) ...[
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _iniciarFlujoAgregarProducto(context, viewModel);
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text('Añadir Producto'),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSmallScreen ? 16 : 32,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.inventory,
+                      size: isSmallScreen ? 60 : 80,
+                      color: Colors.grey.shade400,
                     ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No hay productos en el inventario',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 16 : 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (viewModel.tienePermisoModificarInventario) ...[
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          _iniciarFlujoAgregarProducto(context, viewModel);
+                        },
+                        icon: const Icon(Icons.add),
+                        label: const Text('Añadir Producto'),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -159,7 +178,7 @@ class InventoryScreen extends StatelessWidget {
           child: RefreshIndicator(
             onRefresh: viewModel.cargarInventario,
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
               itemCount: inventario.length,
               itemBuilder: (context, index) {
                 final item = inventario[index];

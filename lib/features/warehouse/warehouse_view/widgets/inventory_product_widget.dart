@@ -49,6 +49,8 @@ class _InventoryProductWidgetState extends State<InventoryProductWidget> {
   @override
   Widget build(BuildContext context) {
     final bool stockBajo = _stockActual < 10;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -56,35 +58,25 @@ class _InventoryProductWidgetState extends State<InventoryProductWidget> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.inventarioItem.productoNombre,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Almacén: ${widget.inventarioItem.usuarioNombre}',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
+            if (isSmallScreen) ...[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.inventarioItem.productoNombre,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Container(
+                  const SizedBox(height: 4),
+                  Text(
+                    'Almacén: ${widget.inventarioItem.usuarioNombre}',
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color:
@@ -119,17 +111,87 @@ class _InventoryProductWidgetState extends State<InventoryProductWidget> {
                       ],
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ] else ...[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.inventarioItem.productoNombre,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Almacén: ${widget.inventarioItem.usuarioNombre}',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color:
+                            stockBajo
+                                ? Colors.red.shade100
+                                : Colors.green.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            stockBajo
+                                ? Icons.warning_amber_rounded
+                                : Icons.check_circle_outline,
+                            color:
+                                stockBajo
+                                    ? Colors.red.shade700
+                                    : Colors.green.shade700,
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              '$_stockActual unidades',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    stockBajo
+                                        ? Colors.red.shade700
+                                        : Colors.green.shade700,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             if (widget.puedeModificar) ...[
               const SizedBox(height: 16),
               const Divider(),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
+              if (isSmallScreen) ...[
+                Column(
+                  children: [
+                    TextField(
                       controller: _modificacionController,
                       decoration: const InputDecoration(
                         labelText: 'Cantidad',
@@ -146,23 +208,69 @@ class _InventoryProductWidgetState extends State<InventoryProductWidget> {
                         });
                       },
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  _buildStockButton(
-                    context,
-                    icon: Icons.remove,
-                    color: Colors.red,
-                    onPressed: () => _actualizarStock(-_modificacion),
-                  ),
-                  const SizedBox(width: 8),
-                  _buildStockButton(
-                    context,
-                    icon: Icons.add,
-                    color: Colors.green,
-                    onPressed: () => _actualizarStock(_modificacion),
-                  ),
-                ],
-              ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildStockButton(
+                            context,
+                            icon: Icons.remove,
+                            color: Colors.red,
+                            onPressed: () => _actualizarStock(-_modificacion),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _buildStockButton(
+                            context,
+                            icon: Icons.add,
+                            color: Colors.green,
+                            onPressed: () => _actualizarStock(_modificacion),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ] else ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _modificacionController,
+                        decoration: const InputDecoration(
+                          labelText: 'Cantidad',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          setState(() {
+                            _modificacion = int.tryParse(value) ?? 1;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildStockButton(
+                      context,
+                      icon: Icons.remove,
+                      color: Colors.red,
+                      onPressed: () => _actualizarStock(-_modificacion),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildStockButton(
+                      context,
+                      icon: Icons.add,
+                      color: Colors.green,
+                      onPressed: () => _actualizarStock(_modificacion),
+                    ),
+                  ],
+                ),
+              ],
             ],
             if (_isLoading) ...[
               const SizedBox(height: 16),
