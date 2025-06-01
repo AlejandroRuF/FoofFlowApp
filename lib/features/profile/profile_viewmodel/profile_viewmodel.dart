@@ -151,7 +151,7 @@ class ProfileViewModel extends ChangeNotifier {
         'password': passwordController.text.trim(),
         'telefono': telefonoController.text.trim(),
         'direccion': direccionController.text.trim(),
-        'tipoUsuario': 'empleado',
+        'tipo_usuario': 'empleado',
       };
 
       final empleadoCreado = await _interactor.crearEmpleado(datosEmpleado);
