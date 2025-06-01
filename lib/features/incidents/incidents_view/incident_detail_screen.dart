@@ -165,132 +165,290 @@ class IncidentDetailScreen extends StatelessWidget {
             if (incidencia.estado == 'pendiente' &&
                 viewModel.puedeGestionarIncidencia) ...[
               const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.check),
-                    label: const Text('Marcar como resuelta'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                    ),
-                    onPressed: () async {
-                      showDialog(
-                        context: context,
-                        builder:
-                            (dialogContext) => AlertDialog(
-                              title: const Text('Confirmar resolución'),
-                              content: const Text(
-                                '¿Está seguro de marcar esta incidencia como resuelta? Esta acción no se puede deshacer.',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(dialogContext),
-                                  child: const Text('Cancelar'),
-                                ),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  onPressed: () async {
-                                    Navigator.pop(dialogContext);
-                                    final resultado =
-                                        await viewModel.resolverIncidencia();
-                                    if (resultado) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Incidencia resuelta correctamente',
-                                          ),
-                                          backgroundColor: Colors.green,
-                                        ),
-                                      );
-                                    } else {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Error al resolver la incidencia',
-                                          ),
-                                          backgroundColor: Colors.red,
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  child: const Text('Confirmar'),
-                                ),
-                              ],
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  return constraints.maxWidth < 400
+                      ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.check),
+                            label: const Text('Marcar como resuelta'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
                             ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.cancel),
-                    label: const Text('Cancelar incidencia'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                    ),
-                    onPressed: () async {
-                      showDialog(
-                        context: context,
-                        builder:
-                            (dialogContext) => AlertDialog(
-                              title: const Text('Confirmar cancelación'),
-                              content: const Text(
-                                '¿Está seguro de cancelar esta incidencia? Esta acción no se puede deshacer.',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(dialogContext),
-                                  child: const Text('No cancelar'),
-                                ),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  onPressed: () async {
-                                    Navigator.pop(dialogContext);
-                                    final resultado =
-                                        await viewModel.cancelarIncidencia();
-                                    if (resultado) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Incidencia cancelada correctamente',
-                                          ),
-                                          backgroundColor: Colors.green,
+                            onPressed: () async {
+                              showDialog(
+                                context: context,
+                                builder:
+                                    (dialogContext) => AlertDialog(
+                                      title: const Text('Confirmar resolución'),
+                                      content: const Text(
+                                        '¿Está seguro de marcar esta incidencia como resuelta? Esta acción no se puede deshacer.',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed:
+                                              () =>
+                                                  Navigator.pop(dialogContext),
+                                          child: const Text('Cancelar'),
                                         ),
-                                      );
-                                    } else {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Error al cancelar la incidencia',
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.green,
+                                            foregroundColor: Colors.white,
                                           ),
-                                          backgroundColor: Colors.red,
+                                          onPressed: () async {
+                                            Navigator.pop(dialogContext);
+                                            final resultado =
+                                                await viewModel
+                                                    .resolverIncidencia();
+                                            if (resultado) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Incidencia resuelta correctamente',
+                                                  ),
+                                                  backgroundColor: Colors.green,
+                                                ),
+                                              );
+                                            } else {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Error al resolver la incidencia',
+                                                  ),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                              );
+                                            }
+                                          },
+                                          child: const Text('Confirmar'),
                                         ),
-                                      );
-                                    }
-                                  },
-                                  child: const Text('Sí, cancelar'),
-                                ),
-                              ],
+                                      ],
+                                    ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          OutlinedButton.icon(
+                            icon: const Icon(Icons.cancel),
+                            label: const Text('Cancelar incidencia'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.red,
                             ),
+                            onPressed: () async {
+                              showDialog(
+                                context: context,
+                                builder:
+                                    (dialogContext) => AlertDialog(
+                                      title: const Text(
+                                        'Confirmar cancelación',
+                                      ),
+                                      content: const Text(
+                                        '¿Está seguro de cancelar esta incidencia? Esta acción no se puede deshacer.',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed:
+                                              () =>
+                                                  Navigator.pop(dialogContext),
+                                          child: const Text('No cancelar'),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                          onPressed: () async {
+                                            Navigator.pop(dialogContext);
+                                            final resultado =
+                                                await viewModel
+                                                    .cancelarIncidencia();
+                                            if (resultado) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Incidencia cancelada correctamente',
+                                                  ),
+                                                  backgroundColor: Colors.green,
+                                                ),
+                                              );
+                                            } else {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'Error al cancelar la incidencia',
+                                                  ),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                              );
+                                            }
+                                          },
+                                          child: const Text('Sí, cancelar'),
+                                        ),
+                                      ],
+                                    ),
+                              );
+                            },
+                          ),
+                        ],
+                      )
+                      : Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: ElevatedButton.icon(
+                              icon: const Icon(Icons.check),
+                              label: const Text('Marcar como resuelta'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: () async {
+                                showDialog(
+                                  context: context,
+                                  builder:
+                                      (dialogContext) => AlertDialog(
+                                        title: const Text(
+                                          'Confirmar resolución',
+                                        ),
+                                        content: const Text(
+                                          '¿Está seguro de marcar esta incidencia como resuelta? Esta acción no se puede deshacer.',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed:
+                                                () => Navigator.pop(
+                                                  dialogContext,
+                                                ),
+                                            child: const Text('Cancelar'),
+                                          ),
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.green,
+                                              foregroundColor: Colors.white,
+                                            ),
+                                            onPressed: () async {
+                                              Navigator.pop(dialogContext);
+                                              final resultado =
+                                                  await viewModel
+                                                      .resolverIncidencia();
+                                              if (resultado) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Incidencia resuelta correctamente',
+                                                    ),
+                                                    backgroundColor:
+                                                        Colors.green,
+                                                  ),
+                                                );
+                                              } else {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Error al resolver la incidencia',
+                                                    ),
+                                                    backgroundColor: Colors.red,
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                            child: const Text('Confirmar'),
+                                          ),
+                                        ],
+                                      ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: OutlinedButton.icon(
+                              icon: const Icon(Icons.cancel),
+                              label: const Text('Cancelar incidencia'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.red,
+                              ),
+                              onPressed: () async {
+                                showDialog(
+                                  context: context,
+                                  builder:
+                                      (dialogContext) => AlertDialog(
+                                        title: const Text(
+                                          'Confirmar cancelación',
+                                        ),
+                                        content: const Text(
+                                          '¿Está seguro de cancelar esta incidencia? Esta acción no se puede deshacer.',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed:
+                                                () => Navigator.pop(
+                                                  dialogContext,
+                                                ),
+                                            child: const Text('No cancelar'),
+                                          ),
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.red,
+                                              foregroundColor: Colors.white,
+                                            ),
+                                            onPressed: () async {
+                                              Navigator.pop(dialogContext);
+                                              final resultado =
+                                                  await viewModel
+                                                      .cancelarIncidencia();
+                                              if (resultado) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Incidencia cancelada correctamente',
+                                                    ),
+                                                    backgroundColor:
+                                                        Colors.green,
+                                                  ),
+                                                );
+                                              } else {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Error al cancelar la incidencia',
+                                                    ),
+                                                    backgroundColor: Colors.red,
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                            child: const Text('Sí, cancelar'),
+                                          ),
+                                        ],
+                                      ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       );
-                    },
-                  ),
-                ],
+                },
               ),
             ],
           ],
