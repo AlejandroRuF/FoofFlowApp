@@ -94,10 +94,11 @@ class ProductCardWidget extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
+                      if (tipoUsuario == 'restaurante')
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
                               '€${product.precioFinal.toStringAsFixed(2)}',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
@@ -105,11 +106,25 @@ class ProductCardWidget extends StatelessWidget {
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          if (tipoUsuario == 'restaurante')
+                            const SizedBox(height: 8),
                             _buildCartControls(context, constraints),
-                        ],
-                      ),
+                          ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '€${product.precioFinal.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: priceFontSize,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       const SizedBox(height: 2),
                       Text(
                         'Base: €${product.precio.toStringAsFixed(2)} + ${product.impuestos}% IVA',
@@ -166,82 +181,137 @@ class ProductCardWidget extends StatelessWidget {
   }
 
   Widget _buildCartControls(BuildContext context, BoxConstraints constraints) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isSmallDevice = constraints.maxWidth < 200;
+
     if (actualizandoCarrito) {
-      return SizedBox(
-        width: constraints.maxWidth < 200 ? 20 : 24,
-        height: constraints.maxWidth < 200 ? 20 : 24,
-        child: const CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+      return Center(
+        child: SizedBox(
+          width: isSmallDevice ? 18 : 24,
+          height: isSmallDevice ? 18 : 24,
+          child: const CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+          ),
         ),
       );
     }
 
     if (cantidadEnCarrito > 0) {
       return Container(
+        width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.amber.shade100,
-          borderRadius: BorderRadius.circular(4),
+          color:
+              isDark
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.primary,
+          borderRadius: BorderRadius.circular(isSmallDevice ? 6 : 8),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            IconButton(
-              icon: Icon(
-                Icons.remove,
-                size: constraints.maxWidth < 200 ? 14 : 18,
-              ),
-              padding: EdgeInsets.zero,
-              constraints: BoxConstraints(
-                minWidth: constraints.maxWidth < 200 ? 24 : 30,
-                minHeight: constraints.maxWidth < 200 ? 24 : 30,
-              ),
-              onPressed: () {
+            GestureDetector(
+              onTap: () {
                 if (onAgregarAlCarrito != null) {
                   onAgregarAlCarrito!(product.id, cantidadEnCarrito - 1);
                 }
               },
-            ),
-            Text(
-              '$cantidadEnCarrito',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: constraints.maxWidth < 200 ? 14 : 16,
+              child: Container(
+                width: isSmallDevice ? 28 : 32,
+                height: isSmallDevice ? 28 : 32,
+                decoration: BoxDecoration(
+                  color:
+                      isDark
+                          ? Colors.black.withOpacity(0.2)
+                          : Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(isSmallDevice ? 4 : 6),
+                ),
+                child: Icon(
+                  Icons.remove,
+                  size: isSmallDevice ? 12 : 16,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.add, size: constraints.maxWidth < 200 ? 14 : 18),
-              padding: EdgeInsets.zero,
-              constraints: BoxConstraints(
-                minWidth: constraints.maxWidth < 200 ? 24 : 30,
-                minHeight: constraints.maxWidth < 200 ? 24 : 30,
+            Container(
+              constraints: BoxConstraints(minWidth: isSmallDevice ? 24 : 32),
+              child: Text(
+                '$cantidadEnCarrito',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: isSmallDevice ? 12 : 14,
+                  color: isDark ? Colors.black : Colors.white,
+                ),
               ),
-              onPressed: () {
+            ),
+            GestureDetector(
+              onTap: () {
                 if (onAgregarAlCarrito != null) {
                   onAgregarAlCarrito!(product.id, cantidadEnCarrito + 1);
                 }
               },
+              child: Container(
+                width: isSmallDevice ? 28 : 32,
+                height: isSmallDevice ? 28 : 32,
+                decoration: BoxDecoration(
+                  color:
+                      isDark
+                          ? Colors.black.withOpacity(0.2)
+                          : Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(isSmallDevice ? 4 : 6),
+                ),
+                child: Icon(
+                  Icons.add,
+                  size: isSmallDevice ? 12 : 16,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+              ),
             ),
           ],
         ),
       );
     } else {
-      return IconButton(
-        icon: Icon(
-          Icons.add_shopping_cart,
-          color: Colors.amber,
-          size: constraints.maxWidth < 200 ? 16 : 20,
+      return Center(
+        child: GestureDetector(
+          onTap: () {
+            if (onAgregarAlCarrito != null) {
+              onAgregarAlCarrito!(product.id, 1);
+            }
+          },
+          child: Container(
+            width: isSmallDevice ? 28 : 32,
+            height: isSmallDevice ? 28 : 32,
+            decoration: BoxDecoration(
+              color:
+                  isDark
+                      ? Theme.of(
+                        context,
+                      ).colorScheme.surfaceVariant.withOpacity(0.3)
+                      : Theme.of(
+                        context,
+                      ).colorScheme.surfaceVariant.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(isSmallDevice ? 6 : 8),
+              border: Border.all(
+                color:
+                    isDark
+                        ? Theme.of(context).colorScheme.outline.withOpacity(0.5)
+                        : Theme.of(
+                          context,
+                        ).colorScheme.outline.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              Icons.add_shopping_cart,
+              color:
+                  isDark
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.amber.shade700,
+              size: isSmallDevice ? 14 : 18,
+            ),
+          ),
         ),
-        padding: EdgeInsets.zero,
-        constraints: BoxConstraints(
-          minWidth: constraints.maxWidth < 200 ? 24 : 30,
-          minHeight: constraints.maxWidth < 200 ? 24 : 30,
-        ),
-        onPressed: () {
-          if (onAgregarAlCarrito != null) {
-            onAgregarAlCarrito!(product.id, 1);
-          }
-        },
       );
     }
   }

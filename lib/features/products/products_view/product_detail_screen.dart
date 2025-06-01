@@ -83,45 +83,98 @@ class ProductDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 3,
-                child: Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: _buildProductImage(viewModel),
-                ),
-              ),
-              if (producto.imagenQrUrl != null)
-                Expanded(
-                  flex: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'Código QR',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isSmallScreen = constraints.maxWidth < 600;
+
+              if (isSmallScreen) {
+                return Column(
+                  children: [
+                    Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: _buildProductImage(viewModel),
+                    ),
+                    if (producto.imagenQrUrl != null) ...[
+                      const SizedBox(height: 16),
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Código QR',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  _buildDownloadButton(context, viewModel),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxHeight: 200,
+                                  maxWidth: 200,
                                 ),
-                                _buildDownloadButton(context, viewModel),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            _buildQrImage(viewModel),
-                          ],
+                                child: _buildQrImage(viewModel),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
+                    ],
+                  ],
+                );
+              } else {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Card(
+                        clipBehavior: Clip.antiAlias,
+                        child: _buildProductImage(viewModel),
+                      ),
                     ),
-                  ),
-                ),
-            ],
+                    if (producto.imagenQrUrl != null)
+                      Expanded(
+                        flex: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 16.0),
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                        'Código QR',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      _buildDownloadButton(context, viewModel),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _buildQrImage(viewModel),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              }
+            },
           ),
           const SizedBox(height: 24),
           Card(
