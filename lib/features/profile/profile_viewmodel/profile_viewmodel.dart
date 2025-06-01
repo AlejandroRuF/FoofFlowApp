@@ -2,11 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/models/user_model.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../auth/login/login_viewmodel/login_viewmodel.dart';
 import '../profile_interactor/profile_interactor.dart';
 import '../profile_model/Profile_management_model.dart';
 
 class ProfileViewModel extends ChangeNotifier {
   final ProfileInteractor _interactor = ProfileInteractor();
+  final LoginViewModel _loginViewModel = LoginViewModel();
   ProfileModel _state = ProfileModel();
   final Set<int> _empleadosModificados = {};
 
@@ -232,11 +234,13 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> cambiarPassword(
+  Future<Map<String, dynamic>> cambiarPassword(
     String currentPassword,
     String newPassword,
   ) async {
-    if (usuario == null) return false;
+    if (usuario == null) {
+      return {'success': false, 'shouldNavigateToLogin': false};
+    }
 
     _actualizarEstado(isSaving: true, error: null);
 
@@ -247,19 +251,38 @@ class ProfileViewModel extends ChangeNotifier {
         newPassword,
       );
 
+      if (exito) {
+        final success = await _loginViewModel.logout();
+        if (!success) {
+          _actualizarEstado(
+            isSaving: false,
+            error: 'Error al cerrar sesión después del cambio de contraseña',
+          );
+          return {'success': false, 'shouldNavigateToLogin': false};
+        }
+
+        _actualizarEstado(
+          isSaving: false,
+          isPasswordChangeMode: false,
+          error: null,
+        );
+
+        return {'success': true, 'shouldNavigateToLogin': true};
+      }
+
       _actualizarEstado(
         isSaving: false,
         isPasswordChangeMode: false,
-        error: exito ? null : 'Error al cambiar la contraseña',
+        error: 'Error al cambiar la contraseña',
       );
 
-      return exito;
+      return {'success': false, 'shouldNavigateToLogin': false};
     } catch (e) {
       _actualizarEstado(
         isSaving: false,
         error: 'Error al cambiar contraseña: $e',
       );
-      return false;
+      return {'success': false, 'shouldNavigateToLogin': false};
     }
   }
 
@@ -344,6 +367,24 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
+  Future<bool> cerrarSesionDirecto() async {
+    _actualizarEstado(isSaving: true, error: null);
+
+    try {
+      final success = await _loginViewModel.logout();
+
+      _actualizarEstado(
+        isSaving: false,
+        error: success ? null : 'Error al cerrar sesión',
+      );
+
+      return success;
+    } catch (e) {
+      _actualizarEstado(isSaving: false, error: 'Error al cerrar sesión: $e');
+      return false;
+    }
+  }
+
   void refrescarDatos() {
     _inicializar();
   }
@@ -357,6 +398,7 @@ class ProfileViewModel extends ChangeNotifier {
 
     try {
       final exito = await _interactor.solicitarRestablecerPassword(email);
+      final logout = await _loginViewModel.logout();
 
       _actualizarEstado(
         isSaving: false,

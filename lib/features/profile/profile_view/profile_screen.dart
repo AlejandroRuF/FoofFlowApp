@@ -501,6 +501,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _cambiarPassword(BuildContext context, ProfileViewModel viewModel) {
     if (viewModel.usuario == null) return;
 
+    final String userEmail = viewModel.usuario!.email;
+
     showDialog(
       context: context,
       builder: (context) {
@@ -515,7 +517,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Correo electrónico: ${viewModel.usuario!.email}',
+                'Correo electrónico: $userEmail',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
@@ -526,22 +528,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: const Text('Cancelar'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(context);
-                viewModel.solicitarCambioPassword(viewModel.usuario!.email).then((
-                  success,
-                ) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        success
-                            ? 'Se ha enviado un enlace a tu correo electrónico'
-                            : 'Error al enviar el enlace',
+                final success = await viewModel.solicitarCambioPassword(
+                  userEmail,
+                );
+
+                if (success) {
+                  if (mounted) {
+                    context.go('/login');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Se ha enviado un enlace a tu correo electrónico',
+                        ),
+                        backgroundColor: Colors.green,
                       ),
-                      backgroundColor: success ? Colors.green : Colors.red,
-                    ),
-                  );
-                });
+                    );
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Error al enviar el enlace'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
               },
               child: const Text('Enviar enlace'),
             ),
