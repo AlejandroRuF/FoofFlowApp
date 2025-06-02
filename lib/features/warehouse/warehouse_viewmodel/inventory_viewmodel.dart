@@ -17,6 +17,7 @@ class InventoryViewModel extends ChangeNotifier {
 
   WarehouseModel _state = WarehouseModel();
   StreamSubscription<String>? _dataChangedSubscription;
+  Timer? _debounceTimer;
 
   WarehouseModel get state => _state;
 
@@ -36,6 +37,7 @@ class InventoryViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _dataChangedSubscription?.cancel();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -49,8 +51,15 @@ class InventoryViewModel extends ChangeNotifier {
           eventKey == 'inventory_bulk_add' ||
           eventKey == 'product_create' ||
           eventKey == 'product_update') {
-        cargarInventario();
+        _debouncedCargarInventario();
       }
+    });
+  }
+
+  void _debouncedCargarInventario() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      cargarInventario();
     });
   }
 

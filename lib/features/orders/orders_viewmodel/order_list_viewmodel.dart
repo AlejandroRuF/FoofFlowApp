@@ -16,6 +16,7 @@ class OrderListViewModel extends ChangeNotifier {
   DateTime? _ultimaActualizacion;
   StreamSubscription<String>? _dataChangedSubscription;
   StreamSubscription<RefreshEvent>? _eventSubscription;
+  Timer? _debounceTimer;
 
   String _estadoSeleccionado = '';
   String _tipoPedidoSeleccionado = '';
@@ -69,6 +70,7 @@ class OrderListViewModel extends ChangeNotifier {
   void dispose() {
     _dataChangedSubscription?.cancel();
     _eventSubscription?.cancel();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -76,7 +78,7 @@ class OrderListViewModel extends ChangeNotifier {
     _eventSubscription = _eventBus.stream.listen((event) {
       if (event.type == RefreshEventType.orders ||
           event.type == RefreshEventType.all) {
-        cargarPedidos();
+        _debouncedCargarPedidos();
       }
     });
   }
@@ -88,8 +90,15 @@ class OrderListViewModel extends ChangeNotifier {
           eventKey == 'order_status_changed' ||
           eventKey == 'responsive_scaffold_orders_refresh' ||
           eventKey == 'responsive_scaffold_all_refresh') {
-        cargarPedidos();
+        _debouncedCargarPedidos();
       }
+    });
+  }
+
+  void _debouncedCargarPedidos() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      cargarPedidos();
     });
   }
 

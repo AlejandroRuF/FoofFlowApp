@@ -9,6 +9,7 @@ class WarehouseViewModel extends ChangeNotifier {
   final EventBusService _eventBus = EventBusService();
   WarehouseModel _state = WarehouseModel();
   StreamSubscription<String>? _dataChangedSubscription;
+  Timer? _debounceTimer;
 
   WarehouseModel get state => _state;
 
@@ -25,6 +26,7 @@ class WarehouseViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _dataChangedSubscription?.cancel();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -40,8 +42,15 @@ class WarehouseViewModel extends ChangeNotifier {
           eventKey == 'product_create' ||
           eventKey == 'product_update' ||
           eventKey == 'qr_stock_update') {
-        cargarDatos();
+        _debouncedCargarDatos();
       }
+    });
+  }
+
+  void _debouncedCargarDatos() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      cargarDatos();
     });
   }
 

@@ -15,6 +15,7 @@ class ModifyByQRViewModel extends ChangeNotifier {
   String? _productoQRScaneado;
   bool _operacionExitosa = false;
   StreamSubscription<String>? _dataChangedSubscription;
+  Timer? _debounceTimer;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -33,6 +34,7 @@ class ModifyByQRViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _dataChangedSubscription?.cancel();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -47,8 +49,15 @@ class ModifyByQRViewModel extends ChangeNotifier {
           eventKey == 'responsive_scaffold_inventory_refresh' ||
           eventKey == 'responsive_scaffold_warehouse_refresh' ||
           eventKey == 'responsive_scaffold_all_refresh') {
-        _refrescarDatos();
+        _debouncedRefrescarDatos();
       }
+    });
+  }
+
+  void _debouncedRefrescarDatos() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      _refrescarDatos();
     });
   }
 

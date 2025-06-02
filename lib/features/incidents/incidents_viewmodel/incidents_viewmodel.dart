@@ -12,6 +12,7 @@ class IncidentsViewModel extends ChangeNotifier {
   final IncidentsInteractor _interactor = IncidentsInteractor();
   final EventBusService _eventBus = EventBusService();
   StreamSubscription<RefreshEvent>? _eventSubscription;
+  Timer? _debounceTimer;
 
   IncidentsModel _model = IncidentsModel();
 
@@ -39,7 +40,7 @@ class IncidentsViewModel extends ChangeNotifier {
     _eventSubscription = _eventBus.stream.listen((event) {
       if (event.type == RefreshEventType.incidents ||
           event.type == RefreshEventType.all) {
-        cargarIncidencias();
+        _debouncedCargarIncidencias();
       }
     });
   }
@@ -47,7 +48,15 @@ class IncidentsViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _eventSubscription?.cancel();
+    _debounceTimer?.cancel();
     super.dispose();
+  }
+
+  void _debouncedCargarIncidencias() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      cargarIncidencias();
+    });
   }
 
   List<Incidencia> get incidenciasFiltradas {

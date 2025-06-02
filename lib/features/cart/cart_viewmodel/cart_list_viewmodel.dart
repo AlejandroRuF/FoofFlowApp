@@ -11,6 +11,7 @@ class CartListViewModel extends ChangeNotifier {
   CartModel _model = CartModel(isLoading: true);
   StreamSubscription<String>? _dataChangedSubscription;
   StreamSubscription<RefreshEvent>? _eventSubscription;
+  Timer? _debounceTimer;
 
   CartModel get model => _model;
 
@@ -24,6 +25,7 @@ class CartListViewModel extends ChangeNotifier {
   void dispose() {
     _dataChangedSubscription?.cancel();
     _eventSubscription?.cancel();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -31,7 +33,7 @@ class CartListViewModel extends ChangeNotifier {
     _eventSubscription = _eventBus.stream.listen((event) {
       if (event.type == RefreshEventType.products ||
           event.type == RefreshEventType.all) {
-        cargarCarritos();
+        _debouncedCargarCarritos();
       }
     });
   }
@@ -46,8 +48,15 @@ class CartListViewModel extends ChangeNotifier {
           eventKey == 'product_update' ||
           eventKey == 'responsive_scaffold_cart_refresh' ||
           eventKey == 'responsive_scaffold_all_refresh') {
-        cargarCarritos();
+        _debouncedCargarCarritos();
       }
+    });
+  }
+
+  void _debouncedCargarCarritos() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      cargarCarritos();
     });
   }
 

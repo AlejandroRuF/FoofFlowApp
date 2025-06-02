@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/features/products/products_interactor/products_interactor.dart';
 import 'package:foodflow_app/features/products/products_model/products_model.dart';
@@ -93,9 +94,13 @@ class ProductListViewModel extends ChangeNotifier {
     try {
       final categorias = await _interactor.obtenerCategorias();
       _model = _model.copyWith(categorias: categorias);
-      print('Categorías cargadas: ${categorias.length}');
+      if (kDebugMode) {
+        print('Categorías cargadas: ${categorias.length}');
+      }
     } catch (e) {
-      print('Error al cargar categorías: $e');
+      if (kDebugMode) {
+        print('Error al cargar categorías: $e');
+      }
     } finally {
       _cargandoCategorias = false;
       notifyListeners();
@@ -121,7 +126,9 @@ class ProductListViewModel extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      print('Error al cargar carrito: $e');
+      if (kDebugMode) {
+        print('Error al cargar carrito: $e');
+      }
     }
   }
 
@@ -167,9 +174,11 @@ class ProductListViewModel extends ChangeNotifier {
   }
 
   void aplicarFiltros() {
-    print(
-      'Aplicando filtros. Búsqueda: $_busquedaTexto, Categoría: $_categoriaSeleccionadaId, PrecioMin: $_precioMin, PrecioMax: $_precioMax, SoloActivos: $_soloActivos',
-    );
+    if (kDebugMode) {
+      print(
+        'Aplicando filtros. Búsqueda: $_busquedaTexto, Categoría: $_categoriaSeleccionadaId, PrecioMin: $_precioMin, PrecioMax: $_precioMax, SoloActivos: $_soloActivos',
+      );
+    }
 
     final productosFiltrados = _model.filtrarProductosAvanzado(
       textoBusqueda: _busquedaTexto,
@@ -179,9 +188,11 @@ class ProductListViewModel extends ChangeNotifier {
       soloActivos: _soloActivos,
     );
 
-    print(
-      'Productos filtrados: ${productosFiltrados.length} de ${_model.productos.length} totales',
-    );
+    if (kDebugMode) {
+      print(
+        'Productos filtrados: ${productosFiltrados.length} de ${_model.productos.length} totales',
+      );
+    }
 
     notifyListeners();
   }
@@ -206,14 +217,18 @@ class ProductListViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      print(
-        'Iniciando carga de productos. CocinaCentralId: $_cocinaCentralIdSeleccionada',
-      );
+      if (kDebugMode) {
+        print(
+          'Iniciando carga de productos. CocinaCentralId: $_cocinaCentralIdSeleccionada',
+        );
+      }
       final nuevoModelo = await _interactor.obtenerProductos(
         cocinaCentralId: _cocinaCentralIdSeleccionada,
       );
 
-      print('Productos cargados: ${nuevoModelo.productos.length}');
+      if (kDebugMode) {
+        print('Productos cargados: ${nuevoModelo.productos.length}');
+      }
 
       _model = nuevoModelo.copyWith(
         isLoading: false,
@@ -221,7 +236,9 @@ class ProductListViewModel extends ChangeNotifier {
       );
 
       if (nuevoModelo.productos.isEmpty) {
-        print('Advertencia: No se encontraron productos');
+        if (kDebugMode) {
+          print('Advertencia: No se encontraron productos');
+        }
         _model = _model.copyWith(
           error: nuevoModelo.error ?? 'No se encontraron productos',
         );
@@ -229,7 +246,9 @@ class ProductListViewModel extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      print('Error al cargar productos: $e');
+      if (kDebugMode) {
+        print('Error al cargar productos: $e');
+      }
       _model = _model.copyWith(
         isLoading: false,
         error: 'Error al cargar productos: $e',

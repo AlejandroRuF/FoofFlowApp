@@ -7,6 +7,10 @@ import 'package:foodflow_app/core/router/app_router.dart';
 import 'package:foodflow_app/features/dashboard/dashboard_viewmodel/dashboard_viewmodel.dart';
 import 'package:foodflow_app/features/auth/login/login_viewmodel/login_viewmodel.dart';
 import 'package:foodflow_app/features/orders/orders_viewmodel/order_list_viewmodel.dart';
+import 'package:foodflow_app/features/products/products_viewmodel/product_list_view_model.dart';
+import 'package:foodflow_app/features/products/products_viewmodel/kitchen_list_view_model.dart';
+import 'package:foodflow_app/features/products/products_viewmodel/product_detail_view_model.dart';
+import 'package:foodflow_app/features/products/products_viewmodel/product_form_view_model.dart';
 import 'package:foodflow_app/core/theme/theme.dart';
 
 void main() {
@@ -30,6 +34,10 @@ void main() {
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => DashboardViewModel()),
         ChangeNotifierProvider(create: (_) => OrderListViewModel()),
+        ChangeNotifierProvider(create: (_) => ProductListViewModel()),
+        ChangeNotifierProvider(create: (_) => KitchenListViewModel()),
+        ChangeNotifierProvider(create: (_) => ProductDetailViewModel()),
+        ChangeNotifierProvider(create: (_) => ProductFormViewModel()),
       ],
       child: const MyApp(),
     ),

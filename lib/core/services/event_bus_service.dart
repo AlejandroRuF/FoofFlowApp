@@ -42,8 +42,10 @@ class EventBusService {
   final _dataChangedController = StreamController<String>.broadcast();
 
   final Set<String> _recentEvents = <String>{};
+  final Map<String, DateTime> _lastEventTimes = <String, DateTime>{};
   Timer? _cleanupTimer;
   bool _isDisposed = false;
+  static const Duration _eventDebounce = Duration(milliseconds: 300);
 
   Stream<RefreshEvent> get stream => _controller.stream;
   Stream<String> get dataChangedStream => _dataChangedController.stream;
@@ -75,6 +77,15 @@ class EventBusService {
   }) {
     if (_isDisposed) return;
 
+    final now = DateTime.now();
+    final lastTime = _lastEventTimes[source];
+
+    if (lastTime != null && now.difference(lastTime) < _eventDebounce) {
+      return;
+    }
+
+    _lastEventTimes[source] = now;
+
     if (!_dataChangedController.isClosed) {
       _dataChangedController.add(source);
     }
@@ -83,8 +94,6 @@ class EventBusService {
     if (additionalData != null) {
       eventData.addAll(additionalData);
     }
-
-    final eventId = DateTime.now().millisecondsSinceEpoch.toString();
 
     if (source.contains('inventory') || source.contains('warehouse')) {
       publishRefresh(RefreshEventType.inventory, data: eventData);
@@ -109,6 +118,10 @@ class EventBusService {
     _cleanupTimer?.cancel();
     _cleanupTimer = Timer(const Duration(seconds: 2), () {
       _recentEvents.clear();
+      final now = DateTime.now();
+      _lastEventTimes.removeWhere(
+        (key, time) => now.difference(time) > const Duration(seconds: 5),
+      );
     });
   }
 
@@ -116,6 +129,7 @@ class EventBusService {
     _isDisposed = true;
     _cleanupTimer?.cancel();
     _recentEvents.clear();
+    _lastEventTimes.clear();
 
     if (!_controller.isClosed) {
       _controller.close();

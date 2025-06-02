@@ -21,6 +21,7 @@ class CartDetailViewModel extends ChangeNotifier {
   String? _error;
   StreamSubscription<String>? _dataChangedSubscription;
   StreamSubscription<RefreshEvent>? _eventSubscription;
+  Timer? _debounceTimer;
 
   Map<int, bool> _actualizandoProductos = {};
 
@@ -39,6 +40,7 @@ class CartDetailViewModel extends ChangeNotifier {
   void dispose() {
     _dataChangedSubscription?.cancel();
     _eventSubscription?.cancel();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -47,7 +49,7 @@ class CartDetailViewModel extends ChangeNotifier {
       if ((event.type == RefreshEventType.products ||
               event.type == RefreshEventType.all) &&
           _carrito?.id != null) {
-        cargarCarritoDetalle(_carrito!.id);
+        _debouncedCargarCarritoDetalle();
       }
     });
   }
@@ -61,8 +63,16 @@ class CartDetailViewModel extends ChangeNotifier {
               eventKey == 'cart_cleared' ||
               eventKey == 'product_update') &&
           _carrito?.id != null) {
-        cargarCarritoDetalle(_carrito!.id);
+        _debouncedCargarCarritoDetalle();
       }
+    });
+  }
+
+  void _debouncedCargarCarritoDetalle() {
+    if (_carrito?.id == null) return;
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      cargarCarritoDetalle(_carrito!.id);
     });
   }
 
