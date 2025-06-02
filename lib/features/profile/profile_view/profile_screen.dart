@@ -177,6 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           usuario: usuario,
           imageTempPath: viewModel.state.imagePath,
           onTap: () => _mostrarOpcionesFoto(context, viewModel),
+          isEditable: false,
           isLoading:
               viewModel.state.isSaving && viewModel.state.imagePath != null,
         ),

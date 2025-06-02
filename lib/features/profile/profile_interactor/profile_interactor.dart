@@ -31,6 +31,9 @@ class ProfileInteractor {
 
   Future<bool> actualizarUsuario(int userId, Map<String, dynamic> datos) async {
     try {
+      if (datos.containsKey('imagen') && datos['imagen'] is! String) {
+        datos.remove('imagen');
+      }
       final user = await _userService.actualizarUsuario(userId, datos);
       if (user != null) {
         _eventBus.publishDataChanged('profile_updated');

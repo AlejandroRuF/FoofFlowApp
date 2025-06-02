@@ -253,17 +253,39 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> guardarDatosUsuario(Map<String, dynamic> datos) async {
+  Future<bool> actualizarPerfilCompleto(
+    Map<String, dynamic> datos,
+    String? imagePath,
+  ) async {
     if (usuario == null) return false;
 
     _actualizarEstado(isSaving: true, error: null);
 
     try {
-      final exito = await _interactor.actualizarUsuario(usuario!.id, datos);
+      bool exito = true;
+
+      // Si hay una imagen, subirla primero
+      if (imagePath != null) {
+        final imagenUrl = await _interactor.subirImagenPerfil(
+          usuario!.id,
+          File(imagePath),
+        );
+
+        if (imagenUrl == null) {
+          _actualizarEstado(isSaving: false, error: 'Error al subir la imagen');
+          return false;
+        }
+      }
+
+      // Solo actualizar datos si hay cambios en campos de texto
+      if (datos.isNotEmpty) {
+        exito = await _interactor.actualizarUsuario(usuario!.id, datos);
+      }
 
       _actualizarEstado(
         isSaving: false,
         isEditMode: false,
+        imagePath: null,
         error: exito ? null : 'Error al guardar datos del usuario',
       );
 
@@ -276,6 +298,10 @@ class ProfileViewModel extends ChangeNotifier {
       _actualizarEstado(isSaving: false, error: 'Error al guardar datos: $e');
       return false;
     }
+  }
+
+  Future<bool> guardarDatosUsuario(Map<String, dynamic> datos) async {
+    return await actualizarPerfilCompleto(datos, state.imagePath);
   }
 
   Future<Map<String, dynamic>> cambiarPassword(

@@ -89,6 +89,14 @@ class UserService {
     Map<String, dynamic> datos,
   ) async {
     try {
+      if (kDebugMode) {
+        print(
+          'Realizando solicitud a: ${ApiEndpoints.getFullUrl("${ApiEndpoints.usuario}$userId/")}',
+        );
+        print('Headers: ${ApiServices.dio.options.headers}');
+        print('Datos: $datos');
+      }
+
       final response = await ApiServices.dio.patch(
         "${ApiEndpoints.usuario}$userId/",
         data: datos,
@@ -256,6 +264,10 @@ class UserService {
 
   Future<String?> subirImagenPerfil(int userId, File imagen) async {
     try {
+      if (kDebugMode) {
+        print('Datos: Instance of \'FormData\'');
+      }
+
       final formData = FormData.fromMap({
         'imagen': await MultipartFile.fromFile(
           imagen.path,

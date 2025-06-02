@@ -5,7 +5,7 @@ import 'package:foodflow_app/models/user_model.dart';
 class ProfileAvatarWidget extends StatelessWidget {
   final User usuario;
   final String? imageTempPath;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool isEditable;
   final bool isLoading;
 
@@ -13,8 +13,8 @@ class ProfileAvatarWidget extends StatelessWidget {
     super.key,
     required this.usuario,
     this.imageTempPath,
-    required this.onTap,
-    this.isEditable = true,
+    this.onTap,
+    this.isEditable = false,
     this.isLoading = false,
   });
 
@@ -85,7 +85,7 @@ class ProfileAvatarWidget extends StatelessWidget {
                     : _buildInitials(),
           ),
         ),
-        if (isEditable)
+        if (isEditable && onTap != null)
           Positioned(
             right: 0,
             bottom: 0,

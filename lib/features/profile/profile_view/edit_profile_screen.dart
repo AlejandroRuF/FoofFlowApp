@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
+import 'package:foodflow_app/features/profile/profile_view/widgets/profile_avatar_widget.dart';
 import 'package:foodflow_app/models/user_model.dart';
 import 'package:foodflow_app/core/services/usuario_services.dart';
+import 'package:image_picker/image_picker.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final User usuario;
@@ -22,6 +25,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   bool _isLoading = false;
   String? _error;
+  String? _imagePath;
 
   @override
   void initState() {
@@ -64,6 +68,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: ProfileAvatarWidget(
+                usuario: widget.usuario,
+                imageTempPath: _imagePath,
+                onTap: _mostrarOpcionesFoto,
+                isEditable: true,
+                isLoading: false,
+              ),
+            ),
+            const SizedBox(height: 24),
             if (_error != null)
               Container(
                 padding: const EdgeInsets.all(12),
@@ -176,6 +190,59 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  void _mostrarOpcionesFoto() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Tomar foto'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _seleccionarImagen(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Seleccionar de la galería'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _seleccionarImagen(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _seleccionarImagen(ImageSource source) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: source);
+
+      if (image != null) {
+        setState(() {
+          _imagePath = image.path;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al seleccionar imagen: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   void _guardarCambios() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -186,7 +253,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     try {
       final userService = UserService();
+      bool exitoTotal = true;
 
+      // Primero subir la imagen si hay una nueva
+      if (_imagePath != null) {
+        final imagenSubida = await userService.subirImagenPerfil(
+          widget.usuario.id,
+          File(_imagePath!),
+        );
+
+        if (imagenSubida == null) {
+          setState(() {
+            _error = 'Error al subir la imagen';
+            _isLoading = false;
+          });
+          return;
+        }
+      }
+
+      // Luego actualizar los datos del perfil (sin incluir la imagen)
       final datosActualizados = {
         'nombre': _nombreController.text,
         'telefono':
@@ -204,7 +289,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         datosActualizados,
       );
 
-      if (resultado != null) {
+      if (resultado == null) {
+        exitoTotal = false;
+      }
+
+      if (exitoTotal) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
