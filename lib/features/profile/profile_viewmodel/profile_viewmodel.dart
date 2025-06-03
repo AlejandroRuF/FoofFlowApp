@@ -264,7 +264,6 @@ class ProfileViewModel extends ChangeNotifier {
     try {
       bool exito = true;
 
-      // Si hay una imagen, subirla primero
       if (imagePath != null) {
         final imagenUrl = await _interactor.subirImagenPerfil(
           usuario!.id,
@@ -277,7 +276,6 @@ class ProfileViewModel extends ChangeNotifier {
         }
       }
 
-      // Solo actualizar datos si hay cambios en campos de texto
       if (datos.isNotEmpty) {
         exito = await _interactor.actualizarUsuario(usuario!.id, datos);
       }

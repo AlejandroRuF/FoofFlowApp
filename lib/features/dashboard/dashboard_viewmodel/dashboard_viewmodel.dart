@@ -13,6 +13,7 @@ class DashboardViewModel extends ChangeNotifier {
   String? _errorMessage;
   Map<String, dynamic>? _dashboardData;
   DashboardModel? _dashboardModel;
+  User? _empleadorUsuario;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -47,6 +48,13 @@ class DashboardViewModel extends ChangeNotifier {
   String get tipoUsuario => _dashboardData?['tipo_usuario'] ?? 'desconocido';
   User? get usuario => _dashboardData?['usuario'];
 
+  String get tipoEmpleador {
+    if (_empleadorUsuario != null) {
+      return _empleadorUsuario!.tipoUsuario;
+    }
+    return 'desconocido';
+  }
+
   Future<void> cargarDatosDashboard() async {
     _isLoading = true;
     _errorMessage = null;
@@ -58,6 +66,11 @@ class DashboardViewModel extends ChangeNotifier {
       if (resultado['success'] == true) {
         _dashboardData = resultado;
         _dashboardModel = DashboardModel.fromInteractorData(resultado);
+        final usuarioSesion = _sessionService.user;
+        if (usuarioSesion?.tipoUsuario == 'empleado') {
+          _empleadorUsuario = await _sessionService.obtenerPropietario();
+          notifyListeners();
+        }
       } else {
         _errorMessage = resultado['error'] ?? 'Error al cargar el dashboard';
       }
@@ -74,6 +87,11 @@ class DashboardViewModel extends ChangeNotifier {
 
   Future<void> recargarDatos() async {
     try {
+      final usuarioSesion = _sessionService.user;
+      if (usuarioSesion?.tipoUsuario == 'empleado') {
+        _empleadorUsuario = await _sessionService.obtenerPropietario();
+      }
+
       final resultado = await _interactor.recargarDatosDashboard();
 
       if (resultado['success'] == true) {
@@ -93,23 +111,60 @@ class DashboardViewModel extends ChangeNotifier {
     }
   }
 
+  bool _empleadorPuedeVer(String funcionalidad) {
+    if (_empleadorUsuario == null) return false;
+
+    final tipoEmpleadorLower = _empleadorUsuario!.tipoUsuario.toLowerCase();
+
+    switch (funcionalidad) {
+      case 'prevision_demanda':
+        return tipoEmpleadorLower == 'administrador' ||
+            tipoEmpleadorLower == 'restaurante';
+      case 'pedidos':
+      case 'inventario':
+      case 'incidencias':
+      case 'metricas':
+        return true;
+      default:
+        return false;
+    }
+  }
+
   bool get tienePermisoVerPrevisionDemanda {
-    if (tipoUsuario == 'empleado') {
+    final tipoUsuarioActual =
+        tipoUsuario != 'desconocido'
+            ? tipoUsuario
+            : _sessionService.user?.tipoUsuario ?? 'desconocido';
+
+    if (tipoUsuarioActual == 'empleado') {
+      if (!_empleadorPuedeVer('prevision_demanda')) return false;
       return _sessionService.permisos?.puedeVerPrevisionDemanda ?? false;
     }
-    final tipo = tipoUsuario.toLowerCase();
+    final tipo = tipoUsuarioActual.toLowerCase();
     return tipo == 'administrador' || tipo == 'restaurante';
   }
 
   bool get tienePermisoVerPedidos {
-    if (tipoUsuario == 'empleado') {
+    final tipoUsuarioActual =
+        tipoUsuario != 'desconocido'
+            ? tipoUsuario
+            : _sessionService.user?.tipoUsuario ?? 'desconocido';
+
+    if (tipoUsuarioActual == 'empleado') {
+      if (!_empleadorPuedeVer('pedidos')) return false;
       return _sessionService.permisos?.puedeVerPedidos ?? false;
     }
     return true;
   }
 
   bool get tienePermisoVerInventario {
-    if (tipoUsuario == 'empleado') {
+    final tipoUsuarioActual =
+        tipoUsuario != 'desconocido'
+            ? tipoUsuario
+            : _sessionService.user?.tipoUsuario ?? 'desconocido';
+
+    if (tipoUsuarioActual == 'empleado') {
+      if (!_empleadorPuedeVer('inventario')) return false;
       final permisos = _sessionService.permisos;
       final puedeVerProductos = permisos?.puedeVerProductos ?? false;
       final puedeVerAlmacenes = permisos?.puedeVerAlmacenes ?? false;
@@ -119,14 +174,26 @@ class DashboardViewModel extends ChangeNotifier {
   }
 
   bool get tienePermisoVerIncidencias {
-    if (tipoUsuario == 'empleado') {
+    final tipoUsuarioActual =
+        tipoUsuario != 'desconocido'
+            ? tipoUsuario
+            : _sessionService.user?.tipoUsuario ?? 'desconocido';
+
+    if (tipoUsuarioActual == 'empleado') {
+      if (!_empleadorPuedeVer('incidencias')) return false;
       return _sessionService.permisos?.puedeVerIncidencias ?? false;
     }
     return true;
   }
 
   bool get tienePermisoVerMetricas {
-    if (tipoUsuario == 'empleado') {
+    final tipoUsuarioActual =
+        tipoUsuario != 'desconocido'
+            ? tipoUsuario
+            : _sessionService.user?.tipoUsuario ?? 'desconocido';
+
+    if (tipoUsuarioActual == 'empleado') {
+      if (!_empleadorPuedeVer('metricas')) return false;
       return _sessionService.permisos?.puedeVerMetricas ?? false;
     }
     return true;

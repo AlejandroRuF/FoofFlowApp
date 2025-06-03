@@ -255,7 +255,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final userService = UserService();
       bool exitoTotal = true;
 
-      // Primero subir la imagen si hay una nueva
       if (_imagePath != null) {
         final imagenSubida = await userService.subirImagenPerfil(
           widget.usuario.id,
@@ -271,7 +270,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         }
       }
 
-      // Luego actualizar los datos del perfil (sin incluir la imagen)
       final datosActualizados = {
         'nombre': _nombreController.text,
         'telefono':

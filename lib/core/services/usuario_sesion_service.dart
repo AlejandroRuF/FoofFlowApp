@@ -3,6 +3,7 @@ import '../../models/permisos_empleado_model.dart';
 import '../../models/user_model.dart';
 import '../../models/auth_model.dart';
 import 'package:flutter/foundation.dart';
+import 'usuario_services.dart';
 
 class UserSessionService {
   static final UserSessionService _instance = UserSessionService._internal();
@@ -12,6 +13,7 @@ class UserSessionService {
   Auth? _auth;
   User? _user;
   PermisosEmpleado? _permisos;
+  User? _propietario;
 
   PermisosEmpleado? get permisos => _permisos;
 
@@ -27,8 +29,6 @@ class UserSessionService {
       if (accessToken != null && refreshToken != null) {
         _auth = Auth(accessToken: accessToken, refreshToken: refreshToken);
       }
-      // } else {
-      //   await prefs.clear();
     }
 
     final accessToken = prefs.getString('access_token');
@@ -87,6 +87,7 @@ class UserSessionService {
     _auth = null;
     _user = null;
     _permisos = null;
+    _propietario = null;
   }
 
   static const String _rememberCredentialsKey = 'remember_credentials';
@@ -264,33 +265,79 @@ class UserSessionService {
         return null;
       }
 
+      if (_propietario != null && _propietario!.id == _user!.propietarioId) {
+        return _propietario;
+      }
+
       final prefs = await SharedPreferences.getInstance();
-      final propietarioId = _user!.propietarioId;
+      final propietarioId = _user!.propietarioId!;
+
+      final userService = UserService();
+      final usuarios = await userService.obtenerTodosLosUsuarios();
+      final propietarioData =
+          usuarios.where((user) => user.id == propietarioId).isNotEmpty
+              ? usuarios.firstWhere((user) => user.id == propietarioId)
+              : null;
+
+      if (propietarioData != null) {
+        _propietario = propietarioData;
+        await prefs.setString('propietario_nombre', propietarioData.nombre);
+        await prefs.setString('propietario_email', propietarioData.email);
+        await prefs.setString(
+          'propietario_tipo_usuario',
+          propietarioData.tipoUsuario,
+        );
+        return _propietario;
+      }
 
       final nombre = prefs.getString('propietario_nombre');
       final email = prefs.getString('propietario_email');
       final tipoUsuario = prefs.getString('propietario_tipo_usuario');
 
       if (nombre != null && email != null && tipoUsuario != null) {
-        return User(
-          id: propietarioId!,
+        _propietario = User(
+          id: propietarioId,
           nombre: nombre,
           email: email,
           tipoUsuario: tipoUsuario,
         );
+        return _propietario;
       }
 
-      return User(
-        id: propietarioId!,
-        nombre: 'Propietario',
-        email: 'propietario@example.com',
-        tipoUsuario: 'cocina_central',
-      );
+      return null;
     } catch (e) {
       if (kDebugMode) {
         print('Error al obtener datos del propietario: $e');
       }
+
+      final prefs = await SharedPreferences.getInstance();
+      final propietarioId = _user?.propietarioId;
+
+      if (propietarioId != null) {
+        final nombre = prefs.getString('propietario_nombre');
+        final email = prefs.getString('propietario_email');
+        final tipoUsuario = prefs.getString('propietario_tipo_usuario');
+
+        if (nombre != null && email != null && tipoUsuario != null) {
+          _propietario = User(
+            id: propietarioId,
+            nombre: nombre,
+            email: email,
+            tipoUsuario: tipoUsuario,
+          );
+          return _propietario;
+        }
+      }
+
       return null;
     }
+  }
+
+  Future<void> guardarDatosPropietario(User propietario) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('propietario_nombre', propietario.nombre);
+    await prefs.setString('propietario_email', propietario.email);
+    await prefs.setString('propietario_tipo_usuario', propietario.tipoUsuario);
+    _propietario = propietario;
   }
 }
