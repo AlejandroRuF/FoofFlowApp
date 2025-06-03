@@ -4,11 +4,13 @@ import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/features/orders/orders_interactor/orders_interactor.dart';
 import 'package:foodflow_app/models/pedido_model.dart';
 import 'package:foodflow_app/core/services/event_bus_service.dart';
+import 'package:foodflow_app/models/user_model.dart';
 
 class OrderFormViewModel extends ChangeNotifier {
   final OrdersInteractor _interactor = OrdersInteractor();
   final UserSessionService _sessionService = UserSessionService();
   final EventBusService _eventBus = EventBusService();
+  User? _propietario;
 
   Pedido? _pedido;
   bool _isLoading = false;
@@ -23,6 +25,18 @@ class OrderFormViewModel extends ChangeNotifier {
   OrderFormViewModel() {
     _subscribeToEvents();
     _listenToEvents();
+    _initPropietario();
+  }
+
+  Future<void> _initPropietario() async {
+    try {
+      _propietario = await _sessionService.obtenerPropietario();
+      notifyListeners();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error al obtener propietario: $e');
+      }
+    }
   }
 
   @override
@@ -94,6 +108,9 @@ class OrderFormViewModel extends ChangeNotifier {
 
     if (usuario.tipoUsuario == 'empleado') {
       final permisos = _sessionService.permisos;
+      if (_propietario?.tipoUsuario != 'cocina_central') {
+        return false;
+      }
       return permisos?.puedeEditarPedidos == true;
     }
 
@@ -113,6 +130,9 @@ class OrderFormViewModel extends ChangeNotifier {
     }
 
     if (usuario.tipoUsuario == 'empleado') {
+      if (_propietario?.tipoUsuario != 'cocina_central') {
+        return false;
+      }
       final permisos = _sessionService.permisos;
       return permisos?.puedeEditarPedidos == true;
     }
@@ -134,6 +154,9 @@ class OrderFormViewModel extends ChangeNotifier {
 
     if (usuario.tipoUsuario == 'empleado') {
       final permisos = _sessionService.permisos;
+      if (_propietario?.tipoUsuario != 'restaurante') {
+        return false;
+      }
       return permisos?.puedeEditarPedidos == true;
     }
 
@@ -161,6 +184,9 @@ class OrderFormViewModel extends ChangeNotifier {
 
     if (usuario.tipoUsuario == 'empleado') {
       final permisos = _sessionService.permisos;
+      if (_propietario?.tipoUsuario != 'restaurante') {
+        return false;
+      }
       return permisos?.puedeEditarPedidos == true;
     }
 
@@ -181,6 +207,9 @@ class OrderFormViewModel extends ChangeNotifier {
 
     if (usuario.tipoUsuario == 'empleado') {
       final permisos = _sessionService.permisos;
+      if (_propietario?.tipoUsuario != 'cocina_central') {
+        return false;
+      }
       return permisos?.puedeEditarPedidos == true;
     }
 
