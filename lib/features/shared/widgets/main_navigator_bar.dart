@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
+import 'package:foodflow_app/models/user_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../features/auth/login/login_viewmodel/login_viewmodel.dart';
 
-class MainNavigatorBar extends StatelessWidget {
+class MainNavigatorBar extends StatefulWidget {
   final int currentIndex;
   final Function(int) onItemSelected;
 
@@ -14,9 +16,31 @@ class MainNavigatorBar extends StatelessWidget {
   });
 
   @override
+  State<MainNavigatorBar> createState() => _MainNavigatorBarState();
+}
+
+class _MainNavigatorBarState extends State<MainNavigatorBar> {
+  User? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  void _loadUserData() {
+    _user = UserSessionService().user;
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final int safeIndex =
-        currentIndex >= 0 && currentIndex <= 5 ? currentIndex : 0;
+        widget.currentIndex >= 0 && widget.currentIndex <= 5
+            ? widget.currentIndex
+            : 0;
 
     return Drawer(
       child: Column(
@@ -107,17 +131,17 @@ class MainNavigatorBar extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
-                      'Usuario',
-                      style: TextStyle(
+                      _user?.nombre ?? 'Usuario',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      'Administrador',
-                      style: TextStyle(color: Colors.white, fontSize: 12),
+                      _user?.tipoUsuario ?? '',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ],
                 ),
@@ -148,7 +172,7 @@ class MainNavigatorBar extends StatelessWidget {
       selected: isSelected,
       onTap: () {
         Navigator.of(context).pop();
-        onItemSelected(index);
+        widget.onItemSelected(index);
       },
     );
   }

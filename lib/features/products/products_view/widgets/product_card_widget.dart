@@ -9,6 +9,7 @@ class ProductCardWidget extends StatelessWidget {
   final int cantidadEnCarrito;
   final Function(int, int)? onAgregarAlCarrito;
   final bool actualizandoCarrito;
+  final bool esRestaurante;
 
   const ProductCardWidget({
     super.key,
@@ -18,7 +19,12 @@ class ProductCardWidget extends StatelessWidget {
     this.cantidadEnCarrito = 0,
     this.onAgregarAlCarrito,
     this.actualizandoCarrito = false,
+    required this.esRestaurante,
   });
+
+  bool get _muestraVistaRestaurante {
+    return esRestaurante || (tipoUsuario == 'empleado' && esRestaurante);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +32,7 @@ class ProductCardWidget extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       elevation: 3,
       child: InkWell(
-        onTap: tipoUsuario == 'restaurante' ? null : onTap,
+        onTap: _muestraVistaRestaurante ? null : onTap,
         child: LayoutBuilder(
           builder: (context, constraints) {
             double imageHeight = constraints.maxWidth < 200 ? 100 : 120;
@@ -94,7 +100,7 @@ class ProductCardWidget extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       const SizedBox(height: 8),
-                      if (tipoUsuario == 'restaurante')
+                      if (_muestraVistaRestaurante)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

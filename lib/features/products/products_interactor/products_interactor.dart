@@ -56,6 +56,11 @@ class ProductsInteractor {
             cocinaCentralId: empleador!.id,
           );
         }
+        if (empleador?.tipoUsuario == 'restaurante') {
+          productos = await _productosService.obtenerProductos(
+            cocinaCentralId: cocinaCentralId,
+          );
+        }
       } else if (usuario.tipoUsuario == 'restaurante' &&
           cocinaCentralId != null) {
         productos = await _productosService.obtenerProductos(
@@ -87,7 +92,12 @@ class ProductsInteractor {
       }
 
       Map<int, int> cantidadesEnCarrito = {};
-      if (usuario.tipoUsuario == 'restaurante' && cocinaCentralId != null) {
+      final empleador = await _userSessionService.obtenerPropietario();
+
+      if ((usuario.tipoUsuario == 'restaurante' ||
+              (usuario.tipoUsuario == 'empleado' &&
+                  empleador?.tipoUsuario == 'restaurante')) &&
+          cocinaCentralId != null) {
         try {
           final carritos = await _carritoService.obtenerCarritos(
             filtros: {'cocina_central': cocinaCentralId.toString()},
@@ -233,7 +243,27 @@ class ProductsInteractor {
     return false;
   }
 
+  Future<bool> esRestauranteOEmpleadoRestaurante() async {
+    final usuario = _userSessionService.user;
+    if (usuario == null) return false;
+
+    if (usuario.tipoUsuario == 'restaurante') {
+      return true;
+    }
+
+    if (usuario.tipoUsuario == 'empleado' && usuario.propietarioId != null) {
+      final empleador = await _userSessionService.obtenerPropietario();
+      return empleador?.tipoUsuario == 'restaurante';
+    }
+
+    return false;
+  }
+
   String obtenerTipoUsuario() {
     return _userSessionService.user?.tipoUsuario ?? '';
+  }
+
+  Future obtenerPropietario() async {
+    return await _userSessionService.obtenerPropietario();
   }
 }

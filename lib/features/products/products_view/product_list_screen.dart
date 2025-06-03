@@ -26,7 +26,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
           context,
           listen: false,
         );
-        if (viewModel.esRestaurante) {
+        if (viewModel.muestraPantallaRestaurante) {
           viewModel.cargarCarrito();
         }
       }
@@ -67,13 +67,13 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   Widget _buildBody(BuildContext context, ProductListViewModel viewModel) {
     if (viewModel.isLoading) {
-      return Center(
+      return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/icons/app_icon.png', width: 100, height: 100),
-            SizedBox(height: 24),
             CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Cargando productos...'),
           ],
         ),
       );
@@ -84,6 +84,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
             Text(
               'Error: ${viewModel.error}',
               style: const TextStyle(color: Colors.red),
@@ -119,8 +121,29 @@ class _ProductListScreenState extends State<ProductListScreen> {
           onAplicarFiltros: viewModel.aplicarFiltros,
         ),
         if (productos.isEmpty)
-          const Expanded(
-            child: Center(child: Text('No se encontraron productos')),
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.inventory_2_outlined,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No se encontraron productos',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Intenta ajustar los filtros de búsqueda',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                  ),
+                ],
+              ),
+            ),
           )
         else
           Expanded(
@@ -145,34 +168,48 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   aspectRatio = 0.7;
                 }
 
-                return GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: aspectRatio,
-                  ),
-                  itemCount: productos.length,
-                  itemBuilder: (context, index) {
-                    final producto = productos[index];
-                    return ProductCardWidget(
-                      product: producto,
-                      onTap: () {
-                        context.push('/products/detail/${producto.id}');
-                      },
-                      tipoUsuario: viewModel.tipoUsuario,
-                      cantidadEnCarrito: viewModel.model.getCantidadEnCarrito(
-                        producto.id,
-                      ),
-                      onAgregarAlCarrito:
-                          viewModel.esRestaurante
-                              ? (productoId, cantidad) => viewModel
-                                  .agregarAlCarrito(productoId, cantidad)
-                              : null,
-                      actualizandoCarrito: viewModel.actualizandoCarrito,
-                    );
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    await viewModel.cargarProductos();
+                    if (viewModel.muestraPantallaRestaurante) {
+                      await viewModel.cargarCarrito();
+                    }
                   },
+                  child: GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: aspectRatio,
+                    ),
+                    itemCount: productos.length,
+                    itemBuilder: (context, index) {
+                      final producto = productos[index];
+                      return ProductCardWidget(
+                        product: producto,
+                        onTap:
+                            viewModel.muestraPantallaRestaurante
+                                ? null
+                                : () {
+                                  context.push(
+                                    '/products/detail/${producto.id}',
+                                  );
+                                },
+                        tipoUsuario: viewModel.tipoUsuario,
+                        cantidadEnCarrito: viewModel.model.getCantidadEnCarrito(
+                          producto.id,
+                        ),
+                        onAgregarAlCarrito:
+                            viewModel.muestraPantallaRestaurante
+                                ? (productoId, cantidad) => viewModel
+                                    .agregarAlCarrito(productoId, cantidad)
+                                : null,
+                        actualizandoCarrito: viewModel.actualizandoCarrito,
+                        esRestaurante: viewModel.muestraPantallaRestaurante,
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -185,11 +222,13 @@ class _ProductListScreenState extends State<ProductListScreen> {
     BuildContext context,
     ProductListViewModel viewModel,
   ) {
-    if (viewModel.puedeCrearProductos) {
+    if (viewModel.puedeCrearProductos &&
+        !viewModel.muestraPantallaRestaurante) {
       return FloatingActionButton(
         onPressed: () {
           context.push('/products/new');
         },
+        tooltip: 'Crear producto',
         child: const Icon(Icons.add),
       );
     }

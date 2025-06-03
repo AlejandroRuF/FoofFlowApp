@@ -23,6 +23,7 @@ class ProductListViewModel extends ChangeNotifier {
   int? _cocinaCentralIdSeleccionada;
   bool _cargandoCategorias = false;
   bool _actualizandoCarrito = false;
+  bool _esRestaurante = false;
 
   List<Producto> get productos => _model.productos;
   bool get isLoading => _model.isLoading || _cargandoCategorias;
@@ -39,7 +40,9 @@ class ProductListViewModel extends ChangeNotifier {
   bool get esAdministrador =>
       _interactor.obtenerTipoUsuario() == 'administrador' ||
       _interactor.obtenerTipoUsuario() == 'superuser';
-  bool get esRestaurante => _interactor.obtenerTipoUsuario() == 'restaurante';
+
+  bool get esRestaurante => _esRestaurante;
+
   String get tipoUsuario => _interactor.obtenerTipoUsuario();
   bool get puedeCrearProductos => _interactor.puedeCrearEditarProductos();
   bool get actualizandoCarrito => _actualizandoCarrito;
@@ -47,10 +50,23 @@ class ProductListViewModel extends ChangeNotifier {
   List<Categoria> get categoriasDisponibles => _model.categorias;
   ProductsModel get model => _model;
 
+  bool get muestraPantallaRestaurante {
+    final tipo = _interactor.obtenerTipoUsuario();
+    return tipo == 'restaurante' || (tipo == 'empleado' && _esRestaurante);
+  }
+
+  bool get muestraPantallaCocinaCentral {
+    final tipo = _interactor.obtenerTipoUsuario();
+    return tipo == 'administrador' ||
+        tipo == 'cocina_central' ||
+        (tipo == 'empleado' && !_esRestaurante);
+  }
+
   ProductListViewModel() {
     _cargarCategorias();
     _subscribeToEvents();
     _listenToEvents();
+    _verificarTipoUsuario();
   }
 
   @override
@@ -58,6 +74,25 @@ class ProductListViewModel extends ChangeNotifier {
     _dataChangedSubscription?.cancel();
     _eventSubscription?.cancel();
     super.dispose();
+  }
+
+  Future<void> _verificarTipoUsuario() async {
+    final tipoUsuario = _interactor.obtenerTipoUsuario();
+
+    if (tipoUsuario == 'restaurante') {
+      _esRestaurante = true;
+    } else if (tipoUsuario == 'empleado') {
+      final esRestauranteOEmpleado =
+          await _interactor.esRestauranteOEmpleadoRestaurante();
+      _esRestaurante = esRestauranteOEmpleado;
+      if (kDebugMode) {
+        print('Es empleado de restaurante: $_esRestaurante');
+      }
+    } else {
+      _esRestaurante = false;
+    }
+
+    notifyListeners();
   }
 
   void _listenToEvents() {
@@ -108,7 +143,7 @@ class ProductListViewModel extends ChangeNotifier {
   }
 
   Future<void> cargarCarrito() async {
-    if (!esRestaurante || _model.cocinaSeleccionada == null) {
+    if (!muestraPantallaRestaurante || _model.cocinaSeleccionada == null) {
       return;
     }
 
