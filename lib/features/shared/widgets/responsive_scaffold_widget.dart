@@ -7,6 +7,9 @@ import 'package:foodflow_app/features/shared/widgets/app_bottom_navigation_bar.d
 import 'package:foodflow_app/features/shared/widgets/main_navigator_bar.dart';
 import 'package:foodflow_app/core/services/event_bus_service.dart';
 
+import '../../../core/services/usuario_services.dart';
+import '../../../core/services/usuario_sesion_service.dart';
+
 class ResponsiveScaffold extends StatefulWidget {
   final String title;
   final Widget body;
@@ -38,12 +41,17 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final EventBusService _eventBus = EventBusService();
   StreamSubscription<RefreshEvent>? _eventSubscription;
+  final _userSessionService = UserSessionService();
+  final _userService = UserService();
+  final _user = UserSessionService().user;
+  bool _esRestauranteOEmpleado = false;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
     _subscribeToEvents();
+    _verificarTipoUsuario();
   }
 
   @override
@@ -259,14 +267,15 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
       );
     }
 
-    appBarActions.add(
-      IconButton(
-        icon: const Icon(Icons.shopping_cart),
-        tooltip: 'Carrito',
-        onPressed: () => context.push('/cart'),
-      ),
-    );
-
+    if (_esRestauranteOEmpleado) {
+      appBarActions.add(
+        IconButton(
+          icon: const Icon(Icons.shopping_cart),
+          tooltip: 'Carrito',
+          onPressed: () => context.push('/cart'),
+        ),
+      );
+    }
     appBarActions.add(
       IconButton(
         icon: const Icon(Icons.logout),
@@ -325,5 +334,14 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
       floatingActionButtonLocation: widget.floatingActionButtonLocation,
       bottomSheet: widget.bottomSheet,
     );
+  }
+
+  Future<void> _verificarTipoUsuario() async {
+    final empleador = await _userSessionService.obtenerPropietario();
+    setState(() {
+      _esRestauranteOEmpleado =
+          empleador?.tipoUsuario == 'restaurante' ||
+          ['restaurante', 'administrador'].contains(_user?.tipoUsuario);
+    });
   }
 }
