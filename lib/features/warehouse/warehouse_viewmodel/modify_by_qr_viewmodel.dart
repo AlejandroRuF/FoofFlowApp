@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/features/warehouse/interactor/warehouse_interactor.dart';
 import 'package:foodflow_app/core/services/event_bus_service.dart';
@@ -114,6 +115,9 @@ class ModifyByQRViewModel extends ChangeNotifier {
 
     try {
       final productoId = int.tryParse(codigoQR);
+      if (kDebugMode) {
+        print('Producto ID escaneado: $productoId');
+      }
 
       if (productoId == null) {
         _error = 'Código QR inválido. No se pudo identificar el producto.';
