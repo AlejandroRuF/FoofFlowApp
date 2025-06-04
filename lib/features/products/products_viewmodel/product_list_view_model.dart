@@ -22,8 +22,8 @@ class ProductListViewModel extends ChangeNotifier {
   bool _soloActivos = true;
   int? _cocinaCentralIdSeleccionada;
   bool _cargandoCategorias = false;
-  bool _actualizandoCarrito = false;
   bool _esRestaurante = false;
+  Map<int, bool> _actualizandoProductos = {};
 
   List<Producto> get productos => _model.productos;
   bool get isLoading => _model.isLoading || _cargandoCategorias;
@@ -45,7 +45,8 @@ class ProductListViewModel extends ChangeNotifier {
 
   String get tipoUsuario => _interactor.obtenerTipoUsuario();
   bool get puedeCrearProductos => _interactor.puedeCrearEditarProductos();
-  bool get actualizandoCarrito => _actualizandoCarrito;
+  bool get actualizandoCarrito =>
+      _actualizandoProductos.values.any((element) => element);
 
   List<Categoria> get categoriasDisponibles => _model.categorias;
   ProductsModel get model => _model;
@@ -74,6 +75,10 @@ class ProductListViewModel extends ChangeNotifier {
     _dataChangedSubscription?.cancel();
     _eventSubscription?.cancel();
     super.dispose();
+  }
+
+  bool estaActualizandoProducto(int productoId) {
+    return _actualizandoProductos[productoId] ?? false;
   }
 
   Future<void> _verificarTipoUsuario() async {
@@ -115,9 +120,11 @@ class ProductListViewModel extends ChangeNotifier {
           eventKey == 'inventory_add' ||
           eventKey == 'inventory_add_user' ||
           eventKey == 'inventory_bulk_add' ||
-          eventKey == 'qr_stock_update' ||
-          eventKey == 'cart_update') {
+          eventKey == 'qr_stock_update') {
         cargarProductos();
+      }
+      if (eventKey == 'cart_update') {
+        cargarCarrito();
       }
     });
   }
@@ -299,7 +306,7 @@ class ProductListViewModel extends ChangeNotifier {
       return false;
     }
 
-    _actualizandoCarrito = true;
+    _actualizandoProductos[productoId] = true;
     notifyListeners();
 
     try {
@@ -324,12 +331,12 @@ class ProductListViewModel extends ChangeNotifier {
         _model = _model.copyWith(error: 'Error al agregar producto al carrito');
       }
 
-      _actualizandoCarrito = false;
+      _actualizandoProductos[productoId] = false;
       notifyListeners();
       return resultado;
     } catch (e) {
       _model = _model.copyWith(error: 'Error al agregar al carrito: $e');
-      _actualizandoCarrito = false;
+      _actualizandoProductos[productoId] = false;
       notifyListeners();
       return false;
     }

@@ -17,34 +17,37 @@ class ProductListScreen extends StatefulWidget {
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
+  late ProductListViewModel _viewModel;
+
   @override
   void initState() {
     super.initState();
+    _viewModel = ProductListViewModel();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        final viewModel = Provider.of<ProductListViewModel>(
-          context,
-          listen: false,
-        );
-        if (viewModel.muestraPantallaRestaurante) {
-          viewModel.cargarCarrito();
+        if (widget.cocinaCentralId != null) {
+          _viewModel.establecerCocinaCentral(widget.cocinaCentralId!);
+        } else {
+          _viewModel.cargarProductos();
+        }
+        if (_viewModel.muestraPantallaRestaurante) {
+          _viewModel.cargarCarrito();
         }
       }
     });
   }
 
   @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) {
-        final viewModel = ProductListViewModel();
-        if (widget.cocinaCentralId != null) {
-          viewModel.establecerCocinaCentral(widget.cocinaCentralId!);
-        } else {
-          viewModel.cargarProductos();
-        }
-        return viewModel;
-      },
+    return ChangeNotifierProvider<ProductListViewModel>.value(
+      value: _viewModel,
       child: Consumer<ProductListViewModel>(
         builder: (context, viewModel, _) {
           return ResponsiveScaffold(
@@ -186,27 +189,30 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     itemCount: productos.length,
                     itemBuilder: (context, index) {
                       final producto = productos[index];
-                      return ProductCardWidget(
-                        product: producto,
-                        onTap:
-                            viewModel.muestraPantallaRestaurante
-                                ? null
-                                : () {
-                                  context.push(
-                                    '/products/detail/${producto.id}',
-                                  );
-                                },
-                        tipoUsuario: viewModel.tipoUsuario,
-                        cantidadEnCarrito: viewModel.model.getCantidadEnCarrito(
-                          producto.id,
-                        ),
-                        onAgregarAlCarrito:
-                            viewModel.muestraPantallaRestaurante
-                                ? (productoId, cantidad) => viewModel
-                                    .agregarAlCarrito(productoId, cantidad)
-                                : null,
-                        actualizandoCarrito: viewModel.actualizandoCarrito,
-                        esRestaurante: viewModel.muestraPantallaRestaurante,
+                      return Consumer<ProductListViewModel>(
+                        builder: (context, vm, child) {
+                          return ProductCardWidget(
+                            product: producto,
+                            onTap:
+                                viewModel.muestraPantallaRestaurante
+                                    ? null
+                                    : () {
+                                      context.push(
+                                        '/products/detail/${producto.id}',
+                                      );
+                                    },
+                            tipoUsuario: viewModel.tipoUsuario,
+                            cantidadEnCarrito: viewModel.model
+                                .getCantidadEnCarrito(producto.id),
+                            onAgregarAlCarrito:
+                                viewModel.muestraPantallaRestaurante
+                                    ? (productoId, cantidad) => viewModel
+                                        .agregarAlCarrito(productoId, cantidad)
+                                    : null,
+                            actualizandoCarrito: viewModel.actualizandoCarrito,
+                            esRestaurante: viewModel.muestraPantallaRestaurante,
+                          );
+                        },
                       );
                     },
                   ),
