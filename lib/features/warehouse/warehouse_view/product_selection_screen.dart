@@ -97,13 +97,14 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Inventario destino: ${widget.kitchenName}',
-                          style: TextStyle(
-                            fontSize: isSmallScreen ? 14 : 16,
-                            fontWeight: FontWeight.bold,
+                        if (_viewModel.esAdmin)
+                          Text(
+                            'Inventario destino: ${widget.kitchenName}',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 14 : 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
                         const SizedBox(height: 8),
                         Container(
                           padding: EdgeInsets.symmetric(

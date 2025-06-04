@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -205,20 +206,10 @@ class InventoryScreen extends StatelessWidget {
   ) async {
     if (viewModel.esAdmin) {
       await _mostrarSeleccionUsuarios(context, viewModel);
-    } else if (viewModel.esRestauranteOCocina) {
+    } else {
       final usuarioActual = viewModel.usuarioActual;
       if (usuarioActual != null) {
         await _mostrarSeleccionCocinas(context, viewModel, usuarioActual);
-      }
-    } else if (viewModel.esEmpleado) {
-      final usuarioId = viewModel.idUsuarioParaInventario;
-      if (usuarioId != null) {
-        await _mostrarSeleccionProductos(
-          context,
-          viewModel,
-          usuarioId,
-          viewModel.usuarioActual?.nombre ?? 'Mi inventario',
-        );
       }
     }
   }
@@ -271,7 +262,11 @@ class InventoryScreen extends StatelessWidget {
     User usuario,
   ) async {
     try {
-      final cocinas = await viewModel.obtenerCocinasDeUsuario(usuario.id);
+      final id =
+          viewModel.esEmpleado
+              ? usuario.empleadorId ?? usuario.propietarioId
+              : usuario.id;
+      final cocinas = await viewModel.obtenerCocinasDeUsuario(id!);
 
       if (cocinas.isEmpty) {
         if (context.mounted) {
@@ -311,12 +306,8 @@ class InventoryScreen extends StatelessWidget {
   ) async {
     try {
       List<Producto> productos;
-      if (viewModel.esEmpleado) {
-        productos = await viewModel.obtenerProductosParaEmpleado();
-      } else {
-        await viewModel.cargarProductosDisponibles();
-        productos = viewModel.state.productosDisponibles;
-      }
+      await viewModel.cargarProductosDisponibles();
+      productos = viewModel.state.productosDisponibles;
 
       if (productos.isEmpty) {
         if (context.mounted) {
@@ -336,7 +327,7 @@ class InventoryScreen extends StatelessWidget {
           extra: {
             'productos': productos,
             'kitchenName': nombreCocina,
-            'kitchenId': usuarioId,
+            'kitchenId': viewModel.esEmpleado ? usuarioId : null,
           },
         );
       }

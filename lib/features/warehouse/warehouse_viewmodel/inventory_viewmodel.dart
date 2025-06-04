@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/core/services/usuario_services.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
@@ -274,7 +275,7 @@ class InventoryViewModel extends ChangeNotifier {
     if (esRestauranteOCocina) {
       return usuarioActual?.id;
     } else if (esEmpleado) {
-      return usuarioActual?.empleadorId ?? usuarioActual?.propietarioId;
+      return usuarioActual?.propietarioId;
     }
     return null;
   }
@@ -320,7 +321,7 @@ class InventoryViewModel extends ChangeNotifier {
       return {
         'flujo': 'empleado',
         'requiereSeleccionUsuario': false,
-        'requiereSeleccionCocina': false,
+        'requiereSeleccionCocina': true,
         'usuarioId': idUsuarioParaInventario,
       };
     }
@@ -461,15 +462,20 @@ class InventoryViewModel extends ChangeNotifier {
     }
 
     final empleadorId = idUsuarioParaInventario;
+    if (kDebugMode) {
+      print('idUsuarioParaInventario ${idUsuarioParaInventario}');
+    }
     if (empleadorId == null) {
       return [];
     }
 
     try {
       final productosModel = await _interactor.obtenerProductosDisponibles();
-      return productosModel.productosDisponibles
-          .where((producto) => producto.cocinaCentralId == empleadorId)
-          .toList();
+      if (kDebugMode) {
+        print('obtenerProductosDisponibles ${productosModel.toString()}}');
+      }
+      final empleador = await _userSessionService.obtenerPropietario();
+      return productosModel.productosDisponibles.toList();
     } catch (e) {
       return [];
     }

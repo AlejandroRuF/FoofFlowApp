@@ -130,7 +130,7 @@ class DashboardInteractor {
         tramoActual = 3;
       }
 
-      final productosSeleccionados = productos.toList();
+      final productosSeleccionados = productos.take(10).toList();
 
       final List<Map<String, dynamic>> previsionesTramoActual = [];
 
