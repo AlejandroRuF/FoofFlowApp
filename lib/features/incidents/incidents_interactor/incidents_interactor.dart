@@ -1,16 +1,20 @@
 import 'package:foodflow_app/core/services/incidencias_service.dart';
 import 'package:foodflow_app/core/services/pedidos_service.dart';
 import 'package:foodflow_app/core/services/productos_service.dart';
+import 'package:foodflow_app/core/services/usuario_services.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/core/services/event_bus_service.dart';
 import 'package:foodflow_app/features/incidents/incidents_model/incidents_model.dart';
 import 'package:foodflow_app/models/pedido_model.dart';
 import 'package:foodflow_app/models/pedido_producto_model.dart';
+import 'package:foodflow_app/models/producto_model.dart';
+import 'package:foodflow_app/models/user_model.dart';
 
 class IncidentsInteractor {
   final IncidenciasService _incidenciasService = IncidenciasService();
   final PedidosService _pedidosService = PedidosService();
   final ProductosService _productosService = ProductosService();
+  final UserService _userService = UserService();
   final UserSessionService _userSessionService = UserSessionService();
   final EventBusService _eventBus = EventBusService();
 
@@ -96,6 +100,36 @@ class IncidentsInteractor {
   Future<List<Pedido>> obtenerPedidosUsuario() async {
     try {
       return await _pedidosService.obtenerPedidos();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<Producto>> obtenerProductos() async {
+    try {
+      return await _productosService.obtenerProductos();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<User>> obtenerUsuarios() async {
+    try {
+      final usuario = _userSessionService.user;
+      if (usuario == null) return [];
+
+      if (usuario.tipoUsuario == 'administrador' ||
+          usuario.isSuperuser ||
+          usuario.tipoUsuario == 'cocina_central') {
+        final usuarios = await _userService.obtenerTodosLosUsuarios();
+        return usuarios
+            .where(
+              (u) => !['administrador', 'empleado'].contains(u.tipoUsuario),
+            )
+            .toList();
+      }
+
+      return [];
     } catch (e) {
       return [];
     }

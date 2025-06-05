@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodflow_app/models/pedido_model.dart';
 import 'package:foodflow_app/models/producto_model.dart';
+import 'package:foodflow_app/models/user_model.dart';
 import 'package:intl/intl.dart';
 
 import '../../incidents_viewmodel/incidents_viewmodel.dart';
@@ -19,18 +20,53 @@ class _IncidentFiltersWidgetState extends State<IncidentFiltersWidget> {
   final TextEditingController _searchController = TextEditingController();
 
   final List<Producto> _productos = [];
+  final List<User> _usuarios = [];
   bool _productosCargados = false;
+  bool _usuariosCargados = false;
 
   @override
   void initState() {
     super.initState();
     _searchController.text = '';
     _cargarProductos();
+    _cargarUsuarios();
   }
 
   Future<void> _cargarProductos() async {
-    if (mounted) {
-      _productosCargados = true;
+    try {
+      final productos = await widget.viewModel.obtenerProductos();
+      if (mounted) {
+        setState(() {
+          _productos.clear();
+          _productos.addAll(productos);
+          _productosCargados = true;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _productosCargados = true;
+        });
+      }
+    }
+  }
+
+  Future<void> _cargarUsuarios() async {
+    try {
+      final usuarios = await widget.viewModel.obtenerUsuarios();
+      if (mounted) {
+        setState(() {
+          _usuarios.clear();
+          _usuarios.addAll(usuarios);
+          _usuariosCargados = true;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _usuariosCargados = true;
+        });
+      }
     }
   }
 
@@ -96,6 +132,8 @@ class _IncidentFiltersWidgetState extends State<IncidentFiltersWidget> {
         _buildPedidoFilter(),
         const SizedBox(height: 8),
         _buildProductoFilter(),
+        const SizedBox(height: 8),
+        _buildUsuarioFilter(),
         const SizedBox(height: 8),
         _buildFechaFilters(),
         const SizedBox(height: 16),
@@ -193,10 +231,34 @@ class _IncidentFiltersWidgetState extends State<IncidentFiltersWidget> {
           child: Text('Todos los productos'),
         ),
         ..._productos.map((producto) {
-          final nombreProducto = producto.nombre;
           return DropdownMenuItem<int>(
             value: producto.id,
-            child: Text(nombreProducto),
+            child: Text(producto.nombre),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildUsuarioFilter() {
+    return DropdownButtonFormField<int?>(
+      decoration: const InputDecoration(
+        labelText: 'Reportado por',
+        border: OutlineInputBorder(),
+      ),
+      value: widget.viewModel.filtrosActivos['usuario_id'] as int?,
+      onChanged: (int? value) {
+        widget.viewModel.establecerUsuarioFiltro(value);
+      },
+      items: [
+        const DropdownMenuItem<int?>(
+          value: null,
+          child: Text('Todos los usuarios'),
+        ),
+        ..._usuarios.map((usuario) {
+          return DropdownMenuItem<int>(
+            value: usuario.id,
+            child: Text(usuario.nombre),
           );
         }),
       ],

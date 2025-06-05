@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:foodflow_app/features/incidents/incidents_model/incidents_model.dart';
 import 'package:foodflow_app/models/incidencia_model.dart';
 import 'package:foodflow_app/models/pedido_model.dart';
+import 'package:foodflow_app/models/producto_model.dart';
+import 'package:foodflow_app/models/user_model.dart';
 import 'package:foodflow_app/core/services/event_bus_service.dart';
 import 'dart:async';
 
@@ -78,21 +80,25 @@ class IncidentsViewModel extends ChangeNotifier {
 
   void establecerEstadoFiltro(String estado) {
     _estadoSeleccionado = estado;
+    _filtrosActivos['estado'] = estado;
     notifyListeners();
   }
 
   void establecerPedidoFiltro(int? pedidoId) {
     _pedidoSeleccionado = pedidoId;
+    _filtrosActivos['pedido_id'] = pedidoId;
     notifyListeners();
   }
 
   void establecerProductoFiltro(int? productoId) {
     _productoSeleccionado = productoId;
+    _filtrosActivos['producto_id'] = productoId;
     notifyListeners();
   }
 
   void establecerUsuarioFiltro(int? usuarioId) {
     _usuarioSeleccionado = usuarioId;
+    _filtrosActivos['usuario_id'] = usuarioId;
     notifyListeners();
   }
 
@@ -136,6 +142,7 @@ class IncidentsViewModel extends ChangeNotifier {
     _usuarioSeleccionado = null;
     _fechaDesde = null;
     _fechaHasta = null;
+    _filtrosActivos.clear();
     notifyListeners();
   }
 
@@ -182,6 +189,14 @@ class IncidentsViewModel extends ChangeNotifier {
 
   Future<List<Pedido>> obtenerPedidosUsuario() async {
     return await _interactor.obtenerPedidosUsuario();
+  }
+
+  Future<List<Producto>> obtenerProductos() async {
+    return await _interactor.obtenerProductos();
+  }
+
+  Future<List<User>> obtenerUsuarios() async {
+    return await _interactor.obtenerUsuarios();
   }
 
   Future<bool> crearIncidencia({

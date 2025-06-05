@@ -1,5 +1,7 @@
 class ApiConfig {
-  static const String hostUrl = 'http://192.168.1.130:8000/';
+  // static const String hostUrl = 'http://192.168.1.130:8000/';
+  static const String hostUrl =
+      'https://foodflowrailway-production.up.railway.app/';
   static const String baseUrl = '${hostUrl}api/';
 }
 
