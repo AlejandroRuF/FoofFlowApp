@@ -181,9 +181,13 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
 
       if (cocinas.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No se encontraron cocinas para este usuario'),
-            backgroundColor: Colors.orange,
+          SnackBar(
+            content: const Text('No se encontraron cocinas para este usuario'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
         setState(() {
@@ -204,6 +208,10 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
           SnackBar(
             content: Text('Error al cargar cocinas: $e'),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }

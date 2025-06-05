@@ -237,6 +237,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           SnackBar(
             content: Text('Error al seleccionar imagen: $e'),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }
@@ -294,9 +298,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (exitoTotal) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Perfil actualizado correctamente'),
+            SnackBar(
+              content: const Text('Perfil actualizado correctamente'),
               backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
           Navigator.pop(context);

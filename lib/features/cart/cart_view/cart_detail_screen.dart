@@ -217,16 +217,29 @@ class _CartDetailBody extends StatelessWidget {
                           final resultado = await viewModel.confirmarCarrito();
                           if (resultado && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Carrito confirmado con éxito'),
+                              SnackBar(
+                                content: const Text(
+                                  'Carrito confirmado con éxito',
+                                ),
+                                backgroundColor: Colors.green,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
                               ),
                             );
                             Navigator.of(context).pop();
                           } else if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Error al confirmar el carrito'),
+                              SnackBar(
+                                content: const Text(
+                                  'Error al confirmar el carrito',
+                                ),
                                 backgroundColor: Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
                               ),
                             );
                           }

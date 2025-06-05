@@ -209,6 +209,10 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
                 loginViewModel.errorMessage ?? 'Error al cerrar sesión',
               ),
               backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         }

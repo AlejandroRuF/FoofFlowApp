@@ -396,9 +396,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (success) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Empleado creado exitosamente'),
+            SnackBar(
+              content: const Text('Empleado creado exitosamente'),
               backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         }
@@ -408,6 +412,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SnackBar(
               content: Text(viewModel.state.error ?? 'Error al crear empleado'),
               backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         }
@@ -493,17 +501,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 viewModel.subirImagenPerfil().then((success) {
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Imagen de perfil actualizada'),
+                      SnackBar(
+                        content: const Text('Imagen de perfil actualizada'),
                         backgroundColor: Colors.green,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     );
                     viewModel.refrescarDatos();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Error al actualizar la imagen'),
+                      SnackBar(
+                        content: const Text('Error al actualizar la imagen'),
                         backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     );
                   }
@@ -563,20 +579,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   if (mounted) {
                     context.go('/login');
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
+                      SnackBar(
+                        content: const Text(
                           'Se ha enviado un enlace a tu correo electrónico',
                         ),
                         backgroundColor: Colors.green,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     );
                   }
                 } else {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Error al enviar el enlace'),
+                      SnackBar(
+                        content: const Text('Error al enviar el enlace'),
                         backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     );
                   }
@@ -598,9 +622,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (resultado) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Permisos guardados correctamente'),
+        SnackBar(
+          content: const Text('Permisos guardados correctamente'),
           backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
     } else {
@@ -608,6 +636,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SnackBar(
           content: Text(viewModel.state.error ?? 'Error al guardar permisos'),
           backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
     }

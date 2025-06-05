@@ -885,7 +885,14 @@ class OrderDetailScreen extends StatelessWidget {
                 onPressed: () async {
                   if (controller.text.trim().isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Debe indicar un motivo')),
+                      SnackBar(
+                        content: const Text('Debe indicar un motivo'),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
                     );
                     return;
                   }

@@ -208,22 +208,38 @@ class IncidentDetailScreen extends StatelessWidget {
                                               ScaffoldMessenger.of(
                                                 context,
                                               ).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
+                                                SnackBar(
+                                                  content: const Text(
                                                     'Incidencia resuelta correctamente',
                                                   ),
                                                   backgroundColor: Colors.green,
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10,
+                                                        ),
+                                                  ),
                                                 ),
                                               );
                                             } else {
                                               ScaffoldMessenger.of(
                                                 context,
                                               ).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
+                                                SnackBar(
+                                                  content: const Text(
                                                     'Error al resolver la incidencia',
                                                   ),
                                                   backgroundColor: Colors.red,
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10,
+                                                        ),
+                                                  ),
                                                 ),
                                               );
                                             }
@@ -274,22 +290,38 @@ class IncidentDetailScreen extends StatelessWidget {
                                               ScaffoldMessenger.of(
                                                 context,
                                               ).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
+                                                SnackBar(
+                                                  content: const Text(
                                                     'Incidencia cancelada correctamente',
                                                   ),
                                                   backgroundColor: Colors.green,
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10,
+                                                        ),
+                                                  ),
                                                 ),
                                               );
                                             } else {
                                               ScaffoldMessenger.of(
                                                 context,
                                               ).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
+                                                SnackBar(
+                                                  content: const Text(
                                                     'Error al cancelar la incidencia',
                                                   ),
                                                   backgroundColor: Colors.red,
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10,
+                                                        ),
+                                                  ),
                                                 ),
                                               );
                                             }
@@ -347,23 +379,41 @@ class IncidentDetailScreen extends StatelessWidget {
                                                 ScaffoldMessenger.of(
                                                   context,
                                                 ).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
+                                                  SnackBar(
+                                                    content: const Text(
                                                       'Incidencia resuelta correctamente',
                                                     ),
                                                     backgroundColor:
                                                         Colors.green,
+                                                    behavior:
+                                                        SnackBarBehavior
+                                                            .floating,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            10,
+                                                          ),
+                                                    ),
                                                   ),
                                                 );
                                               } else {
                                                 ScaffoldMessenger.of(
                                                   context,
                                                 ).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
+                                                  SnackBar(
+                                                    content: const Text(
                                                       'Error al resolver la incidencia',
                                                     ),
                                                     backgroundColor: Colors.red,
+                                                    behavior:
+                                                        SnackBarBehavior
+                                                            .floating,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            10,
+                                                          ),
+                                                    ),
                                                   ),
                                                 );
                                               }
@@ -417,23 +467,41 @@ class IncidentDetailScreen extends StatelessWidget {
                                                 ScaffoldMessenger.of(
                                                   context,
                                                 ).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
+                                                  SnackBar(
+                                                    content: const Text(
                                                       'Incidencia cancelada correctamente',
                                                     ),
                                                     backgroundColor:
                                                         Colors.green,
+                                                    behavior:
+                                                        SnackBarBehavior
+                                                            .floating,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            10,
+                                                          ),
+                                                    ),
                                                   ),
                                                 );
                                               } else {
                                                 ScaffoldMessenger.of(
                                                   context,
                                                 ).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
+                                                  SnackBar(
+                                                    content: const Text(
                                                       'Error al cancelar la incidencia',
                                                     ),
                                                     backgroundColor: Colors.red,
+                                                    behavior:
+                                                        SnackBarBehavior
+                                                            .floating,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            10,
+                                                          ),
+                                                    ),
                                                   ),
                                                 );
                                               }
@@ -479,9 +547,14 @@ class IncidentDetailScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
+                    SnackBar(
+                      content: const Text(
                         'Esta funcionalidad aún no está implementada',
+                      ),
+                      backgroundColor: Colors.amber,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   );
@@ -515,9 +588,14 @@ class IncidentDetailScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
+                    SnackBar(
+                      content: const Text(
                         'Esta funcionalidad aún no está implementada',
+                      ),
+                      backgroundColor: Colors.amber,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   );

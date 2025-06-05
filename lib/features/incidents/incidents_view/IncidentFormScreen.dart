@@ -114,9 +114,13 @@ class _IncidentFormScreenState extends State<IncidentFormScreen> {
         _eventBus.publishDataChanged('incidents.created');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Incidencia creada con éxito'),
+            SnackBar(
+              content: const Text('Incidencia creada con éxito'),
               backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
           context.pop();

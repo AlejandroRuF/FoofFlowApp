@@ -834,7 +834,8 @@ class ProductDetailScreen extends StatelessWidget {
       SnackBar(
         content: Text(mensaje),
         backgroundColor: isError ? Colors.red : Colors.green,
-        duration: Duration(seconds: isError ? 4 : 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

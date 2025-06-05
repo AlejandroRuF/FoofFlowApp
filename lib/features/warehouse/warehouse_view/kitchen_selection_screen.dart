@@ -186,6 +186,10 @@ class _KitchenSelectionScreenState extends State<KitchenSelectionScreen> {
               'La cocina "${cocina.nombre}" no tiene productos en su inventario',
             ),
             backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
         return;
@@ -205,6 +209,10 @@ class _KitchenSelectionScreenState extends State<KitchenSelectionScreen> {
           SnackBar(
             content: Text('Error al cargar productos de la cocina: $e'),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }

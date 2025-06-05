@@ -310,9 +310,13 @@ class _InventoryProductWidgetState extends State<InventoryProductWidget> {
     if (nuevoStock < 0) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('El stock no puede ser negativo'),
+          SnackBar(
+            content: const Text('El stock no puede ser negativo'),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }
@@ -335,16 +339,24 @@ class _InventoryProductWidgetState extends State<InventoryProductWidget> {
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Stock actualizado correctamente'),
+            SnackBar(
+              content: const Text('Stock actualizado correctamente'),
               backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Error al actualizar el stock'),
+            SnackBar(
+              content: const Text('Error al actualizar el stock'),
               backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         }

@@ -232,9 +232,13 @@ class InventoryScreen extends StatelessWidget {
       if (usuariosDisponibles.isEmpty) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No se encontraron usuarios disponibles'),
+            SnackBar(
+              content: const Text('No se encontraron usuarios disponibles'),
               backgroundColor: Colors.orange,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         }
@@ -250,6 +254,10 @@ class InventoryScreen extends StatelessWidget {
           SnackBar(
             content: Text('Error al cargar usuarios: $e'),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }
@@ -271,9 +279,15 @@ class InventoryScreen extends StatelessWidget {
       if (cocinas.isEmpty) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No se encontraron cocinas para este usuario'),
+            SnackBar(
+              content: const Text(
+                'No se encontraron cocinas para este usuario',
+              ),
               backgroundColor: Colors.orange,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         }
@@ -337,6 +351,10 @@ class InventoryScreen extends StatelessWidget {
           SnackBar(
             content: Text('Error al cargar productos: $e'),
             backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }

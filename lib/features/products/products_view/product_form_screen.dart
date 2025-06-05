@@ -828,6 +828,11 @@ class ProductFormScreen extends StatelessWidget {
                                   ? 'Producto creado correctamente'
                                   : 'Producto actualizado correctamente',
                             ),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         );
                         context.pop();
@@ -837,6 +842,10 @@ class ProductFormScreen extends StatelessWidget {
                         SnackBar(
                           content: Text(viewModel.error!),
                           backgroundColor: Colors.red,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       );
                     }
