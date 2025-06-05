@@ -87,6 +87,10 @@ class _InventoryFiltersWidgetState extends State<InventoryFiltersWidget> {
         _stockMaximoController.text.isNotEmpty) {
       _stockMaximoController.text = '';
     }
+
+    if (oldWidget.categoriaIdSeleccionada != widget.categoriaIdSeleccionada) {
+      setState(() {});
+    }
   }
 
   @override
@@ -150,14 +154,7 @@ class _InventoryFiltersWidgetState extends State<InventoryFiltersWidget> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             OutlinedButton(
-              onPressed: () {
-                setState(() {
-                  _searchController.clear();
-                  _stockMinimoController.clear();
-                  _stockMaximoController.clear();
-                });
-                widget.onLimpiarFiltros();
-              },
+              onPressed: _limpiarTodosFiltros,
               child: const Text('Limpiar filtros'),
             ),
             const SizedBox(width: 8),
@@ -171,6 +168,16 @@ class _InventoryFiltersWidgetState extends State<InventoryFiltersWidget> {
     );
   }
 
+  void _limpiarTodosFiltros() {
+    setState(() {
+      _searchController.clear();
+      _stockMinimoController.clear();
+      _stockMaximoController.clear();
+    });
+    widget.onCategoriaChanged(null);
+    widget.onLimpiarFiltros();
+  }
+
   Widget _buildCategoriaFilter() {
     return DropdownButtonFormField<int?>(
       decoration: const InputDecoration(
@@ -178,7 +185,9 @@ class _InventoryFiltersWidgetState extends State<InventoryFiltersWidget> {
         border: OutlineInputBorder(),
       ),
       value: widget.categoriaIdSeleccionada,
-      onChanged: widget.onCategoriaChanged,
+      onChanged: (value) {
+        widget.onCategoriaChanged(value);
+      },
       items: [
         const DropdownMenuItem<int?>(
           value: null,

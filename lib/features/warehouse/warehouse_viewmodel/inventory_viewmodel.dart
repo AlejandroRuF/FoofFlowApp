@@ -79,6 +79,7 @@ class InventoryViewModel extends ChangeNotifier {
 
     try {
       final inventarioModel = await _interactor.obtenerInventario();
+      await cargarProductosDisponibles();
       _state = _state.copyWith(
         isLoading: false,
         inventarioItems: inventarioModel.inventarioItems,
@@ -423,7 +424,13 @@ class InventoryViewModel extends ChangeNotifier {
   }
 
   void limpiarFiltros() {
-    _state = _state.copyWith(
+    _state = WarehouseModel(
+      inventarioItems: _state.inventarioItems,
+      productosDisponibles: _state.productosDisponibles,
+      categorias: _state.categorias,
+      isLoading: _state.isLoading,
+      error: _state.error,
+      productoSeleccionado: _state.productoSeleccionado,
       busqueda: '',
       mostrarStockBajo: false,
       stockMinimo: null,

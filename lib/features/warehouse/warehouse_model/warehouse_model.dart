@@ -84,7 +84,16 @@ class WarehouseModel {
           stockMinimo == null || item.stockActual >= stockMinimo!;
       final cumpleStockMaximo =
           stockMaximo == null || item.stockActual <= stockMaximo!;
-      final cumpleCategoria = categoriaIdSeleccionada == null;
+
+      final cumpleCategoria =
+          categoriaIdSeleccionada == null ||
+          productosDisponibles.any(
+            (producto) =>
+                producto.id == item.productoId &&
+                producto.categoria != null &&
+                producto.categoria!.id == categoriaIdSeleccionada,
+          );
+
       final cumpleActivos = !soloActivos || true;
 
       if (!cumpleBusqueda ||
