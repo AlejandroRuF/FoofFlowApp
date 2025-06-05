@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 import 'package:foodflow_app/features/orders/orders_viewmodel/order_detail_viewmodel.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
 import 'package:foodflow_app/models/pedido_producto_model.dart';
-import 'package:foodflow_app/core/services/event_bus_service.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class OrderDetailScreen extends StatelessWidget {
   final int pedidoId;
@@ -931,10 +931,6 @@ class OrderDetailScreen extends StatelessWidget {
     switch (tipo) {
       case 'normal':
         return 'Normal';
-      case 'urgente':
-        return 'Urgente';
-      case 'especial':
-        return 'Especial';
       case 'por_prevision':
         return 'Por Previsión';
       default:

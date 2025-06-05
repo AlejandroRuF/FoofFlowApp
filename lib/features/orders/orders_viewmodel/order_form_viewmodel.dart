@@ -1,9 +1,10 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 import 'package:foodflow_app/core/services/usuario_sesion_service.dart';
 import 'package:foodflow_app/features/orders/orders_interactor/orders_interactor.dart';
 import 'package:foodflow_app/models/pedido_model.dart';
-import 'package:foodflow_app/core/services/event_bus_service.dart';
 import 'package:foodflow_app/models/user_model.dart';
 
 class OrderFormViewModel extends ChangeNotifier {
@@ -167,7 +168,7 @@ class OrderFormViewModel extends ChangeNotifier {
     final usuario = _sessionService.user;
     if (usuario == null) return false;
 
-    return usuario.isSuperuser || usuario.tipoUsuario == 'administrador';
+    return false;
   }
 
   bool get puedeEditarUrgente {
