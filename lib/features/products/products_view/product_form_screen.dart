@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
 
 import '../../../models/user_model.dart';
+import '../../../models/categoria_model.dart';
 import '../products_viewmodel/product_form_view_model.dart';
 
 class ProductFormScreen extends StatelessWidget {
@@ -340,6 +341,15 @@ class ProductFormScreen extends StatelessWidget {
                 ),
 
             const SizedBox(height: 16),
+            puedeEditarDatosBasicos
+                ? _buildCategoriaDropdown(context, viewModel)
+                : _buildReadOnlyField(
+                  context,
+                  'Categoría',
+                  viewModel.categoriaSeleccionada?.nombre ?? 'Sin categoría',
+                ),
+
+            const SizedBox(height: 16),
             MediaQuery.of(context).size.width < 600
                 ? Column(
                   children: [
@@ -449,6 +459,141 @@ class ProductFormScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCategoriaDropdown(
+    BuildContext context,
+    ProductFormViewModel viewModel,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.edit,
+              size: 16,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'Categoría',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'EDITABLE',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        viewModel.categoriasLoading
+            ? Container(
+              height: 56,
+              decoration: BoxDecoration(
+                color:
+                    isDark
+                        ? Theme.of(context).colorScheme.surface
+                        : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                  width: 2,
+                ),
+              ),
+              child: const Center(child: CircularProgressIndicator()),
+            )
+            : DropdownButtonFormField<Categoria>(
+              value: viewModel.categoriaSeleccionada,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor:
+                    isDark
+                        ? Theme.of(context).colorScheme.surface
+                        : Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.5),
+                    width: 2,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.5),
+                    width: 2,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2.5,
+                  ),
+                ),
+                prefixIcon: Icon(
+                  Icons.category,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              hint: Text(
+                'Seleccionar categoría',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              items: [
+                DropdownMenuItem<Categoria>(
+                  value: null,
+                  child: Text(
+                    'Sin categoría',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+                ...viewModel.categorias.map((categoria) {
+                  return DropdownMenuItem(
+                    value: categoria,
+                    child: Text(
+                      categoria.nombre,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ],
+              onChanged: (Categoria? value) {
+                viewModel.categoriaSeleccionada = value;
+                viewModel.notifyListeners();
+              },
+            ),
+      ],
     );
   }
 

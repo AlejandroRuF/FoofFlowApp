@@ -39,6 +39,10 @@ class ProductFormViewModel extends ChangeNotifier {
   List<User> cocinasCentrales = [];
   User? cocinaCentralSeleccionada;
 
+  List<Categoria> categorias = [];
+  bool _categoriasLoading = false;
+  bool get categoriasLoading => _categoriasLoading;
+
   bool get isEditMode => _model.productoSeleccionado != null;
 
   bool get puedeEditarDatosBasicos {
@@ -68,6 +72,7 @@ class ProductFormViewModel extends ChangeNotifier {
 
   ProductFormViewModel() {
     _cargarCocinasCentrales();
+    _cargarCategorias();
   }
 
   Future<void> cargarProducto(int productoId) async {
@@ -129,6 +134,21 @@ class ProductFormViewModel extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _model = _model.copyWith(error: 'Error al cargar cocinas centrales: $e');
+      notifyListeners();
+    }
+  }
+
+  Future<void> _cargarCategorias() async {
+    _categoriasLoading = true;
+    notifyListeners();
+
+    try {
+      categorias = await _interactor.obtenerCategorias();
+      _categoriasLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _categoriasLoading = false;
+      _model = _model.copyWith(error: 'Error al cargar categorías: $e');
       notifyListeners();
     }
   }

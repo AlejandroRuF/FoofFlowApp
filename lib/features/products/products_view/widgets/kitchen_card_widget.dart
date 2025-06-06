@@ -17,11 +17,16 @@ class KitchenCardWidget extends StatelessWidget {
           backgroundColor: Colors.amber,
           child:
               kitchen.imagen != null
-                  ? Image.network(
-                    kitchen.imagen!,
-                    errorBuilder:
-                        (context, error, stackTrace) =>
-                            const Icon(Icons.business),
+                  ? ClipOval(
+                    child: Image.network(
+                      kitchen.imagen!,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (context, error, stackTrace) =>
+                              const Icon(Icons.business),
+                    ),
                   )
                   : const Icon(Icons.business),
         ),

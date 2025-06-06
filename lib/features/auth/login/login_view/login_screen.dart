@@ -392,7 +392,7 @@ class _LoginFormState extends State<LoginForm> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(viewModel.errorMessage!),
-                        backgroundColor: Colors.green,
+                        backgroundColor: Colors.red,
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),

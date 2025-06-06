@@ -47,6 +47,7 @@ class ProductsInteractor {
       if (usuario.tipoUsuario == 'cocina_central') {
         productos = await _productosService.obtenerProductos(
           cocinaCentralId: usuario.id,
+          incluirInactivos: true,
         );
       } else if (usuario.tipoUsuario == 'empleado' &&
           usuario.propietarioId != null) {

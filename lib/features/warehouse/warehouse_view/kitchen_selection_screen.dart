@@ -130,9 +130,22 @@ class _KitchenSelectionScreenState extends State<KitchenSelectionScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: const CircleAvatar(
-          backgroundColor: Colors.blue,
-          child: Icon(Icons.kitchen, color: Colors.white),
+        leading: CircleAvatar(
+          backgroundColor: Colors.amber,
+          child:
+              cocina.imagen != null
+                  ? ClipOval(
+                    child: Image.network(
+                      cocina.imagen!,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (context, error, stackTrace) =>
+                              const Icon(Icons.business),
+                    ),
+                  )
+                  : const Icon(Icons.business),
         ),
         title: Text(
           cocina.nombre,

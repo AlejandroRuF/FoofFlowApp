@@ -49,7 +49,7 @@ class ProductosService {
       }
 
       if (!incluirInactivos) {
-        queryParams['is_active'] = 'true';
+        queryParams['show_inactivos'] = 'true';
       }
 
       final response = await ApiServices.dio.get(
