@@ -500,7 +500,7 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
                               ),
                               const Spacer(),
                               Text(
-                                '\$${producto.precio.toStringAsFixed(2)}',
+                                '€${producto.precio.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.green,
