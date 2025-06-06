@@ -124,13 +124,6 @@ class OrderListViewModel extends ChangeNotifier {
       return;
     }
 
-    final ahora = DateTime.now();
-    if (_ultimaActualizacion != null &&
-        ahora.difference(_ultimaActualizacion!).inSeconds < 5 &&
-        _model.pedidos.isNotEmpty) {
-      return;
-    }
-
     _setLoading(true);
     try {
       final filtros = _construirFiltrosAPI();
@@ -144,7 +137,7 @@ class OrderListViewModel extends ChangeNotifier {
         error: null,
         filtros: filtros,
       );
-      _ultimaActualizacion = ahora;
+      _ultimaActualizacion = DateTime.now();
     } catch (e) {
       _model = _model.copyWith(
         isLoading: false,

@@ -22,6 +22,7 @@ class _OrderListScreenState extends State<OrderListScreen>
   late OrderListViewModel _viewModel;
   final EventBusService _eventBus = EventBusService();
   StreamSubscription? _subscription;
+  bool _hasLoadedOnce = false;
 
   @override
   void initState() {
@@ -49,6 +50,15 @@ class _OrderListScreenState extends State<OrderListScreen>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _viewModel = Provider.of<OrderListViewModel>(context);
+
+    if (!_hasLoadedOnce) {
+      _hasLoadedOnce = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _viewModel.forzarRecarga();
+        }
+      });
+    }
   }
 
   @override
@@ -62,13 +72,20 @@ class _OrderListScreenState extends State<OrderListScreen>
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: _viewModel,
-      child: const _OrderListBody(),
+      child: _OrderListBody(
+        onScreenActivated: () {
+          _hasLoadedOnce = false;
+          _viewModel.forzarRecarga();
+        },
+      ),
     );
   }
 }
 
 class _OrderListBody extends StatelessWidget {
-  const _OrderListBody();
+  final VoidCallback onScreenActivated;
+
+  const _OrderListBody({required this.onScreenActivated});
 
   @override
   Widget build(BuildContext context) {
@@ -117,67 +134,77 @@ class _OrderListBody extends StatelessWidget {
 
     final pedidosFiltrados = viewModel.pedidosFiltrados;
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          OrderFiltersWidget(
-            busquedaTexto: viewModel.busquedaTexto,
-            estadoSeleccionado: viewModel.estadoSeleccionado,
-            tipoPedidoSeleccionado: viewModel.tipoPedidoSeleccionado,
-            urgenteSeleccionado: viewModel.urgenteSeleccionado,
-            importeMin: viewModel.importeMin,
-            importeMax: viewModel.importeMax,
-            fechaInicio: viewModel.fechaInicio,
-            fechaFin: viewModel.fechaFin,
-            onBusquedaTextoChanged: viewModel.setBusquedaTexto,
-            onEstadoChanged: viewModel.setEstadoFiltro,
-            onTipoPedidoChanged: viewModel.setTipoPedidoFiltro,
-            onUrgenteChanged: viewModel.setUrgenteFiltro,
-            onImporteMinChanged: viewModel.setImporteMin,
-            onImporteMaxChanged: viewModel.setImporteMax,
-            onFechaInicioChanged: viewModel.setFechaInicio,
-            onFechaFinChanged: viewModel.setFechaFin,
-            onLimpiarFiltros: viewModel.limpiarFiltros,
-            onAplicarFiltros: viewModel.cargarPedidos,
-          ),
-          OrdersStatusWidget(
-            totalPedidos: pedidosFiltrados.length,
-            pendientes:
-                pedidosFiltrados.where((p) => p.estado == 'pendiente').length,
-            enProceso:
-                pedidosFiltrados.where((p) => p.estado == 'en_proceso').length,
-            completados:
-                pedidosFiltrados.where((p) => p.estado == 'completado').length,
-            cancelados:
-                pedidosFiltrados.where((p) => p.estado == 'cancelado').length,
-          ),
-          const SizedBox(height: 8),
-          if (pedidosFiltrados.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 16.0,
-                horizontal: 16.0,
-              ),
-              child: Text(
-                'No se encontraron pedidos con los filtros aplicados',
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.start,
-              ),
-            )
-          else
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: pedidosFiltrados.length,
-              itemBuilder: (context, index) {
-                final pedido = pedidosFiltrados[index];
-                return OrderCardWidget(
-                  pedido: pedido,
-                  onTap: () => _navegarADetallePedido(context, pedido.id),
-                );
-              },
+    return RefreshIndicator(
+      onRefresh: () async {
+        await viewModel.forzarRecarga();
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            OrderFiltersWidget(
+              busquedaTexto: viewModel.busquedaTexto,
+              estadoSeleccionado: viewModel.estadoSeleccionado,
+              tipoPedidoSeleccionado: viewModel.tipoPedidoSeleccionado,
+              urgenteSeleccionado: viewModel.urgenteSeleccionado,
+              importeMin: viewModel.importeMin,
+              importeMax: viewModel.importeMax,
+              fechaInicio: viewModel.fechaInicio,
+              fechaFin: viewModel.fechaFin,
+              onBusquedaTextoChanged: viewModel.setBusquedaTexto,
+              onEstadoChanged: viewModel.setEstadoFiltro,
+              onTipoPedidoChanged: viewModel.setTipoPedidoFiltro,
+              onUrgenteChanged: viewModel.setUrgenteFiltro,
+              onImporteMinChanged: viewModel.setImporteMin,
+              onImporteMaxChanged: viewModel.setImporteMax,
+              onFechaInicioChanged: viewModel.setFechaInicio,
+              onFechaFinChanged: viewModel.setFechaFin,
+              onLimpiarFiltros: viewModel.limpiarFiltros,
+              onAplicarFiltros: viewModel.cargarPedidos,
             ),
-        ],
+            OrdersStatusWidget(
+              totalPedidos: pedidosFiltrados.length,
+              pendientes:
+                  pedidosFiltrados.where((p) => p.estado == 'pendiente').length,
+              enProceso:
+                  pedidosFiltrados
+                      .where((p) => p.estado == 'en_proceso')
+                      .length,
+              completados:
+                  pedidosFiltrados
+                      .where((p) => p.estado == 'completado')
+                      .length,
+              cancelados:
+                  pedidosFiltrados.where((p) => p.estado == 'cancelado').length,
+            ),
+            const SizedBox(height: 8),
+            if (pedidosFiltrados.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16.0,
+                  horizontal: 16.0,
+                ),
+                child: Text(
+                  'No se encontraron pedidos con los filtros aplicados',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.start,
+                ),
+              )
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: pedidosFiltrados.length,
+                itemBuilder: (context, index) {
+                  final pedido = pedidosFiltrados[index];
+                  return OrderCardWidget(
+                    pedido: pedido,
+                    onTap: () => _navegarADetallePedido(context, pedido.id),
+                  );
+                },
+              ),
+          ],
+        ),
       ),
     );
   }

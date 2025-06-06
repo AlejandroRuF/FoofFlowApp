@@ -40,6 +40,7 @@ class ProductCardWidget extends StatelessWidget {
             double categoryFontSize = constraints.maxWidth < 200 ? 11 : 13;
             double priceFontSize = constraints.maxWidth < 200 ? 15 : 17;
             double basePriceFontSize = constraints.maxWidth < 200 ? 9 : 11;
+            double unitFontSize = constraints.maxWidth < 200 ? 10 : 12;
 
             return Column(
               mainAxisSize: MainAxisSize.min,
@@ -88,17 +89,42 @@ class ProductCardWidget extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
-                      if (product.categoriaNombre != null)
-                        Text(
-                          product.categoriaNombre!,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: categoryFontSize,
+                      Row(
+                        children: [
+                          if (product.categoriaNombre != null)
+                            Expanded(
+                              child: Text(
+                                product.categoriaNombre!,
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: categoryFontSize,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.shade500,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.white, width: 1),
+                            ),
+                            child: Text(
+                              product.unidadMedida,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: unitFontSize,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        ],
+                      ),
                       const SizedBox(height: 8),
                       if (_muestraVistaRestaurante)
                         Column(
