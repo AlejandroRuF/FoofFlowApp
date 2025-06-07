@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 import 'package:foodflow_app/features/orders/orders_viewmodel/order_form_viewmodel.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
-import 'package:foodflow_app/core/services/event_bus_service.dart';
+import 'package:provider/provider.dart';
 
 class OrderFormScreen extends StatefulWidget {
   final int pedidoId;
@@ -565,7 +565,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
               context: context,
               label: 'Tipo de Pedido',
               value: _tipoPedido,
-              items: ['normal', 'urgente', 'especial'],
+              items: ['normal', 'Por Previsión'],
               onChanged: (value) {
                 setState(() {
                   _tipoPedido = value;
@@ -795,7 +795,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 ),
               ),
               Icon(
-                Icons.visibility_off,
+                Icons.lock_outline,
                 size: 16,
                 color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
               ),
