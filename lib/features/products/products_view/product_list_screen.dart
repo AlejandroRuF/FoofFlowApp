@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:foodflow_app/features/products/products_view/widgets/product_card_widget.dart';
 import 'package:foodflow_app/features/products/products_view/widgets/product_filters_widget.dart';
 import 'package:foodflow_app/features/shared/widgets/responsive_scaffold_widget.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../products_viewmodel/product_list_view_model.dart';
 
@@ -154,12 +154,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
               builder: (context, constraints) {
                 int crossAxisCount;
                 double aspectRatio;
-                if (constraints.maxWidth < 400) {
+                if (constraints.maxWidth < 500) {
                   crossAxisCount = 2;
-                  aspectRatio = 0.6;
-                } else if (constraints.maxWidth < 700) {
+                  aspectRatio = 0.5;
+                } else if (constraints.maxWidth < 800) {
                   crossAxisCount = 3;
-                  aspectRatio = 0.50;
+                  aspectRatio = 0.55;
                 } else if (constraints.maxWidth < 1000) {
                   crossAxisCount = 4;
                   aspectRatio = 0.65;
