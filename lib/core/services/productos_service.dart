@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -160,17 +161,14 @@ class ProductosService {
       bool resultado = false;
 
       if (imagen != null) {
-        final Map<String, dynamic> formDataFields = {
-          'imagen': await MultipartFile.fromFile(
-            imagen.path,
-            filename:
-                'imagen_producto_${DateTime.now().millisecondsSinceEpoch}.jpg',
-          ),
-        };
-
-        if (datos.containsKey('is_active')) {
-          formDataFields['is_active'] = datos['is_active'];
-        }
+        final Map<String, dynamic> formDataFields = Map<String, dynamic>.from(
+          datos,
+        );
+        formDataFields['imagen'] = await MultipartFile.fromFile(
+          imagen.path,
+          filename:
+              'imagen_producto_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        );
 
         final formData = FormData.fromMap(formDataFields);
 
@@ -182,22 +180,9 @@ class ProductosService {
 
         resultado = response.statusCode == 200;
       } else {
-        final datosPermitidos = <String, dynamic>{};
-
-        if (datos.containsKey('is_active')) {
-          datosPermitidos['is_active'] = datos['is_active'];
-        }
-
-        if (datosPermitidos.isEmpty) {
-          if (kDebugMode) {
-            print('No hay campos permitidos para actualizar');
-          }
-          return true;
-        }
-
         final response = await ApiServices.dio.patch(
           '${ApiEndpoints.productos}$productoId/',
-          data: datosPermitidos,
+          data: datos,
           options: Options(headers: {'Content-Type': 'application/json'}),
         );
 

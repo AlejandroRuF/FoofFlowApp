@@ -1,14 +1,15 @@
-import 'dart:io';
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:foodflow_app/core/services/event_bus_service.dart';
 import 'package:foodflow_app/features/products/products_interactor/products_interactor.dart';
 import 'package:foodflow_app/features/products/products_model/products_model.dart';
 import 'package:foodflow_app/models/categoria_model.dart';
 import 'package:foodflow_app/models/producto_model.dart';
 import 'package:foodflow_app/models/user_model.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:foodflow_app/core/services/event_bus_service.dart';
 
 class ProductFormViewModel extends ChangeNotifier {
   final ProductsInteractor _interactor = ProductsInteractor();
@@ -86,6 +87,8 @@ class ProductFormViewModel extends ChangeNotifier {
       final producto = productoModel.productoSeleccionado;
 
       if (producto != null) {
+        await _cargarCategorias();
+
         _model = _model.copyWith(
           isLoading: false,
           productoSeleccionado: producto,
@@ -96,10 +99,16 @@ class ProductFormViewModel extends ChangeNotifier {
         precioController.text = producto.precio.toString();
         impuestosController.text = producto.impuestos.toString();
         unidadMedidaController.text = producto.unidadMedida;
-        categoriaSeleccionada = producto.categoria;
         productoActivo = producto.isActive;
         imagenUrl = producto.imagenUrl;
         _imagenEliminada = false;
+
+        if (producto.categoria != null) {
+          categoriaSeleccionada = categorias.firstWhere(
+            (cat) => cat.id == producto.categoria!.id,
+            orElse: () => producto.categoria!,
+          );
+        }
 
         for (var cocina in cocinasCentrales) {
           if (cocina.id == producto.cocinaCentralId) {
@@ -186,24 +195,39 @@ class ProductFormViewModel extends ChangeNotifier {
 
     try {
       final datos = {
-        'nombre': nombreController.text,
-        'descripcion': descripcionController.text,
-        'precio': double.parse(precioController.text),
-        'impuestos': double.parse(impuestosController.text),
-        'unidad_medida': unidadMedidaController.text,
+        'nombre': nombreController.text.trim(),
+        'descripcion': descripcionController.text.trim(),
+        'precio': precioController.text,
+        'impuestos': impuestosController.text,
+        'unidad_medida': unidadMedidaController.text.trim(),
         'is_active': productoActivo,
+        'categoria': categoriaSeleccionada?.id,
+        'cocina_central': cocinaCentralSeleccionada?.id,
       };
 
-      if (cocinaCentralSeleccionada != null) {
-        datos['cocina_central'] = cocinaCentralSeleccionada!.id;
+      if (double.tryParse(precioController.text) != null) {
+        datos['precio'] = double.parse(precioController.text).toString();
       }
 
-      if (categoriaSeleccionada != null) {
-        datos['categoria'] = categoriaSeleccionada!.id;
+      if (double.tryParse(impuestosController.text) != null) {
+        datos['impuestos'] = double.parse(impuestosController.text).toString();
+      }
+
+      // Aseguramos que los campos null se envíen explícitamente
+      if (datos['categoria'] == null) {
+        datos['categoria'] = null;
+      }
+
+      if (datos['cocina_central'] == null) {
+        datos['cocina_central'] = null;
       }
 
       if (_imagenEliminada && imagenSeleccionada == null) {
         datos['eliminar_imagen'] = true;
+      }
+
+      if (kDebugMode) {
+        print('Datos a enviar: $datos');
       }
 
       bool resultado;
@@ -215,7 +239,7 @@ class ProductFormViewModel extends ChangeNotifier {
       } else {
         resultado = await _interactor.actualizarProducto(
           _model.productoSeleccionado!.id,
-          datos,
+          Map<String, dynamic>.from(datos),
           imagenSeleccionada,
         );
         if (resultado) {
